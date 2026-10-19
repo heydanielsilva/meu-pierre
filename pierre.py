@@ -203,8 +203,71 @@ def contas() -> list[dict]:
                     "final": str(c["numero"] or "")[-4:], "saldo": c["saldo"], "limite": c["limite"],
                     "limite_disponivel": c["limite_disponivel"], "vencimento": c["vencimento_fatura"],
                     "fechamento": c["fechamento_fatura"],
-                    "uso_limite": (1 - (c["limite_disponivel"] or 0) / c["limite"]) if cartao and c["limite"] else None})
+                    "uso_limite": (1 - (c["limite_disponivel"] or 0) / c["limite"]) if cartao and c["limite"] else None,
+                    **(_faturas_do_cartao(c) if cartao else {})})
     return out
+
+
+def _mais_meses(d: date, n: int) -> date:
+    m = d.month - 1 + n
+    a, m = d.year + m // 12, m % 12 + 1
+    return date(a, m, min(d.day, calendar.monthrange(a, m)[1]))
+
+
+def _faturas_do_cartao(c) -> dict:
+    """Fatura aberta, fatura fechada a pagar e as próximas (parcelas já lançadas) de um cartão.
+
+    O saldo que a Pluggy manda para o cartão é o total devido (inclui parcelas futuras), e /bills só
+    traz faturas fechadas. A fatura aberta é calculada pelas compras do ciclo atual: as que ainda não
+    têm fatura (billId vazio) ou, se o banco não informa o billId, as feitas entre o fechamento
+    anterior e o próximo.
+    """
+    hoje = hoje_br()
+    venc = date.fromisoformat(c["vencimento_fatura"]) if c["vencimento_fatura"] else None
+    fech = date.fromisoformat(c["fechamento_fatura"]) if c["fechamento_fatura"] else (venc - timedelta(days=7) if venc else None)
+    if not fech:
+        fech = hoje.replace(day=calendar.monthrange(hoje.year, hoje.month)[1])
+    folga = max(1, (venc - fech).days) if venc and venc > fech else 7
+    while fech < hoje:                                   # próximo fechamento a partir de hoje
+        fech = _mais_meses(fech, 1)
+    while _mais_meses(fech, -1) >= hoje:
+        fech = _mais_meses(fech, -1)
+    ini = _mais_meses(fech, -1)                          # ciclo aberto: (ini, fech]
+
+    txs = [dict(t) for t in store.con.execute(
+        "SELECT * FROM transactions WHERE account_id=? AND data > ?", (c["id"], (hoje - timedelta(days=400)).isoformat())).fetchall()]
+    com_fatura = any(t.get("fatura_id") for t in txs)
+
+    def valor(t) -> float:
+        if t["direcao"] == "saida":
+            return t["valor"]
+        return -t["valor"] if "estorno" in _sem_acento(t["descricao"] or "") else 0.0   # pagamento da fatura não conta
+
+    def soma(de: date, ate: date) -> float:
+        return sum(valor(t) for t in txs if de.isoformat() < t["data"] <= ate.isoformat())
+
+    if com_fatura:
+        aberta = sum(valor(t) for t in txs if not t.get("fatura_id") and t["data"] <= fech.isoformat())
+    else:
+        aberta = soma(ini, fech)
+
+    # fatura já fechada que ainda vence (a do ciclo anterior)
+    fechada = None
+    venc_ant = ini + timedelta(days=folga)
+    if venc_ant >= hoje:
+        b = store.con.execute("SELECT * FROM bills WHERE account_id=? AND vencimento >= ? ORDER BY vencimento LIMIT 1",
+                              (c["id"], hoje.isoformat())).fetchone()
+        if b:
+            fechada = {"valor": b["valor"], "vence": b["vencimento"], "minimo": b["pagamento_minimo"]}
+        elif not com_fatura:
+            fechada = {"valor": soma(_mais_meses(ini, -1), ini), "vence": venc_ant.isoformat(), "minimo": None}
+
+    # próximas faturas: só o que já está comprometido em parcelas deste cartão
+    parcelas = [p for p in parcelas_futuras() if p.get("conta_id") == c["id"]]
+    proximas = [{"vence": (_mais_meses(fech, k) + timedelta(days=folga)).isoformat(),
+                 "valor": sum(p["valor"] for p in parcelas if p["restantes"] >= k)} for k in range(1, 7)]
+    return {"fatura_aberta": round(aberta, 2), "fecha_em": fech.isoformat(), "vence_em": (fech + timedelta(days=folga)).isoformat(),
+            "fatura_fechada": fechada, "proximas_faturas": proximas, "total_devido": c["saldo"]}
 
 
 def patrimonio() -> dict:

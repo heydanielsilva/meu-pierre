@@ -310,6 +310,7 @@
   .barras-mes .bm.prox i { background: var(--acento); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 25%, transparent); }
   .barras-mes .bm:not(.prox):not(.zero) i { opacity: .55; }
   .barras-mes .bm:hover i { opacity: 1; }
+  .barras-mes.sim .bm i { opacity: 1 !important; }
   .barras-mes .bm::after { content: attr(data-rotulo); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
                            background: #0f4a49; color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px;
                            white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 2; }
@@ -472,6 +473,62 @@
   .inv-numeros small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
   .inv-numeros b { font-size: 14.5px; font-variant-numeric: tabular-nums; }
 
+  .evo-grade { display: grid; gap: 28px; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; }
+  .evo-tabela { font-size: 13.5px; }
+  .evo-cab, .evo-linha { display: grid; grid-template-columns: 1fr 1.2fr 1.1fr 1fr; gap: 8px; align-items: center; padding: 8px 0; }
+  .evo-cab { color: var(--suave); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .evo-linha { border-top: 1px solid var(--linha); font-variant-numeric: tabular-nums; }
+  .evo-linha small.cdi { display: block; font-size: 11.5px; color: var(--suave); font-weight: 600; }
+  .evo-linha small.cdi.pos { color: var(--pos); }
+  .inv-numeros > div > small + b + small { margin-top: 1px; }
+
+  /* Mercado e dicas */
+  .dicas { display: grid; gap: 10px; }
+  .dica-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 16px; background: var(--cartao-2);
+               border-left: 4px solid var(--c, var(--suave)); }
+  .dica-item .bloco { width: 40px; height: 40px; border-radius: 13px; }
+  .dica-item .bloco svg { width: 22px; height: 22px; }
+  .dica-item b { display: block; margin-bottom: 2px; }
+  .dica-item p { margin: 0; color: var(--suave); font-size: 13.5px; }
+  .sim-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .sim-form label { font-size: 12.5px; color: var(--suave); font-weight: 600; display: grid; gap: 4px; }
+  .sim-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0 12px; }
+  .sim-res div { background: var(--cartao-2); border-radius: 14px; padding: 10px 12px; min-width: 0; }
+  .sim-res small { display: block; color: var(--suave); font-size: 12px; }
+  .sim-res b { font-size: 16px; font-variant-numeric: tabular-nums; }
+  .busca-ativo { display: flex; flex-wrap: wrap; gap: 8px; }
+  .busca-ativo .campo { flex: 1 1 180px; text-transform: uppercase; }
+  .links-ativo { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .botao-link { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 6px; border-radius: 12px; text-decoration: none;
+                background: var(--cartao-2); color: var(--texto); font-weight: 600; font-size: 13.5px; border: 1px solid var(--linha);
+                transition: transform .2s, border-color .2s; }
+  .botao-link:hover { transform: translateY(-2px); border-color: var(--acento); }
+  .botao-link .ic { width: 28px; height: 28px; }
+  .botao-link .ic img { padding: 5px; }
+  .ativos-carteira { display: grid; gap: 10px; margin-top: 16px; }
+  .ativo-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 14px; border-radius: 16px; background: var(--cartao-2); }
+  .ativo-linha .tk { font-weight: 800; letter-spacing: .02em; min-width: 72px; }
+  .fontes { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .fonte { border-radius: 20px; padding: 18px; background: var(--cartao-2); display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; }
+  .fonte::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--c); }
+  .fonte .topo-f { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px; }
+  .fonte .topo-f .ic { width: 38px; height: 38px; }
+  .fonte p { margin: 0; color: var(--suave); font-size: 13.5px; flex: 1; }
+  .fonte .links { display: flex; flex-wrap: wrap; gap: 6px; }
+  .fonte .links a { font-size: 12.5px; font-weight: 600; padding: 5px 10px; border-radius: 999px; text-decoration: none;
+                    background: color-mix(in srgb, var(--c) 16%, var(--cartao)); color: var(--texto); }
+  .fonte .links a:hover { background: color-mix(in srgb, var(--c) 30%, var(--cartao)); }
+  .guia { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .guia details { background: var(--cartao-2); border-radius: 16px; padding: 14px 16px; }
+  .guia summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+  .guia summary::-webkit-details-marker { display: none; }
+  .guia summary::after { content: "+"; color: var(--acento-texto); font-weight: 800; }
+  .guia details[open] summary::after { content: "−"; }
+  .guia p, .guia li { color: var(--suave); font-size: 13.5px; }
+  .guia table { font-size: 13px; margin-top: 6px; }
+  .guia td, .guia th { padding: 5px 8px; }
+  .aviso-legal { color: var(--suave); font-size: 12.5px; text-align: center; margin: 4px 0 0; }
+
   /* Telas */
   .vista { display: grid; gap: 24px; min-width: 0; }
   .vista[hidden] { display: none !important; }
@@ -571,6 +628,8 @@
     .tx .sub .conta { display: none; }
     .parcela .sub { white-space: normal; }
     .barras-mes { gap: 4px; }
+    .evo-grade { grid-template-columns: 1fr; }
+    .sim-res { grid-template-columns: 1fr; }
     .cc-grade { grid-template-columns: 1fr; }
     .inv-topo { flex-wrap: wrap; }
     .inv-topo .meio { flex: 1 1 calc(100% - 60px); }
@@ -667,6 +726,7 @@
     <a href="#transacoes" title="Transações"><svg class="i"><use href="#i-troca"/></svg></a>
     <a href="#analise" title="Análise: categorias, assinaturas e parcelas"><svg class="i"><use href="#i-grafico"/></svg></a>
     <a href="#investimentos" title="Investimentos"><svg class="i"><use href="#i-invest"/></svg></a>
+    <a href="#mercado" title="Mercado e dicas"><svg class="i"><use href="#i-lampada"/></svg></a>
     <a href="#ajustes" title="Regras e conexões"><svg class="i"><use href="#i-ajuste"/></svg></a>
     <a href="/sair" class="fim" title="Sair"><svg class="i"><use href="#i-sair"/></svg></a>
   </nav>
@@ -818,6 +878,17 @@
       <!-- Investimentos e parcelas -->
       <div class="vista" data-vista="investimentos" hidden>
         <section class="grade-4" id="invResumo"></section>
+        <section class="cartao" id="invEvolucao">
+          <div class="cab"><h2>Rendimento de verdade</h2><span class="extra" id="invEvoExtra"></span></div>
+          <div class="evo-grade">
+            <div>
+              <div class="legenda"><span><i style="background:#f28c3b"></i>Quanto rendeu no mês</span><span><i style="background:repeating-linear-gradient(90deg, var(--suave) 0 4px, transparent 4px 7px);height:3px;border-radius:2px"></i>Se rendesse 100% do CDI</span></div>
+              <div class="grafico"><canvas id="gInvest"></canvas></div>
+            </div>
+            <div id="invMeses"></div>
+          </div>
+          <p class="dica" id="invEvoDica"></p>
+        </section>
         <section class="grade-2" id="invGraficos">
           <div class="cartao">
             <div class="cab"><h2>Onde está seu dinheiro</h2><span class="extra">por tipo de aplicação</span></div>
@@ -834,6 +905,47 @@
         <section class="cartao">
           <div class="cab"><h2>Suas aplicações</h2><span class="extra" id="invTotal"></span></div>
           <div id="investimentos"></div>
+        </section>
+      </div>
+
+      <!-- Mercado e dicas -->
+      <div class="vista" data-vista="mercado" hidden>
+        <section class="grade-4" id="mercIndicadores"></section>
+        <section class="grade-2">
+          <div class="cartao">
+            <div class="cab"><h2>Dicas para a sua carteira</h2><span class="extra">com base nos seus dados</span></div>
+            <div class="dicas" id="mercDicas"></div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><h2>Simulador</h2><span class="extra">quanto o dinheiro pode render</span></div>
+            <form class="sim-form" id="simForm" onsubmit="return false">
+              <label>Valor inicial (R$)<input class="campo" id="simInicial" type="number" min="0" step="100" value="1000"></label>
+              <label>Aporte por mês (R$)<input class="campo" id="simAporte" type="number" min="0" step="50" value="500"></label>
+              <label>Prazo (meses)<input class="campo" id="simPrazo" type="number" min="1" max="600" step="1" value="24"></label>
+              <label>Rentabilidade (% do CDI)<input class="campo" id="simCdi" type="number" min="0" max="300" step="1" value="100"></label>
+            </form>
+            <div class="sim-res" id="simRes"></div>
+            <div id="simBarras"></div>
+            <p class="dica" id="simNota"></p>
+          </div>
+        </section>
+        <section class="cartao">
+          <div class="cab"><h2>Pesquisar um ativo</h2><span class="extra">abre direto nos sites de análise</span></div>
+          <form class="busca-ativo" id="buscaAtivo">
+            <input class="campo" id="tickerBusca" placeholder="Código do ativo (ex.: PETR4, MXRF11)" maxlength="7" autocomplete="off">
+            <button class="pilula roxa">Ver links</button>
+          </form>
+          <div class="links-ativo" id="linksAtivo"></div>
+          <div class="ativos-carteira" id="ativosCarteira"></div>
+        </section>
+        <section class="cartao">
+          <div class="cab"><h2>Onde se informar</h2><span class="extra">análises, indicadores e notícias</span></div>
+          <div class="fontes" id="mercFontes"></div>
+        </section>
+        <section class="cartao">
+          <div class="cab"><h2>Guia rápido</h2><span class="extra">o básico para decidir melhor</span></div>
+          <div class="guia" id="mercGuia"></div>
+          <p class="aviso-legal">As dicas e o simulador são informativos, calculados com os seus dados e indicadores públicos. Não são recomendação de investimento.</p>
         </section>
       </div>
 
@@ -1564,6 +1676,141 @@ function renderCartoesAnalise() {
   }).join("") : `<div class="vazio">${sel ? "Nenhuma compra parcelada neste cartão." : "Nenhuma compra parcelada em andamento."}</div>`;
 }
 
+// ================================================================= Mercado e dicas
+const FONTES = [
+  { nome: "Investidor10", dominio: "investidor10.com.br", cor: "#2e7d32",
+    texto: "Indicadores, gráficos e comparadores de ações, FIIs, ETFs e BDRs, rankings e notícias. Bom para comparar ativos parecidos.",
+    links: [["Início", "https://investidor10.com.br/"], ["Ações", "https://investidor10.com.br/acoes/"], ["FIIs", "https://investidor10.com.br/fiis/"], ["Notícias", "https://investidor10.com.br/noticias/"]] },
+  { nome: "Fundamentus", dominio: "fundamentus.com.br", cor: "#1565c0",
+    texto: "Dados fundamentalistas de empresas e FIIs: P/L, P/VP, dividend yield, ROE, dívida. A busca avançada filtra por esses números.",
+    links: [["Início", "https://www.fundamentus.com.br/"], ["Busca de ações", "https://www.fundamentus.com.br/buscaavancada.php"], ["Lista de FIIs", "https://www.fundamentus.com.br/fii_resultado.php"]] },
+  { nome: "XP Conteúdos", dominio: "xpi.com.br", cor: "#111111",
+    texto: "Análises do research da XP, relatórios, carteiras recomendadas e notícias do mercado, com explicações para quem está começando.",
+    links: [["Conteúdos e research", "https://conteudos.xpi.com.br/"], ["XP Investimentos", "https://www.xpi.com.br/"]] },
+  { nome: "BB Investimentos", dominio: "bb.com.br", cor: "#f5c400",
+    texto: "Produtos de investimento do Banco do Brasil (CDB, LCI/LCA, fundos, Tesouro) e conteúdos de mercado do banco.",
+    links: [["Investimentos BB", "https://www.bb.com.br/site/investimentos/"], ["Banco do Brasil", "https://www.bb.com.br/"]] },
+  { nome: "Tesouro Direto", dominio: "tesourodireto.com.br", cor: "#0b6e4f",
+    texto: "Site oficial dos títulos públicos: taxas do dia, simulador e explicação de cada título (Selic, Prefixado, IPCA+).",
+    links: [["Títulos e taxas", "https://www.tesourodireto.com.br/"]] },
+  { nome: "Banco Central", dominio: "bcb.gov.br", cor: "#0d47a1",
+    texto: "Fonte oficial da Selic, do CDI e do IPCA usados neste painel, e calculadora do cidadão para corrigir valores.",
+    links: [["Banco Central", "https://www.bcb.gov.br/"], ["Calculadora do cidadão", "https://www3.bcb.gov.br/CALCIDADAO/"]] },
+];
+const GUIA = [
+  ["Reserva de emergência", "<p>Guarde de 3 a 6 meses dos seus gastos (ou mais, se a renda varia) em algo seguro e com resgate no mesmo dia: Tesouro Selic, CDB de liquidez diária ou caixinhas que rendem perto de 100% do CDI. Só depois pense em aplicações mais arriscadas.</p>"],
+  ["O que é \"% do CDI\"", "<p>O CDI acompanha a Selic e é a régua da renda fixa. Um CDB de 100% do CDI rende igual ao CDI; 110% rende 10% a mais. Menos de ~90% do CDI costuma ser pouco para renda fixa comum.</p>"],
+  ["FGC: até R$ 250 mil por banco", "<p>CDB, LCI, LCA e poupança têm a garantia do Fundo Garantidor de Créditos: até R$ 250 mil por CPF em cada instituição (limite total de R$ 1 milhão a cada 4 anos). Tesouro Direto é garantido pelo governo; fundos e ações não têm FGC.</p>"],
+  ["Imposto de renda na renda fixa", "<p>Cobrado só sobre o rendimento, menor quanto mais tempo o dinheiro fica:</p><table><tr><th>Prazo</th><th>IR</th></tr><tr><td>até 180 dias</td><td>22,5%</td></tr><tr><td>181 a 360 dias</td><td>20%</td></tr><tr><td>361 a 720 dias</td><td>17,5%</td></tr><tr><td>acima de 720 dias</td><td>15%</td></tr></table><p>LCI, LCA, CRI e CRA para pessoa física são isentos.</p>"],
+  ["Renda fixa x renda variável", "<p>Na renda fixa você sabe a regra do rendimento (ex.: 100% do CDI, IPCA + 6%). Na variável (ações, FIIs, ETFs) o preço oscila todo dia: pode render mais no longo prazo, mas pode ficar negativo por um tempo. Use para dinheiro que pode esperar anos.</p>"],
+  ["Diversificar", "<p>Não deixe tudo em um só lugar: misture tipos (pós-fixado, inflação, ações/FIIs) e, na renda fixa, respeite o limite do FGC por banco. Rebalanceie de vez em quando para voltar à divisão que você escolheu.</p>"],
+  ["Como ler P/L, P/VP e dividend yield", "<p><b>P/L</b>: quantos anos de lucro pagam o preço da ação. <b>P/VP</b>: preço comparado ao patrimônio (em FIIs, abaixo de 1 = cotado abaixo do valor dos imóveis). <b>Dividend yield</b>: quanto pagou em proventos nos últimos 12 meses, em % do preço. Compare sempre com empresas do mesmo setor.</p>"],
+  ["Inflação e juro real", "<p>Rendimento só aumenta seu poder de compra se ganhar da inflação. Juro real ≈ (1 + taxa) ÷ (1 + IPCA) − 1. Títulos IPCA+ garantem um juro real se levados até o vencimento.</p>"],
+];
+const ehTicker = (t) => /^[A-Z]{4}\d{1,2}$/.test(t);
+const tickersCarteira = () => [...new Set(D.investimentos.flatMap((i) => (i.nome || "").toUpperCase().match(/\b[A-Z]{4}\d{1,2}\b/g) || []))];
+function linksTicker(t, classe = "") {
+  t = t.toUpperCase();
+  const fii = /imobili/i.test(classe) || (!classe && /11$/.test(t));
+  const tipo = fii ? "fiis" : /etf/i.test(classe) ? "etfs" : "acoes";
+  const fonte = (nome, url) => `<a class="botao-link" href="${url}" target="_blank" rel="noopener noreferrer">${bolinha(nome, "Investimentos", true)}${nome}</a>`;
+  return fonte("Fundamentus", `https://www.fundamentus.com.br/detalhes.php?papel=${t}`) +
+         fonte("Investidor10", `https://investidor10.com.br/${tipo}/${t.toLowerCase()}/`) +
+         fonte("XP Conteúdos", `https://conteudos.xpi.com.br/?s=${t}`);
+}
+
+function renderMercado() {
+  const IND = D.indicadores, I = D.investimentos, R = D.resumo;
+  // indicadores
+  $("mercIndicadores").innerHTML = IND ?
+    tile("alvo", ["#ffc35c", "#d9860f"], "Selic", pctSinal(IND.selic).replace("+", ""), "meta definida pelo Copom, ao ano") +
+    tile("invest", ["#8d9bff", "#4c59d6"], "CDI em 12 meses", pctSinal(IND.cdi_12m).replace("+", ""), "último mês: " + pctSinal(IND.cdi_meses?.at(-1)?.taxa).replace("+", "")) +
+    tile("mes", ["#ff8f6b", "#d9452f"], "IPCA em 12 meses", pctSinal(IND.ipca_12m).replace("+", ""), "inflação oficial") +
+    tile("resultado", ["#4fdca0", "#11946a"], "Juro real", pctSinal(IND.juro_real), "Selic descontada a inflação")
+    : `<div class="cartao vazio" style="grid-column:1/-1">Não consegui buscar os indicadores do Banco Central agora. Eles aparecem na próxima atualização.</div>`;
+
+  // dicas calculadas com os dados do painel
+  const fechados = D.evolucao.filter((e) => e.mes !== hoje() && (e.gastos || e.receitas)).slice(-6);
+  const gastoMedio = fechados.length ? fechados.reduce((s, e) => s + e.gastos, 0) / fechados.length : R.gastos;
+  const sobraMedia = fechados.length ? fechados.reduce((s, e) => s + e.sobra, 0) / fechados.length : R.sobra;
+  const liquidos = I.filter((i) => ["Renda fixa", "Tesouro Direto"].includes(i.classe)).reduce((s, i) => s + (i.saldo || 0), 0);
+  const emConta = D.contas.filter((c) => !c.cartao).reduce((s, c) => s + (c.saldo || 0), 0);
+  const total = I.reduce((s, i) => s + (i.saldo || 0), 0), cdi12 = IND?.cdi_12m;
+  const dicas = [];
+  const add = (nivel, icone_, titulo, texto) => dicas.push({ nivel, icone_, titulo, texto });
+  if (gastoMedio > 0) {
+    const meses = (liquidos + emConta) / gastoMedio;
+    if (meses < 3) add("alerta", "falta", "Reserva de emergência curta", `Somando conta e renda fixa você tem ${brl(liquidos + emConta)}, que cobre ~${meses.toFixed(1).replace(".", ",")} mês(es) dos seus gastos (${brl(gastoMedio)}/mês). O ideal é de 3 a 6 meses, num lugar seguro e com resgate no mesmo dia.`);
+    else if (meses < 6) add("atencao", "falta", "Reserva de emergência no caminho", `Você cobre ~${meses.toFixed(1).replace(".", ",")} meses de gastos. Chegar a 6 meses (${brl(gastoMedio * 6)}) dá mais tranquilidade.`);
+    else add("ok", "resultado", "Reserva de emergência em dia", `Conta e renda fixa cobrem ~${Math.floor(meses)} meses dos seus gastos. O que passar disso pode buscar rendimentos maiores, com prazo mais longo.`);
+  }
+  if (emConta > Math.max(2000, gastoMedio * 1.5)) add("atencao", "patrimonio", "Dinheiro parado na conta", `Há ${brl(emConta)} em conta corrente, mais que 1,5 mês de gastos. Deixar o excedente numa aplicação com liquidez diária perto de 100% do CDI${cdi12 ? ` (${pctSinal(cdi12).replace("+", "")} em 12 meses)` : ""} faz o dinheiro trabalhar.`);
+  if (cdi12) {
+    const fracos = I.filter((i) => ["Renda fixa", "Tesouro Direto"].includes(i.classe) && i.rent_12m != null && i.rent_12m < cdi12 * 0.85);
+    if (fracos.length) add("atencao", "alvo", "Renda fixa rendendo abaixo do CDI", `${fracos.map((i) => `${esc(i.nome)} (${Math.round(i.rent_12m / cdi12 * 100)}% do CDI)`).join(", ")}. Vale comparar com opções de liquidez parecida que paguem 100% do CDI ou mais.`);
+    const bons = I.filter((i) => ["Renda fixa", "Tesouro Direto"].includes(i.classe) && i.rent_12m != null && i.rent_12m >= cdi12);
+    if (bons.length) add("ok", "invest", "Ganhando do CDI", `${bons.map((i) => esc(i.nome)).join(", ")} renderam pelo menos 100% do CDI nos últimos 12 meses.`);
+  }
+  if (I.length >= 2 && total) {
+    const porClasse = {}; I.forEach((i) => { porClasse[i.classe] = (porClasse[i.classe] || 0) + (i.saldo || 0); });
+    const [cl, v] = Object.entries(porClasse).sort((a, b) => b[1] - a[1])[0];
+    if (v / total > 0.85) add("info", "invest", "Carteira concentrada", `${pctInt(v / total)} do que você investe está em ${cl}. Diversificar entre tipos de aplicação reduz o risco de um só fator afetar tudo.`);
+  }
+  const porBancoRF = {}; I.filter((i) => i.classe === "Renda fixa").forEach((i) => { porBancoRF[i.banco] = (porBancoRF[i.banco] || 0) + (i.saldo || 0); });
+  Object.entries(porBancoRF).filter(([, v]) => v > 250000).forEach(([b, v]) => add("alerta", "falta", `Acima da garantia do FGC no ${esc(b)}`, `Você tem ${brl(v)} em renda fixa no ${esc(b)}. O FGC garante até R$ 250 mil por banco; o que passar disso fica sem garantia.`));
+  const perdas = I.filter((i) => i.aplicado && i.saldo < i.aplicado);
+  if (perdas.length) add("info", "mes", "Aplicações no negativo", `${perdas.map((i) => `${esc(i.nome)} (${pctSinal((i.saldo - i.aplicado) / i.aplicado)})`).join(", ")}. Em renda variável isso pode ser temporário; olhe os fundamentos antes de decidir (veja "Pesquisar um ativo").`);
+  if (sobraMedia > 50) {
+    const taxa = cdi12 ? Math.pow(1 + cdi12, 1 / 12) - 1 : 0.009;
+    const fv = sobraMedia * ((Math.pow(1 + taxa, 12) - 1) / taxa);
+    add("info", "sobra", "Quanto sua sobra pode virar", `Sua sobra média é de ${brl(sobraMedia)}/mês. Aplicada todo mês a 100% do CDI, em 1 ano viraria ~${brl(fv)} (antes do IR).`);
+  } else if (fechados.length) add("alerta", "gastos", "Gastos acima das receitas", `Na média dos últimos meses os gastos passaram as receitas em ${brl(-sobraMedia)}/mês. Antes de investir, vale achar onde cortar (veja Análise).`);
+  const juros = R.categorias.filter((c) => ["Juros e multas", "Tarifas bancárias"].includes(c.categoria)).reduce((s, c) => s + c.valor, 0);
+  if (juros > 0) add("atencao", "parcela", "Juros e tarifas no mês", `Você pagou ${brl(juros)} em juros, multas ou tarifas neste mês. Esse custo costuma ser maior que qualquer rendimento.`);
+  if (IND) add("info", "alvo", "Cenário de juros", `Selic em ${pctSinal(IND.selic).replace("+", "")} e inflação de ${pctSinal(IND.ipca_12m).replace("+", "")} em 12 meses: juro real de ${pctSinal(IND.juro_real)}. Com juro real alto, a renda fixa pós-fixada e atrelada à inflação fica atrativa.`);
+  const CORES = { alerta: ["#ff8a80", "#c8372d"], atencao: ["#ffc35c", "#d9860f"], ok: ["#4fdca0", "#11946a"], info: ["#8d9bff", "#4c59d6"] };
+  $("mercDicas").innerHTML = dicas.map((d) => `<div class="dica-item" style="--c:${CORES[d.nivel][1]};--k1:${CORES[d.nivel][0]};--k2:${CORES[d.nivel][1]}">
+      <span class="bloco"><svg class="k" aria-hidden="true"><use href="#k-${d.icone_}"/></svg></span><div><b>${d.titulo}</b><p>${d.texto}</p></div></div>`).join("") ||
+    `<div class="vazio">Ainda não há dados suficientes para dicas.</div>`;
+
+  // ativos da carteira com links
+  const tks = tickersCarteira();
+  $("ativosCarteira").innerHTML = tks.length ? `<div class="subtitulo"><span>Da sua carteira</span><span>${tks.length}</span></div>` + tks.map((t) => {
+    const inv = I.find((i) => (i.nome || "").toUpperCase().includes(t));
+    return `<div class="ativo-linha"><span class="tk">${t}</span><span class="suave" style="flex:1;min-width:140px">${esc(inv?.classe || "")} · ${brl(inv?.saldo)}</span>${linksTicker(t, inv?.classe)}</div>`;
+  }).join("") : "";
+  $("mercFontes").innerHTML = FONTES.map((f) => `<div class="fonte" style="--c:${f.cor}">
+      <div class="topo-f"><span class="ic" style="--c:${f.cor}">${icone("lampada")}<img src="https://www.google.com/s2/favicons?domain=${f.dominio}&sz=64" alt="" loading="lazy" referrerpolicy="no-referrer"></span>${f.nome}</div>
+      <p>${f.texto}</p><div class="links">${f.links.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${n} ↗</a>`).join("")}</div></div>`).join("");
+  $("mercGuia").innerHTML = GUIA.map(([t, h]) => `<details><summary>${t}</summary>${h}</details>`).join("");
+  simular();
+}
+
+// Simulador: juros compostos mês a mês a uma % do CDI, com IR regressivo da renda fixa
+function simular() {
+  const v = (id) => Math.max(0, +$(id).value || 0);
+  const inicial = v("simInicial"), aporte = v("simAporte"), prazo = Math.min(600, Math.max(1, Math.round(v("simPrazo")) || 1)), pctCdi = v("simCdi") / 100;
+  const cdi12 = D?.indicadores?.cdi_12m ?? 0.11;
+  const taxa = Math.pow(1 + cdi12 * pctCdi, 1 / 12) - 1;
+  let saldo = inicial; const anos = [];
+  const passo = prazo <= 12 ? 1 : prazo <= 36 ? 3 : prazo <= 72 ? 6 : 12;
+  for (let m = 1; m <= prazo; m++) { saldo = saldo * (1 + taxa) + aporte; if (m % passo === 0 || m === prazo) anos.push({ m, saldo, investido: inicial + aporte * m }); }
+  const investido = inicial + aporte * prazo, juros = saldo - investido, dias = prazo * 30;
+  const ir = dias <= 180 ? 0.225 : dias <= 360 ? 0.2 : dias <= 720 ? 0.175 : 0.15;
+  $("simRes").innerHTML = `<div><small>Você investe</small><b>${brl(investido)}</b></div><div><small>Rendimento bruto</small><b class="pos">+${brl(juros)}</b></div>
+    <div><small>Total líquido (IR ${String(ir * 100).replace(".", ",")}%)</small><b>${brl(investido + juros * (1 - ir))}</b></div>`;
+  const maior = Math.max(...anos.map((a) => a.saldo), 1);
+  $("simBarras").innerHTML = `<div class="barras-mes sim" style="grid-template-columns:repeat(${anos.length},minmax(0,1fr));height:110px">${anos.map((a, i) =>
+    `<div class="bm" data-rotulo="${a.m < 12 ? a.m + " meses" : (a.m / 12).toFixed(a.m % 12 ? 1 : 0).replace(".", ",") + " ano(s)"}: ${brl(a.saldo)}"><i style="--i:${i};height:${a.saldo / maior * 100}%;background:linear-gradient(to top, #5b6ee1 ${a.investido / a.saldo * 100}%, #f28c3b 0)"></i><small>${a.m % 12 ? a.m + "m" : a.m / 12 + "a"}</small></div>`).join("")}</div>`;
+  $("simNota").textContent = `CDI de ${pctSinal(cdi12).replace("+", "")} em 12 meses${D?.indicadores ? " (Banco Central)" : " (estimado)"}, mantido constante. Azul: o que você investiu; laranja: rendimento. IR pela tabela regressiva; LCI/LCA são isentas.`;
+}
+["simInicial", "simAporte", "simPrazo", "simCdi"].forEach((id) => $(id).addEventListener("input", simular));
+$("buscaAtivo").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const t = $("tickerBusca").value.trim().toUpperCase();
+  $("linksAtivo").innerHTML = ehTicker(t) ? linksTicker(t) : `<span class="suave">Digite um código como PETR4, ITUB4, BOVA11 ou MXRF11.</span>`;
+});
+
 // Investimentos: resumo, divisão por tipo e por banco, e um cartão por aplicação
 const CLASSES = { "Renda fixa": ["#36a597", "banco"], "Tesouro Direto": ["#3b82c4", "escudo"], "Fundos": ["#8b5cf6", "grafico"],
                   "Ações": ["#f28c3b", "invest"], "Fundos imobiliários": ["#d14d9b", "casa"], "ETFs": ["#e0b03a", "grafico"],
@@ -1571,6 +1818,57 @@ const CLASSES = { "Renda fixa": ["#36a597", "banco"], "Tesouro Direto": ["#3b82c
 const estiloClasse = (c) => CLASSES[c] || CLASSES.Outros;
 const pctSinal = (v) => v == null ? "—" : (v > 0 ? "+" : "") + (v * 100).toFixed(2).replace(".", ",") + "%";
 const classeSinal = (v) => v == null || v === 0 ? "" : v > 0 ? "pos" : "neg";
+
+// Evolução: quanto do saldo é dinheiro que você colocou e quanto é rendimento, e o rendimento real de cada mês
+function renderEvolucaoInvest(RI, cdiDe) {
+  const M = RI.meses || [];
+  $("invEvolucao").hidden = !D.investimentos.length;
+  const inicio = RI.inicio ? data(RI.inicio) : null;
+  if (M.length < 2) {
+    $("invEvoExtra").textContent = "";
+    $("invMeses").innerHTML = `<div class="vazio">${inicio ? `O painel guarda o saldo das aplicações desde ${inicio}.` : "O painel começa a guardar o saldo das aplicações na próxima atualização."}
+      O rendimento real aparece aqui quando houver o saldo de dois meses seguidos (a atualização diária faz isso sozinha).</div>`;
+    $("invEvoDica").textContent = "";
+    graficos.inv?.destroy(); graficos.inv = null;
+    return;
+  }
+  const base = M[0].saldo;
+  let aportes = 0;
+  const serie = M.map((m) => { aportes += m.aportes || 0; const aplicado = Math.min(m.saldo, base + aportes); return { mes: m.mes, aplicado, rend: m.saldo - aplicado }; });
+  const fech = M.filter((m) => m.rendimento != null && !m.parcial), soma = fech.reduce((s, m) => s + m.rendimento, 0);
+  $("invEvoExtra").textContent = fech.length ? `+${brl(soma)} em ${fech.length} ${fech.length === 1 ? "mês" : "meses"}` : "";
+  $("invMeses").innerHTML = `<div class="evo-tabela"><div class="evo-cab"><span>Mês</span><span>Aplicou/resgatou</span><span>Rendeu</span><span>No mês</span></div>` +
+    [...M].reverse().filter((m) => m.rendimento != null).slice(0, 8).map((m) => {
+      const c = cdiDe(m.mes), rel = !m.parcial && c && m.rend_pct != null ? Math.round(m.rend_pct / c * 100) : null;
+      return `<div class="evo-linha"><span>${mesCurtoAno(m.mes)}${m.parcial ? ' <small class="suave">(até hoje)</small>' : ""}</span>
+        <span class="suave">${m.aportes ? (m.aportes > 0 ? "+" : "−") + brl(Math.abs(m.aportes)) : "—"}</span>
+        <b class="${classeSinal(m.rendimento)}">${m.rendimento >= 0 ? "+" : "−"}${brl(Math.abs(m.rendimento))}</b>
+        <span><b class="${classeSinal(m.rend_pct)}">${pctSinal(m.rend_pct)}</b>${rel != null ? `<small class="cdi ${rel >= 100 ? "pos" : ""}">${rel}% CDI</small>` : ""}</span></div>`;
+    }).join("") + `</div>`;
+  $("invEvoDica").textContent = `Calculado pelo próprio painel: saldo no fim de cada mês, menos o saldo do mês anterior, menos o que você aplicou ou resgatou (pelas transações). Saldo guardado desde ${inicio}.`;
+  if (!window.Chart) return;
+  const com = M.filter((m) => m.rendimento != null);
+  const ref = com.map((m) => { const c = cdiDe(m.mes), s0 = m.saldo - m.rendimento - (m.aportes || 0); return c != null && !m.parcial ? s0 * c : null; });
+  graficos.inv?.destroy();
+  graficos.inv = new Chart($("gInvest"), {
+    data: { labels: com.map((m) => NOMES_MES[+m.mes.slice(5, 7) - 1] + (m.parcial ? "*" : "")), datasets: [
+      { type: "bar", label: "Rendeu", data: com.map((m) => m.rendimento), borderRadius: 5, maxBarThickness: 34,
+        backgroundColor: com.map((m) => m.rendimento < 0 ? cor("--neg") : m.parcial ? "#f28c3b88" : "#f28c3b") },
+      { type: "line", label: "100% do CDI", data: ref, borderColor: cor("--suave"), borderDash: [5, 4], borderWidth: 2, pointRadius: 3,
+        pointBackgroundColor: cor("--cartao"), pointBorderColor: cor("--suave"), tension: 0.3, spanGaps: true }] },
+    options: {
+      maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+      animation: menosMovimento() ? false : { duration: 900, easing: "easeOutQuart", delay: (c) => c.type === "data" ? c.dataIndex * 70 : 0 },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: "#0f4a49", padding: 10, cornerRadius: 12, boxPadding: 4, callbacks: {
+        title: (it) => nomeMesLongo(com[it[0].dataIndex].mes) + (com[it[0].dataIndex].parcial ? " (até hoje)" : ""),
+        label: (c) => c.raw == null ? null : ` ${c.datasetIndex ? "Com 100% do CDI" : "Rendeu"}: ${brl(c.raw)}`,
+        footer: (it) => "Saldo: " + brl(com[it[0].dataIndex].saldo) } } },
+      scales: { x: { grid: { display: false }, border: { display: false } },
+                y: { beginAtZero: true, border: { display: false }, grid: { color: cor("--linha") },
+                     ticks: { maxTicksLimit: 5, callback: (v) => oculto ? "" : "R$ " + v.toLocaleString("pt-BR") } } },
+    },
+  });
+}
 
 function renderInvestimentos() {
   const I = D.investimentos, total = I.reduce((s, i) => s + (i.saldo || 0), 0);
@@ -1582,12 +1880,25 @@ function renderInvestimentos() {
   const rMes = media("rent_mes"), r12 = media("rent_12m");
   const ganhoMes = I.filter((i) => i.rent_mes != null).reduce((s, i) => s + i.saldo - i.saldo / (1 + i.rent_mes), 0);
   const ok = resultado >= 0;
+  // CDI do Banco Central para comparar ("% do CDI")
+  const IND = D.indicadores, cdi12 = IND?.cdi_12m;
+  const cdiDe = (m) => IND?.cdi_meses?.find((x) => x.mes === m)?.taxa;
+  const cdiMesAnt = cdiDe(somarMeses(hoje(), -1)) ?? IND?.cdi_meses?.at(-1)?.taxa;
+  const doCdi = (r, ref) => r != null && ref ? Math.round(r / ref * 100) + "% do CDI" : "";
+  // rendimento calculado pelo próprio painel (saldo guardado a cada atualização), quando já há histórico
+  const RI = D.rendimento_investimentos || { meses: [] }, fechadosRI = RI.meses.filter((m) => m.rendimento != null && !m.parcial);
+  const ultRI = fechadosRI.at(-1);
+  const ganhoUlt = ultRI ? ultRI.rendimento : ganhoMes, pctUlt = ultRI ? ultRI.rend_pct : rMes;
+  const cdiUlt = ultRI ? cdiDe(ultRI.mes) : cdiMesAnt;
   $("invResumo").innerHTML = I.length ?
     tile("invest", ["#8d9bff", "#4c59d6"], "Total investido", contar(total), `${I.length} aplicaç${I.length === 1 ? "ão" : "ões"} em ${new Set(I.map((i) => i.banco)).size} banco(s)`) +
     tile("resultado", ok ? ["#4fdca0", "#11946a"] : ["#ff8a80", "#c8372d"], "Resultado", `<span class="${ok ? "pos" : "neg"}">${ok ? "+" : ""}${contar(resultado)}</span>`,
       resPct == null ? "sem valor aplicado informado" : `${pctSinal(resPct)} sobre ${brl(aplicado)} aplicados`) +
-    tile("mes", ["#5fe0d6", "#0f8f8a"], "Rendeu no último mês", `<span class="${classeSinal(ganhoMes)}">${ganhoMes >= 0 ? "+" : ""}${contar(ganhoMes)}</span>`, "média de " + pctSinal(rMes) + " na carteira") +
-    tile("alvo", ["#ffc35c", "#d9860f"], "Rentabilidade em 12 meses", `<span class="${classeSinal(r12)}">${pctSinal(r12)}</span>`, "média ponderada pelo saldo")
+    tile("mes", ["#5fe0d6", "#0f8f8a"], ultRI ? `Rendeu em ${MESES_LONGOS[+ultRI.mes.slice(5, 7) - 1]}` : "Rendeu no último mês",
+      `<span class="${classeSinal(ganhoUlt)}">${ganhoUlt >= 0 ? "+" : ""}${contar(ganhoUlt)}</span>`,
+      pctSinal(pctUlt) + (doCdi(pctUlt, cdiUlt) ? " · " + doCdi(pctUlt, cdiUlt) : "") + (ultRI ? " · calculado pelo saldo" : " · informado pelo banco")) +
+    tile("alvo", ["#ffc35c", "#d9860f"], "Rentabilidade em 12 meses", `<span class="${classeSinal(r12)}">${pctSinal(r12)}</span>`,
+      cdi12 ? `${doCdi(r12, cdi12)} · CDI 12m: ${pctSinal(cdi12)}` : "média ponderada pelo saldo")
     : `<div class="cartao vazio" style="grid-column:1/-1">Nenhum investimento compartilhado pelos bancos ainda. Quando a Pluggy trouxer suas aplicações, elas aparecem aqui.</div>`;
 
   // por tipo: anel + lista
@@ -1621,6 +1932,16 @@ function renderInvestimentos() {
       <b class="${classeSinal(i.rent_12m)}">${pctSinal(i.rent_12m)}</b>`;
   }).join("")}</div>` : `<div class="vazio">Os bancos não informaram a rentabilidade.</div>`;
 
+  // CDI como referência no ranking
+  if (comTaxa.length && cdi12) {
+    const w = cdi12 / escala * 100;
+    $("invRanking").firstElementChild.insertAdjacentHTML("beforeend", `<span class="nome-r suave">CDI (referência)</span>
+      <span class="eixo"><span class="zero" style="left:${zero}%"></span><i style="left:${zero}%;width:${w}%;background:repeating-linear-gradient(45deg, var(--suave) 0 4px, transparent 4px 8px);opacity:.7"></i></span>
+      <b class="suave">${pctSinal(cdi12)}</b>`);
+  }
+
+  renderEvolucaoInvest(RI, cdiDe);
+
   // um cartão por aplicação
   $("investimentos").innerHTML = I.length ? I.map((i, n) => {
     const [cor] = estiloClasse(i.classe), ganho = i.aplicado ? i.saldo - i.aplicado : null;
@@ -1633,8 +1954,8 @@ function renderInvestimentos() {
       <div class="inv-numeros">
         <div><small>Aplicado</small><b>${i.aplicado ? brl(i.aplicado) : "—"}</b></div>
         <div><small>Resultado</small><b class="${classeSinal(ganho)}">${ganho == null ? "—" : (ganho > 0 ? "+" : "") + brl(ganho) + (i.aplicado ? ` (${pctSinal(ganho / i.aplicado)})` : "")}</b></div>
-        <div><small>No último mês</small><b class="${classeSinal(i.rent_mes)}">${pctSinal(i.rent_mes)}</b></div>
-        <div><small>Em 12 meses</small><b class="${classeSinal(i.rent_12m)}">${pctSinal(i.rent_12m)}</b></div></div></div>`;
+        <div><small>No último mês</small><b class="${classeSinal(i.rent_mes)}">${pctSinal(i.rent_mes)}</b>${doCdi(i.rent_mes, cdiMesAnt) ? `<small>${doCdi(i.rent_mes, cdiMesAnt)}</small>` : ""}</div>
+        <div><small>Em 12 meses</small><b class="${classeSinal(i.rent_12m)}">${pctSinal(i.rent_12m)}</b>${doCdi(i.rent_12m, cdi12) ? `<small>${doCdi(i.rent_12m, cdi12)}</small>` : ""}</div></div></div>`;
   }).join("") : `<div class="vazio">Nenhum investimento compartilhado pelos bancos.</div>`;
 }
 
@@ -1751,6 +2072,7 @@ const VISTAS = {
   transacoes: ["Transações", null],
   analise: ["Análise", "Categorias, assinaturas, parcelas e orçamentos"],
   investimentos: ["Investimentos", "Suas aplicações e quanto renderam"],
+  mercado: ["Mercado e dicas", "Indicadores, dicas para a sua carteira e onde pesquisar"],
   ajustes: ["Ajustes", "Regras de categoria e conexões com os bancos"],
 };
 function mostrarVista() {
@@ -1762,6 +2084,8 @@ function mostrarVista() {
   $("subtitulo").textContent = sub || (D ? nomeMesLongo(D.resumo.mes)[0].toUpperCase() + nomeMesLongo(D.resumo.mes).slice(1) : "");
   document.title = (titulo ? titulo + " · " : "") + "Meu Pierre";
   if (v === "inicio") graficos.ev?.resize();
+  if (v === "investimentos") graficos.inv?.resize();
+  if (v === "mercado" && D) renderMercado();
   requestAnimationFrame(animarContadores);
 }
 function irPara(v) {

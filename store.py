@@ -55,6 +55,9 @@ CREATE TABLE IF NOT EXISTS regras (
 );
 CREATE TABLE IF NOT EXISTS orcamentos (categoria TEXT PRIMARY KEY, valor REAL);
 CREATE TABLE IF NOT EXISTS meta (chave TEXT PRIMARY KEY, valor TEXT);
+CREATE TABLE IF NOT EXISTS invest_historico (
+    chave TEXT PRIMARY KEY, invest_id TEXT, item_id TEXT, data TEXT, saldo REAL, aplicado REAL
+);
 """
 
 # Categorias da Pluggy (em inglês) -> português. O que não estiver aqui
@@ -129,7 +132,7 @@ def _sem_acento(s: str) -> str:
 
 # Chave primária de cada tabela, para traduzir "INSERT OR REPLACE" no Postgres.
 CHAVES = {"items": "id", "accounts": "id", "transactions": "id", "investments": "id",
-          "bills": "id", "orcamentos": "categoria", "meta": "chave"}
+          "bills": "id", "orcamentos": "categoria", "meta": "chave", "invest_historico": "chave"}
 _COLUNAS: dict[str, list[str]] = {}
 for _bloco in re.findall(r"CREATE TABLE IF NOT EXISTS (\w+) \((.*?)\);", SCHEMA, re.S):
     _COLUNAS[_bloco[0]] = [c.strip().split()[0] for c in _bloco[1].split(",") if c.strip()]
@@ -392,6 +395,10 @@ class Store:
                    (inv.get("dueDate") or "")[:10] or None, agora) for inv in invs if inv.get("id")]
         if linhas:
             self.con.executemany("INSERT OR REPLACE INTO investments VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", linhas)
+            # foto do saldo do dia: é com ela que o painel calcula quanto cada aplicação rendeu de verdade
+            dia = hoje_br().isoformat()
+            self.con.executemany("INSERT OR REPLACE INTO invest_historico VALUES (?,?,?,?,?,?)",
+                                 [(f"{l[0]}|{dia}", l[0], item_id, dia, l[6], l[7]) for l in linhas if l[6] is not None])
         resumo["investimentos"] += len(linhas)
 
     @staticmethod
@@ -448,6 +455,16 @@ class Store:
             ("inv2", "demo-itau", "Itaú", "Tesouro Selic 2029", "FIXED_INCOME", "TREASURY", 12010.77, 11000, 0.0091, 0.114, "2029-03-01", agora),
             ("inv3", "demo-itau", "Itaú", "Fundo Imobiliário XPML11", "EQUITY", "REAL_ESTATE_FUND", 4870.00, 5200, -0.012, 0.031, None, agora),
         ])
+        # histórico de saldos no fim de cada mês (de trás para frente: tira o rendimento e o aporte do mês)
+        hist = []
+        for inv_id, item, saldo, taxa, aporte in (("inv1", "demo-nu", 18450.32, 0.0093, 800), ("inv2", "demo-itau", 12010.77, 0.009, 0),
+                                                  ("inv3", "demo-itau", 4870.00, -0.004, 0)):
+            dia = hoje
+            for k in range(7):
+                hist.append((f"{inv_id}|{dia.isoformat()}", inv_id, item, dia.isoformat(), round(saldo, 2), None))
+                dia = dia.replace(day=1) - timedelta(days=1)
+                saldo = (saldo - aporte) / (1 + taxa + (0.002 if k % 3 == 0 else 0))
+        self.con.executemany("INSERT OR REPLACE INTO invest_historico VALUES (?,?,?,?,?,?)", hist)
         # faturas dos últimos 6 meses de cada cartão
         contas_bills = []
         for i in range(1, 7):

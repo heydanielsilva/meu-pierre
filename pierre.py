@@ -382,7 +382,7 @@ def investimentos() -> list[dict]:
     out = []
     for r in store.con.execute("SELECT * FROM investments ORDER BY saldo DESC").fetchall():
         classe = SUBTIPOS_INVEST.get(r["subtipo"] or "") or CLASSES_INVEST.get(r["tipo"] or "", "Outros")
-        out.append({"nome": r["nome"], "banco": r["banco"], "tipo": r["tipo"], "subtipo": r["subtipo"], "classe": classe,
+        out.append({"id": r["id"], "nome": r["nome"], "banco": r["banco"], "tipo": r["tipo"], "subtipo": r["subtipo"], "classe": classe,
                     "saldo": r["saldo"], "aplicado": r["valor_aplicado"],
                     "rent_mes": _taxa(r["rent_mes"], 0.3), "rent_12m": _taxa(r["rent_12m"], 2.5),
                     "vencimento": r["vencimento"]})
@@ -400,7 +400,7 @@ def rendimento_investimentos() -> dict:
     """
     rows = store.con.execute("SELECT invest_id, item_id, data, saldo FROM invest_historico ORDER BY data").fetchall()
     if not rows:
-        return {"meses": [], "inicio": None}
+        return {"meses": [], "inicio": None, "por_invest": {}}
     ultimo: dict[tuple[str, str], tuple[str, float]] = {}   # (mês, invest) -> (data, saldo) mais recente do mês
     item_de: dict[str, str] = {}
     for r in rows:
@@ -431,7 +431,10 @@ def rendimento_investimentos() -> dict:
                 rend = s1 - s0 - aportes
                 item.update(aportes=aportes, rendimento=rend, rend_pct=rend / s0 if s0 else None)
         out.append(item)
-    return {"meses": out[-13:], "inicio": rows[0]["data"]}
+    por_invest: dict[str, list[dict]] = defaultdict(list)
+    for (m, k), (_, saldo) in sorted(ultimo.items()):
+        por_invest[k].append({"mes": m, "saldo": saldo})
+    return {"meses": out[-13:], "inicio": rows[0]["data"], "por_invest": {k: v[-13:] for k, v in por_invest.items()}}
 
 
 def _sgs(serie: int, n: int) -> list[tuple[str, float]]:

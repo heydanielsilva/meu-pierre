@@ -338,6 +338,10 @@
 
   /* Animações (desligadas para quem pede menos movimento no sistema) */
   @media (prefers-reduced-motion: no-preference) {
+    .aba:not([hidden]) > section { animation: subir .55s cubic-bezier(.2,.8,.2,1) both; }
+    .aba:not([hidden]) > :nth-child(2) { animation-delay: .07s; } .aba:not([hidden]) > :nth-child(3) { animation-delay: .14s; }
+    .aba:not([hidden]) > :nth-child(4) { animation-delay: .21s; }
+    .painel-ativo:not([hidden]), .inv-grafico { animation: subir .45s cubic-bezier(.2,.8,.2,1) both; }
     .vista:not([hidden]) > section, .vista:not([hidden]) > .principal > section, .vista:not([hidden]) > aside {
       animation: subir .55s cubic-bezier(.2,.8,.2,1) both; }
     .vista:not([hidden]) > :nth-child(2), .vista:not([hidden]) > .principal > :nth-child(2) { animation-delay: .07s; }
@@ -482,6 +486,35 @@
   .evo-linha small.cdi.pos { color: var(--pos); }
   .inv-numeros > div > small + b + small { margin-top: 1px; }
 
+  /* Abas de Investimentos e gráficos do TradingView */
+  .aba { display: grid; gap: 24px; min-width: 0; }
+  .abas { margin-bottom: 0; max-width: 520px; }
+  .tv { width: 100%; min-width: 0; }
+  .tv-faixa { height: 46px; }
+  .faixa-mercado { padding: 8px 14px; }
+  .tv-info { height: 180px; }
+  .tv-grafico { height: 480px; border-radius: 16px; overflow: hidden; }
+  .tv-financas { height: 480px; margin-top: 10px; }
+  .tv-mini { height: 170px; }
+  .painel-ativo { margin-top: 18px; padding: 18px; border-radius: 20px; background: var(--cartao-2); display: grid; gap: 12px; }
+  .pa-cab { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .pa-cab b { font-size: 22px; font-weight: 800; letter-spacing: .02em; margin-right: 10px; }
+  .pa-cab small { color: var(--suave); }
+  .pa-dados summary { cursor: pointer; font-weight: 700; color: var(--acento-texto); }
+  .pa-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .pa-links .links-ativo { margin: 0; }
+  .ativo-card { background: var(--cartao-2); border-radius: 18px; padding: 12px 14px; display: grid; gap: 8px; min-width: 0; }
+  .ativo-card .topo-a { display: flex; align-items: center; gap: 10px; }
+  .ativo-card .topo-a .tk { font-weight: 800; }
+  .ativo-card .topo-a .meio { flex: 1; min-width: 0; color: var(--suave); font-size: 13px; }
+  .inv-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .inv-acoes button { height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--linha); background: var(--cartao);
+                      color: var(--texto); font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .inv-acoes button:hover { border-color: var(--acento); }
+  .inv-acoes button svg.i { width: 16px; height: 16px; }
+  .inv-grafico { margin-top: 12px; }
+  .inv-grafico .grafico { height: 190px; }
+
   /* Mercado e dicas */
   .dicas { display: grid; gap: 10px; }
   .dica-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 16px; background: var(--cartao-2);
@@ -505,7 +538,8 @@
   .botao-link:hover { transform: translateY(-2px); border-color: var(--acento); }
   .botao-link .ic { width: 28px; height: 28px; }
   .botao-link .ic img { padding: 5px; }
-  .ativos-carteira { display: grid; gap: 10px; margin-top: 16px; }
+  .ativos-carteira { margin-top: 16px; }
+  .ativos-grade { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
   .ativo-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 14px; border-radius: 16px; background: var(--cartao-2); }
   .ativo-linha .tk { font-weight: 800; letter-spacing: .02em; min-width: 72px; }
   .fontes { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
@@ -630,6 +664,8 @@
     .barras-mes { gap: 4px; }
     .evo-grade { grid-template-columns: 1fr; }
     .sim-res { grid-template-columns: 1fr; }
+    .tv-grafico { height: 380px; }
+    .tv-info { height: 210px; }
     .cc-grade { grid-template-columns: 1fr; }
     .inv-topo { flex-wrap: wrap; }
     .inv-topo .meio { flex: 1 1 calc(100% - 60px); }
@@ -726,7 +762,6 @@
     <a href="#transacoes" title="Transações"><svg class="i"><use href="#i-troca"/></svg></a>
     <a href="#analise" title="Análise: categorias, assinaturas e parcelas"><svg class="i"><use href="#i-grafico"/></svg></a>
     <a href="#investimentos" title="Investimentos"><svg class="i"><use href="#i-invest"/></svg></a>
-    <a href="#mercado" title="Mercado e dicas"><svg class="i"><use href="#i-lampada"/></svg></a>
     <a href="#ajustes" title="Regras e conexões"><svg class="i"><use href="#i-ajuste"/></svg></a>
     <a href="/sair" class="fim" title="Sair"><svg class="i"><use href="#i-sair"/></svg></a>
   </nav>
@@ -877,6 +912,11 @@
 
       <!-- Investimentos e parcelas -->
       <div class="vista" data-vista="investimentos" hidden>
+        <div class="segmento largo abas" role="group" aria-label="Seções de investimentos" id="invAbas">
+          <button type="button" data-aba="carteira" aria-pressed="true">Minha carteira</button>
+          <button type="button" data-aba="mercado" aria-pressed="false">Mercado e dicas</button>
+        </div>
+        <div class="aba" data-aba="carteira">
         <section class="grade-4" id="invResumo"></section>
         <section class="cartao" id="invEvolucao">
           <div class="cab"><h2>Rendimento de verdade</h2><span class="extra" id="invEvoExtra"></span></div>
@@ -906,10 +946,9 @@
           <div class="cab"><h2>Suas aplicações</h2><span class="extra" id="invTotal"></span></div>
           <div id="investimentos"></div>
         </section>
-      </div>
-
-      <!-- Mercado e dicas -->
-      <div class="vista" data-vista="mercado" hidden>
+        </div>
+        <div class="aba" data-aba="mercado" hidden>
+          <section class="cartao faixa-mercado"><div class="tv tv-faixa" id="tvFaixa"></div></section>
         <section class="grade-4" id="mercIndicadores"></section>
         <section class="grade-2">
           <div class="cartao">
@@ -929,14 +968,22 @@
             <p class="dica" id="simNota"></p>
           </div>
         </section>
-        <section class="cartao">
-          <div class="cab"><h2>Pesquisar um ativo</h2><span class="extra">abre direto nos sites de análise</span></div>
+        <section class="cartao" id="secPesquisa">
+          <div class="cab"><h2>Gráficos e dados dos ativos</h2><span class="extra">ações, FIIs e ETFs da B3</span></div>
           <form class="busca-ativo" id="buscaAtivo">
-            <input class="campo" id="tickerBusca" placeholder="Código do ativo (ex.: PETR4, MXRF11)" maxlength="7" autocomplete="off">
-            <button class="pilula roxa">Ver links</button>
+            <input class="campo" id="tickerBusca" placeholder="Código do ativo (ex.: PETR4, MXRF11, BOVA11)" maxlength="7" autocomplete="off">
+            <button class="pilula roxa">Ver ativo</button>
           </form>
           <div class="links-ativo" id="linksAtivo"></div>
+          <div class="painel-ativo" id="painelAtivo" hidden>
+            <div class="pa-cab"><div><b id="paTicker"></b><small id="paInfo"></small></div><button class="x" id="paFechar" type="button" title="Fechar">✕</button></div>
+            <div class="tv tv-info" id="paCotacao"></div>
+            <div class="tv tv-grafico" id="paGrafico"></div>
+            <details class="pa-dados" id="paDados"><summary>Dados financeiros da empresa</summary><div class="tv tv-financas" id="paFinancas"></div></details>
+            <div class="pa-links"><span class="suave">Análise completa em:</span><span class="links-ativo" id="paLinks"></span></div>
+          </div>
           <div class="ativos-carteira" id="ativosCarteira"></div>
+          <p class="dica">Gráficos e cotações do TradingView (podem ter atraso). Títulos do Tesouro, CDBs e caixinhas não têm cotação em bolsa; o gráfico deles fica em "Minha carteira".</p>
         </section>
         <section class="cartao">
           <div class="cab"><h2>Onde se informar</h2><span class="extra">análises, indicadores e notícias</span></div>
@@ -947,6 +994,7 @@
           <div class="guia" id="mercGuia"></div>
           <p class="aviso-legal">As dicas e o simulador são informativos, calculados com os seus dados e indicadores públicos. Não são recomendação de investimento.</p>
         </section>
+        </div>
       </div>
 
       <!-- Regras e conexões -->
@@ -1190,6 +1238,7 @@ async function carregar(mes = $("mes").value || "") {
   $("conteudo").hidden = false;
   txLimite = 60;
   render();
+  $("mercIndicadores").innerHTML = "";  // força redesenhar a aba Mercado com os dados novos
   mostrarVista();
 }
 
@@ -1775,10 +1824,16 @@ function renderMercado() {
 
   // ativos da carteira com links
   const tks = tickersCarteira();
-  $("ativosCarteira").innerHTML = tks.length ? `<div class="subtitulo"><span>Da sua carteira</span><span>${tks.length}</span></div>` + tks.map((t) => {
+  $("ativosCarteira").innerHTML = tks.length ? `<div class="subtitulo"><span>Da sua carteira</span><span>${tks.length}</span></div><div class="ativos-grade">` + tks.map((t) => {
     const inv = I.find((i) => (i.nome || "").toUpperCase().includes(t));
-    return `<div class="ativo-linha"><span class="tk">${t}</span><span class="suave" style="flex:1;min-width:140px">${esc(inv?.classe || "")} · ${brl(inv?.saldo)}</span>${linksTicker(t, inv?.classe)}</div>`;
-  }).join("") : "";
+    return `<div class="ativo-card"><div class="topo-a"><span class="tk">${t}</span><span class="meio">${esc(inv?.classe || "")} · ${brl(inv?.saldo)}</span>
+        <button class="pilula" type="button" data-ativo="${t}" data-classe="${esc(inv?.classe || "")}" style="height:34px">Ver gráfico</button></div>
+      <div class="tv tv-mini" data-tv-mini="${t}"></div></div>`;
+  }).join("") + "</div>" : "";
+  document.querySelectorAll("[data-tv-mini]").forEach((el) => widgetTV(el, "mini-symbol-overview", { symbol: simboloTV(el.dataset.tvMini), dateRange: "12M", autosize: true, width: "100%", height: "100%" }));
+  widgetTV($("tvFaixa"), "ticker-tape", { displayMode: "adaptive", showSymbolLogo: true, symbols: [
+    { proName: "BMFBOVESPA:IBOV", title: "Ibovespa" }, { proName: "BMFBOVESPA:IFIX", title: "IFIX" }, { proName: "FX_IDC:USDBRL", title: "Dólar" },
+    { proName: "FX_IDC:EURBRL", title: "Euro" }, { proName: "BITSTAMP:BTCUSD", title: "Bitcoin (US$)" }, ...tks.map((t) => ({ proName: simboloTV(t), title: t }))] });
   $("mercFontes").innerHTML = FONTES.map((f) => `<div class="fonte" style="--c:${f.cor}">
       <div class="topo-f"><span class="ic" style="--c:${f.cor}">${icone("lampada")}<img src="https://www.google.com/s2/favicons?domain=${f.dominio}&sz=64" alt="" loading="lazy" referrerpolicy="no-referrer"></span>${f.nome}</div>
       <p>${f.texto}</p><div class="links">${f.links.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${n} ↗</a>`).join("")}</div></div>`).join("");
@@ -1808,8 +1863,112 @@ function simular() {
 $("buscaAtivo").addEventListener("submit", (e) => {
   e.preventDefault();
   const t = $("tickerBusca").value.trim().toUpperCase();
-  $("linksAtivo").innerHTML = ehTicker(t) ? linksTicker(t) : `<span class="suave">Digite um código como PETR4, ITUB4, BOVA11 ou MXRF11.</span>`;
+  $("linksAtivo").innerHTML = ehTicker(t) ? "" : `<span class="suave">Digite um código como PETR4, ITUB4, BOVA11 ou MXRF11.</span>`;
+  if (ehTicker(t)) abrirAtivo(t);
 });
+
+// ---- Gráficos do TradingView dentro do painel (widgets gratuitos, sem sair da página)
+const temaTV = () => document.documentElement.dataset.theme === "light" ? "light" : "dark";
+const simboloTV = (t) => "BMFBOVESPA:" + t.toUpperCase();
+function widgetTV(alvo, tipo, config) {
+  if (!alvo) return;
+  alvo.innerHTML = "";
+  alvo.dataset.tvTipo = tipo;
+  alvo.dataset.tvConfig = JSON.stringify(config);
+  const caixa = document.createElement("div");
+  caixa.className = "tradingview-widget-container";
+  caixa.style.cssText = "width:100%;height:100%";
+  const w = document.createElement("div");
+  w.className = "tradingview-widget-container__widget";
+  w.style.cssText = "width:100%;height:100%";
+  const sc = document.createElement("script");
+  sc.src = `https://s3.tradingview.com/external-embedding/embed-widget-${tipo}.js`;
+  sc.async = true;
+  sc.text = JSON.stringify({ locale: "br", colorTheme: temaTV(), theme: temaTV(), isTransparent: true, ...config });
+  caixa.append(w, sc);
+  alvo.append(caixa);
+}
+// ao trocar o tema, redesenha os widgets que estão na tela
+function refazerWidgetsTV() {
+  document.querySelectorAll("[data-tv-tipo]").forEach((el) => { if (el.offsetParent) widgetTV(el, el.dataset.tvTipo, JSON.parse(el.dataset.tvConfig)); });
+}
+let ativoAberto = null;
+function abrirAtivo(t, classe = "") {
+  t = t.toUpperCase();
+  ativoAberto = { t, classe };
+  const inv = D?.investimentos.find((i) => (i.nome || "").toUpperCase().includes(t));
+  $("painelAtivo").hidden = false;
+  $("paTicker").textContent = t;
+  $("paInfo").textContent = inv ? `na sua carteira · ${inv.classe} · ${brl(inv.saldo)}` : "";
+  widgetTV($("paCotacao"), "symbol-info", { symbol: simboloTV(t), width: "100%" });
+  widgetTV($("paGrafico"), "advanced-chart", { symbol: simboloTV(t), interval: "D", range: "12M", timezone: "America/Sao_Paulo", style: "1",
+    autosize: true, allow_symbol_change: true, hide_side_toolbar: true, withdateranges: true, save_image: false, calendar: false });
+  $("paDados").open = false;
+  $("paFinancas").innerHTML = "";
+  $("paLinks").innerHTML = linksTicker(t, classe || inv?.classe || "");
+  $("painelAtivo").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+$("paDados").addEventListener("toggle", () => {
+  if ($("paDados").open && ativoAberto && !$("paFinancas").childElementCount)
+    widgetTV($("paFinancas"), "financials", { symbol: simboloTV(ativoAberto.t), displayMode: "regular", width: "100%", height: "100%" });
+});
+$("paFechar").addEventListener("click", () => { $("painelAtivo").hidden = true; ativoAberto = null; });
+
+// ---- Abas de Investimentos: Minha carteira | Mercado e dicas
+let abaInv = "carteira";
+try { abaInv = localStorage.getItem("abaInvest") || "carteira"; } catch (e) {}
+function mostrarAba() {
+  document.querySelectorAll("#invAbas button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.aba === abaInv)));
+  document.querySelectorAll(".aba[data-aba]").forEach((a) => { a.hidden = a.dataset.aba !== abaInv; });
+  if (abaInv === "carteira") graficos.inv?.resize();
+  if (abaInv === "mercado" && D && !$("mercIndicadores").childElementCount) renderMercado();
+  requestAnimationFrame(animarContadores);
+}
+$("invAbas").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-aba]");
+  if (!b) return;
+  abaInv = b.dataset.aba;
+  try { localStorage.setItem("abaInvest", abaInv); } catch (err) {}
+  mostrarAba();
+});
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("[data-ativo]");  // "Ver gráfico" de um ativo: vai para Mercado e abre o painel do ativo
+  if (a) {
+    if (abaInv !== "mercado") { abaInv = "mercado"; mostrarAba(); }
+    abrirAtivo(a.dataset.ativo, a.dataset.classe || "");
+    return;
+  }
+  const g = e.target.closest("[data-grafico-inv]");  // gráfico do saldo de uma aplicação, dentro do próprio cartão
+  if (g) {
+    const cartao = g.closest(".inv"), area = cartao.querySelector(".inv-grafico");
+    if (area) { area.remove(); g.setAttribute("aria-expanded", "false"); graficos["inv-" + g.dataset.graficoInv]?.destroy(); return; }
+    g.setAttribute("aria-expanded", "true");
+    cartao.insertAdjacentHTML("beforeend", `<div class="inv-grafico"><div class="grafico"><canvas></canvas></div></div>`);
+    graficoAplicacao(g.dataset.graficoInv, cartao.querySelector(".inv-grafico canvas"));
+  }
+});
+function graficoAplicacao(id, canvas) {
+  const pts = D.rendimento_investimentos?.por_invest?.[id] || [];
+  const area = canvas.closest(".inv-grafico");
+  if (pts.length < 2) {
+    area.innerHTML = `<div class="vazio">O painel guarda o saldo desta aplicação a cada atualização. O gráfico aparece quando houver pelo menos dois meses de histórico.</div>`;
+    return;
+  }
+  if (!window.Chart) return;
+  const ctx = canvas.getContext("2d"), grad = ctx.createLinearGradient(0, 0, 0, 190);
+  grad.addColorStop(0, "#f28c3b55"); grad.addColorStop(1, "#f28c3b00");
+  graficos["inv-" + id]?.destroy();
+  graficos["inv-" + id] = new Chart(ctx, {
+    type: "line",
+    data: { labels: pts.map((p) => NOMES_MES[+p.mes.slice(5, 7) - 1]), datasets: [{ data: pts.map((p) => p.saldo), borderColor: "#f28c3b", backgroundColor: grad,
+      fill: true, tension: 0.35, borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: cor("--cartao"), pointBorderColor: "#f28c3b" }] },
+    options: { maintainAspectRatio: false, animation: menosMovimento() ? false : { duration: 900 },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: "#0f4a49", padding: 10, cornerRadius: 12,
+        callbacks: { title: (it) => nomeMesLongo(pts[it[0].dataIndex].mes), label: (c) => " Saldo: " + brl(c.raw) } } },
+      scales: { x: { grid: { display: false }, border: { display: false } },
+                y: { border: { display: false }, grid: { color: cor("--linha") }, ticks: { maxTicksLimit: 4, callback: (v) => oculto ? "" : "R$ " + v.toLocaleString("pt-BR") } } } },
+  });
+}
 
 // Investimentos: resumo, divisão por tipo e por banco, e um cartão por aplicação
 const CLASSES = { "Renda fixa": ["#36a597", "banco"], "Tesouro Direto": ["#3b82c4", "escudo"], "Fundos": ["#8b5cf6", "grafico"],
@@ -1955,7 +2114,9 @@ function renderInvestimentos() {
         <div><small>Aplicado</small><b>${i.aplicado ? brl(i.aplicado) : "—"}</b></div>
         <div><small>Resultado</small><b class="${classeSinal(ganho)}">${ganho == null ? "—" : (ganho > 0 ? "+" : "") + brl(ganho) + (i.aplicado ? ` (${pctSinal(ganho / i.aplicado)})` : "")}</b></div>
         <div><small>No último mês</small><b class="${classeSinal(i.rent_mes)}">${pctSinal(i.rent_mes)}</b>${doCdi(i.rent_mes, cdiMesAnt) ? `<small>${doCdi(i.rent_mes, cdiMesAnt)}</small>` : ""}</div>
-        <div><small>Em 12 meses</small><b class="${classeSinal(i.rent_12m)}">${pctSinal(i.rent_12m)}</b>${doCdi(i.rent_12m, cdi12) ? `<small>${doCdi(i.rent_12m, cdi12)}</small>` : ""}</div></div></div>`;
+        <div><small>Em 12 meses</small><b class="${classeSinal(i.rent_12m)}">${pctSinal(i.rent_12m)}</b>${doCdi(i.rent_12m, cdi12) ? `<small>${doCdi(i.rent_12m, cdi12)}</small>` : ""}</div></div>
+      <div class="inv-acoes"><button type="button" data-grafico-inv="${esc(i.id)}" aria-expanded="false">${icone("grafico")}Evolução do saldo</button>
+        ${((i.nome || "").toUpperCase().match(/\b[A-Z]{4}\d{1,2}\b/) || []).slice(0, 1).map((t) => `<button type="button" data-ativo="${t}" data-classe="${esc(i.classe)}">${icone("invest")}Gráfico de ${t}</button>`).join("")}</div></div>`;
   }).join("") : `<div class="vazio">Nenhum investimento compartilhado pelos bancos.</div>`;
 }
 
@@ -2071,11 +2232,11 @@ const VISTAS = {
   inicio: [null, "Seu resumo financeiro"],
   transacoes: ["Transações", null],
   analise: ["Análise", "Categorias, assinaturas, parcelas e orçamentos"],
-  investimentos: ["Investimentos", "Suas aplicações e quanto renderam"],
-  mercado: ["Mercado e dicas", "Indicadores, dicas para a sua carteira e onde pesquisar"],
+  investimentos: ["Investimentos", "Sua carteira, o mercado e dicas"],
   ajustes: ["Ajustes", "Regras de categoria e conexões com os bancos"],
 };
 function mostrarVista() {
+  if (location.hash === "#mercado") { abaInv = "mercado"; history.replaceState(null, "", "#investimentos"); }  // endereço antigo
   const v = location.hash.slice(1) in VISTAS ? location.hash.slice(1) : "inicio";
   document.querySelectorAll(".vista").forEach((el) => { el.hidden = el.dataset.vista !== v; });
   document.querySelectorAll("nav.lateral a[href^='#']").forEach((a) => a.classList.toggle("ativo", a.getAttribute("href") === "#" + v));
@@ -2084,8 +2245,7 @@ function mostrarVista() {
   $("subtitulo").textContent = sub || (D ? nomeMesLongo(D.resumo.mes)[0].toUpperCase() + nomeMesLongo(D.resumo.mes).slice(1) : "");
   document.title = (titulo ? titulo + " · " : "") + "Meu Pierre";
   if (v === "inicio") graficos.ev?.resize();
-  if (v === "investimentos") graficos.inv?.resize();
-  if (v === "mercado" && D) renderMercado();
+  if (v === "investimentos") mostrarAba();
   requestAnimationFrame(animarContadores);
 }
 function irPara(v) {
@@ -2216,7 +2376,8 @@ $("btnTema").addEventListener("click", () => {
   const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   try { localStorage.setItem("tema", t); } catch (e) {}
   aplicarTema(t);
-  if (D) renderGraficos();  // os gráficos leem as cores do tema na hora de desenhar
+  if (D) { renderGraficos(); renderEvolucaoInvest(D.rendimento_investimentos || { meses: [] }, (m) => D.indicadores?.cdi_meses?.find((x) => x.mes === m)?.taxa); }
+  refazerWidgetsTV();  // os gráficos leem as cores do tema na hora de desenhar
 });
 aplicarTema(document.documentElement.dataset.theme || "dark");
 

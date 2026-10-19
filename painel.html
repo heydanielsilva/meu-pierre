@@ -4,34 +4,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#151515">
+<meta name="theme-color" content="#0f4a49">
 <title>Meu Pierre</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%230f4a49%27/%3E%3Cg transform=%27translate(26 26) scale(.0538)%27%3E%3Crect width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23fff%27/%3E%3Crect x=%27315%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23fff%27/%3E%3Crect x=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23f28c3b%27/%3E%3Crect y=%27315%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23cfe3e0%27/%3E%3Crect y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3Crect x=%27315%27 y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3Crect x=%27630%27 y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --app: #ececec; --cartao: #fff; --cartao-2: #f4f4f5; --texto: #151515; --suave: #8b8b90; --linha: #e6e6e8;
-    --escuro: #151515; --escuro-2: #222224; --escuro-texto: #f5f5f5; --escuro-suave: #9d9da3;
-    --roxo: #5b54f5; --roxo-claro: #ecebff; --lima: #c9f15c; --lima-texto: #151515;
-    --pos: #16a34a; --neg: #e5484d; --aviso: #d97706; --hachura: #c9c9cf;
+    --app: #eef3f2; --cartao: #fff; --cartao-2: #f3f7f6; --texto: #0f2e2d; --suave: #6b8583; --linha: #e1eae8;
+    --escuro: #0f4a49; --escuro-2: #175957; --escuro-texto: #fff; --escuro-suave: #9ec7c2;
+    --acento: #f28c3b; --acento-claro: #fdeddf; --acento-texto: #b85a14; --menta: #cfe3e0; --menta-2: #9ec7c2; --menta-texto: #0f4a49;
+    --barra: #0f4a49; --pos: #1e8a5a; --neg: #d9534f; --aviso: #e08a1e; --hachura: #b5d3cf;
     --raio: 26px; --sombra: 0 1px 2px rgba(0,0,0,.03);
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --app: #0e0e10; --cartao: #1a1a1d; --cartao-2: #232327; --texto: #f2f2f3; --suave: #9a9aa2; --linha: #2c2c31;
-      --escuro: #050506; --escuro-2: #1c1c1f; --roxo: #7a74ff; --roxo-claro: #26244a;
-      --pos: #4ade80; --neg: #ff6b6b; --aviso: #fbbf24; --hachura: #3a3a40;
+      --app: #0a1f1f; --cartao: #112c2b; --cartao-2: #173836; --texto: #eaf3f2; --suave: #8fb0ac; --linha: #1f4240;
+      --escuro: #071817; --escuro-2: #12302f; --acento: #f59a4e; --acento-claro: #3a2a1c; --acento-texto: #f7a865;
+      --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --app: #0e0e10; --cartao: #1a1a1d; --cartao-2: #232327; --texto: #f2f2f3; --suave: #9a9aa2; --linha: #2c2c31;
-    --escuro: #050506; --escuro-2: #1c1c1f; --roxo: #7a74ff; --roxo-claro: #26244a;
-    --pos: #4ade80; --neg: #ff6b6b; --aviso: #fbbf24; --hachura: #3a3a40;
+    --app: #0a1f1f; --cartao: #112c2b; --cartao-2: #173836; --texto: #eaf3f2; --suave: #8fb0ac; --linha: #1f4240;
+    --escuro: #071817; --escuro-2: #12302f; --acento: #f59a4e; --acento-claro: #3a2a1c; --acento-texto: #f7a865;
+    --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
@@ -46,9 +47,9 @@
   nav.lateral { width: 92px; flex: none; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column;
                 align-items: center; gap: 10px; padding: 28px 0; background: var(--escuro); }
   .logo { width: 44px; height: 44px; display: grid; place-items: center; margin-bottom: 36px; }
-  nav.lateral a { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 16px; color: #8d8d94; text-decoration: none; }
-  nav.lateral a:hover { color: #fff; background: #222224; }
-  nav.lateral a.ativo { color: #7a74ff; }
+  nav.lateral a { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 16px; color: #9ec7c2; text-decoration: none; }
+  nav.lateral a:hover { color: #fff; background: #175957; }
+  nav.lateral a.ativo { color: #f28c3b; background: rgba(242,140,59,.12); }
   nav.lateral .fim { margin-top: auto; }
   .area { flex: 1; min-width: 0; background: var(--app); border-radius: 36px 0 0 36px; padding: 32px 36px 48px; }
   .topo { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; margin-bottom: 28px; }
@@ -59,7 +60,7 @@
   .pilula { height: 46px; padding: 0 18px; border-radius: 999px; border: 0; background: var(--cartao); display: inline-flex;
             align-items: center; gap: 8px; cursor: pointer; text-decoration: none; color: var(--texto); font-weight: 600; box-shadow: var(--sombra); }
   .pilula.redonda { width: 46px; padding: 0; justify-content: center; }
-  .pilula.roxa { background: var(--roxo); color: #fff; }
+  .pilula.roxa { background: var(--acento); color: #fff; }
   .pilula:disabled { opacity: .65; cursor: wait; }
   select.pilula { appearance: none; padding-right: 38px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238b8b90' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
                   background-repeat: no-repeat; background-position: right 16px center; }
@@ -90,17 +91,17 @@
   .kpi .det { font-size: 13px; color: var(--suave); margin-top: 6px; }
   .kpi .selo { position: absolute; top: 26px; right: 24px; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--cartao-2); }
   .kpi.destaque { background: var(--escuro); color: var(--escuro-texto); }
-  .kpi.destaque .icone { background: var(--lima); color: var(--lima-texto); }
+  .kpi.destaque .icone { background: var(--acento); color: #fff; }
   .kpi.destaque .rot { color: #fff; }
   .kpi.destaque .det { color: var(--escuro-suave); }
-  :root[data-theme="dark"] .kpi.destaque { box-shadow: inset 0 0 0 1px #2c2c31; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .kpi.destaque { box-shadow: inset 0 0 0 1px #2c2c31; } }
+  :root[data-theme="dark"] .kpi.destaque { box-shadow: inset 0 0 0 1px #1f4240; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .kpi.destaque { box-shadow: inset 0 0 0 1px #1f4240; } }
 
   /* Receitas */
   .receita { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
   .receita .val { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .variacao { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-weight: 600; }
-  .seta { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--lima); color: var(--lima-texto); }
+  .seta { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--menta); color: var(--menta-texto); }
   .seta.baixo { background: #ffd9d9; color: #b42318; }
   .seta svg { width: 14px; height: 14px; stroke-width: 2.4; }
   .mini { position: relative; height: 96px; min-width: 0; }
@@ -115,15 +116,15 @@
   .tx-item .sub { color: var(--suave); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tx-item .meio { flex: 1; min-width: 0; }
   .tx-item .num { font-weight: 700; }
-  .link { background: none; border: 0; color: var(--roxo); font-weight: 600; cursor: pointer; padding: 0; text-decoration: none; }
+  .link { background: none; border: 0; color: var(--acento-texto); font-weight: 600; cursor: pointer; padding: 0; text-decoration: none; }
 
   /* Barras (categorias, orçamentos) */
   .barra-item + .barra-item { margin-top: 16px; }
   .barra-item .linha { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
   .barra-item .det { color: var(--suave); font-size: 13px; margin-top: 4px; }
   .trilho { height: 10px; border-radius: 999px; background: var(--cartao-2); overflow: hidden; margin-top: 8px; }
-  .trilho > div { height: 100%; border-radius: 999px; background: var(--roxo); }
-  .trilho > div.ok { background: var(--lima); } .trilho > div.medio { background: var(--aviso); } .trilho > div.alto { background: var(--neg); }
+  .trilho > div { height: 100%; border-radius: 999px; background: var(--barra); }
+  .trilho > div.ok { background: var(--menta-2); } .trilho > div.medio { background: var(--aviso); } .trilho > div.alto { background: var(--neg); }
   button.barra-item { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; }
 
   ul.lista { list-style: none; margin: 0; padding: 0; }
@@ -149,7 +150,7 @@
   td.num, th.num { text-align: right; }
   td.num { font-weight: 600; }
   tr.neutra td { color: var(--suave); }
-  .tag { border: 0; padding: 4px 10px; border-radius: 999px; background: var(--roxo-claro); color: var(--roxo);
+  .tag { border: 0; padding: 4px 10px; border-radius: 999px; background: var(--acento-claro); color: var(--acento-texto);
          cursor: pointer; font-size: 12.5px; font-weight: 600; text-align: left; }
   tr.neutra .tag { background: var(--cartao-2); color: var(--suave); }
   .desc-cel { display: flex; align-items: center; gap: 10px; min-width: 180px; }
@@ -162,12 +163,12 @@
   aside.escuro h2 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
   aside.escuro .cab { margin-bottom: 20px; align-items: flex-start; }
   aside.escuro .cab small { display: block; color: var(--escuro-suave); font-size: 16px; margin-top: 4px; }
-  .bola { width: 54px; height: 54px; border-radius: 50%; background: #5b54f5; color: #fff; display: grid; place-items: center; flex: none; }
+  .bola { width: 54px; height: 54px; border-radius: 50%; background: #f28c3b; color: #fff; display: grid; place-items: center; flex: none; }
   .pilha { position: relative; padding-top: 18px; }
   .pilha::before { content: ""; position: absolute; left: 14px; right: 6px; top: 2px; height: 60px; border-radius: 26px 26px 0 0;
-                   background: #5b54f5; transform: rotate(-2.5deg); transform-origin: right top; }
+                   background: #f28c3b; transform: rotate(-2.5deg); transform-origin: right top; }
   .pilha.vazia::before { display: none; }
-  .cc { position: relative; background: var(--lima); color: var(--lima-texto); border-radius: 26px; padding: 22px 24px; min-height: 196px;
+  .cc { position: relative; background: var(--menta); color: var(--menta-texto); border-radius: 26px; padding: 22px 24px; min-height: 196px;
         display: flex; flex-direction: column; }
   .cc + .cc { margin-top: 14px; }
   .cc .banco { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 20px; letter-spacing: -0.01em; }
@@ -176,12 +177,12 @@
   .cc .valor { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
   .cc .numero { font-size: 18px; font-weight: 600; letter-spacing: .04em; margin-top: 6px; }
   .cc .rodape { margin-top: auto; padding-top: 12px; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
-  .cc .trilho { background: rgba(0,0,0,.12); height: 6px; margin-top: 8px; }
-  .cc .trilho > div { background: var(--lima-texto); }
+  .cc .trilho { background: rgba(15,74,73,.15); height: 6px; margin-top: 8px; }
+  .cc .trilho > div { background: #f28c3b; }
   .botoes-cc { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
-  .botoes-cc a { height: 56px; border-radius: 999px; background: #fff; color: #151515; font-weight: 700;
+  .botoes-cc a { height: 56px; border-radius: 999px; background: #fff; color: #0f4a49; font-weight: 700;
                  display: inline-flex; justify-content: center; align-items: center; gap: 8px; text-decoration: none; font-size: 15px; }
-  .contas-escuras li { border-color: #2a2a2d !important; }
+  .contas-escuras li { border-color: #1f5a58 !important; }
   .contas-escuras small { color: var(--escuro-suave) !important; }
   .conta-ic { display: flex; align-items: center; gap: 12px; min-width: 0; }
   .alerta { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 16px; background: var(--escuro-2); font-size: 14px; }
@@ -193,7 +194,7 @@
   /* Avisos */
   #faixas { display: grid; gap: 10px; margin-bottom: 20px; }
   #faixas:empty { display: none; }
-  .faixa { padding: 14px 18px; border-radius: 18px; background: var(--cartao); font-size: 14px; border-left: 5px solid var(--roxo); }
+  .faixa { padding: 14px 18px; border-radius: 18px; background: var(--cartao); font-size: 14px; border-left: 5px solid var(--acento); }
   .faixa.aviso { border-left-color: var(--aviso); }
   .faixa.erro { border-left-color: var(--neg); }
   #carregando { text-align: center; padding: 80px 16px; color: var(--suave); }
@@ -249,7 +250,7 @@
 <div class="app">
   <nav class="lateral" aria-label="Seções">
     <div class="logo" aria-hidden="true">
-      <svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 4v14H6" fill="none" stroke="#7a74ff" stroke-width="5" stroke-linecap="round"/><path d="M20 36V22h14" fill="none" stroke="#c9f15c" stroke-width="5" stroke-linecap="round"/></svg>
+      <svg width="34" height="34" viewBox="0 0 892 892" aria-hidden="true"><rect x="0" y="0" width="262" height="262" rx="34" fill="#fff"/><rect x="315" y="0" width="262" height="262" rx="34" fill="#fff"/><rect x="630" y="0" width="262" height="262" rx="34" fill="#f28c3b"/><rect x="0" y="315" width="262" height="262" rx="34" fill="#cfe3e0"/><rect x="0" y="630" width="262" height="262" rx="34" fill="#9ec7c2"/><rect x="315" y="630" width="262" height="262" rx="34" fill="#9ec7c2"/><rect x="630" y="630" width="262" height="262" rx="34" fill="#9ec7c2"/></svg>
     </div>
     <a href="#inicio" class="ativo" title="Início"><svg class="i"><use href="#i-casa"/></svg></a>
     <a href="#secCartoes" title="Cartões e contas"><svg class="i"><use href="#i-cartao"/></svg></a>
@@ -397,7 +398,7 @@ const cor = (n) => getComputedStyle(document.documentElement).getPropertyValue(n
 const icone = (id) => `<svg class="i"><use href="#i-${id}"/></svg>`;
 
 // Avatar com iniciais e cor fixa por nome (as transações não trazem logotipo).
-const CORES_AVATAR = ["#5b54f5", "#16a34a", "#e5484d", "#f59e0b", "#0ea5e9", "#db2777", "#7c3aed", "#0d9488", "#ea580c", "#3f3f46"];
+const CORES_AVATAR = ["#0f4a49", "#f28c3b", "#2f7f7a", "#c9661f", "#5b9e97", "#1e8a5a", "#8c5a3c", "#3e6b8a", "#b85450", "#4f8a72"];
 function avatar(nome) {
   const bruto = String(nome || "?");
   const limpo = bruto.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, " ").replace(/\b(PIX|TED|DOC|PAG|PGTO|COMPRA|ENVIADO|RECEBIDO|IFD)\b/gi, " ").trim() || bruto;
@@ -545,7 +546,7 @@ function renderGraficos() {
   Chart.defaults.borderColor = cor("--linha");
   Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
   Chart.defaults.font.size = 13;
-  const tooltip = { backgroundColor: "#151515", padding: 10, cornerRadius: 12, displayColors: false, titleFont: { weight: "600" } };
+  const tooltip = { backgroundColor: "#0f4a49", padding: 10, cornerRadius: 12, displayColors: false, titleFont: { weight: "600" } };
 
   // Gastos por mês: o mês escolhido em roxo, os outros hachurados
   const ev = D.evolucao, padrao = hachura();
@@ -555,7 +556,7 @@ function renderGraficos() {
     data: {
       labels: ev.map((e) => NOMES_MES[+e.mes.slice(5, 7) - 1]),
       datasets: [{ data: ev.map((e) => e.gastos), borderRadius: 999, borderSkipped: false, maxBarThickness: 34,
-                   backgroundColor: ev.map((e) => e.mes === R.mes ? cor("--roxo") : padrao) }],
+                   backgroundColor: ev.map((e) => e.mes === R.mes ? cor("--acento") : padrao) }],
     },
     options: {
       maintainAspectRatio: false,
@@ -574,8 +575,8 @@ function renderGraficos() {
   const ult = ev.slice(-6);
   const ctx = $("gReceitas").getContext("2d");
   const grad = ctx.createLinearGradient(0, 0, ctx.canvas.clientWidth || 300, 0);
-  grad.addColorStop(0, cor("--roxo") + "33");
-  grad.addColorStop(1, cor("--roxo"));
+  grad.addColorStop(0, cor("--barra") + "33");
+  grad.addColorStop(1, cor("--acento"));
   graficos.rec?.destroy();
   graficos.rec = new Chart(ctx, {
     type: "line",

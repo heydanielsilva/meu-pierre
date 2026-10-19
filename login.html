@@ -6,6 +6,14 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0f4a49">
 <title>Meu Pierre</title>
+<script>
+  // Tema: escuro por padrão; a escolha do botão fica salva neste navegador.
+  (function () {
+    var t = "dark";
+    try { t = localStorage.getItem("tema") || "dark"; } catch (e) {}
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%230f4a49%27/%3E%3Cg transform=%27translate(26 26) scale(.0538)%27%3E%3Crect width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23fff%27/%3E%3Crect x=%27315%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23fff%27/%3E%3Crect x=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23f28c3b%27/%3E%3Crect y=%27315%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23cfe3e0%27/%3E%3Crect y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3Crect x=%27315%27 y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3Crect x=%27630%27 y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,9 +21,9 @@
 <style>
   :root { --fundo: #0f4a49; --cartao: #fff; --texto: #0f2e2d; --suave: #6b8583; --campo: #f3f7f6; --linha: #e1eae8;
           --acento: #f28c3b; --erro: #d9534f; color-scheme: light; }
-  @media (prefers-color-scheme: dark) {
-    :root { --fundo: #071817; --cartao: #112c2b; --texto: #eaf3f2; --suave: #8fb0ac; --campo: #173836; --linha: #1f4240;
-            --acento: #f59a4e; --erro: #ff7b73; color-scheme: dark; }
+  :root[data-theme="dark"] {
+    --fundo: #071817; --cartao: #112c2b; --texto: #eaf3f2; --suave: #8fb0ac; --campo: #173836; --linha: #1f4240;
+            --acento: #f59a4e; --erro: #ff7b73; color-scheme: dark;
   }
   * { box-sizing: border-box; }
   body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--fundo); color: var(--texto);

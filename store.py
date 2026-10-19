@@ -494,6 +494,10 @@ class Store:
         compra = hoje.replace(day=1) - timedelta(days=60)
         for i in range(3):
             add("card-nu", (compra + timedelta(days=30 * i)), "MAGALU NOTEBOOK", 899.67, "saida", "Electronics", "Magazine Luiza", i + 1, 10)
+        celular = hoje.replace(day=1) - timedelta(days=150)
+        for i in range(6):
+            add("card-nu", (celular + timedelta(days=30 * i + 4)), "AMAZON MARKETPLACE", 249.90, "saida", "Online shopping", "Amazon", i + 1, 12)
+        add("card-nu", hoje.replace(day=min(5, hoje.day)), "DECATHLON BICICLETA", 183.33, "saida", "Sports practice", "Decathlon", 1, 6)
         add("card-nu", hoje - timedelta(days=min(3, hoje.day - 1)), "IFD*IFOOD", 389.00, "saida", "Food delivery", "iFood")
         txs = [t for t in txs if t[4] > 0]
         self.con.executemany("INSERT OR REPLACE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?)", txs)

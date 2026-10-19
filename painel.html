@@ -230,6 +230,126 @@
   .grupo .itens { padding: 14px 2px 4px; }
   .ic.cheio { background: var(--c); color: #fff; }
 
+  /* Análise: resumo, assinaturas e parcelas */
+  .grade-4 { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
+  .resumo-item { display: flex; gap: 14px; align-items: flex-start; padding: 20px; }
+  .resumo-item .ic { width: 46px; height: 46px; }
+  .resumo-item .rot { color: var(--suave); font-size: 14px; font-weight: 500; }
+  .resumo-item .val { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .resumo-item .det { color: var(--suave); font-size: 12.5px; margin-top: 2px; }
+  .subtitulo { display: flex; justify-content: space-between; gap: 10px; color: var(--suave); font-size: 12.5px; font-weight: 700;
+               text-transform: uppercase; letter-spacing: .05em; margin: 18px 0 6px; }
+  .subtitulo:first-child { margin-top: 0; }
+  .item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--linha); }
+  .subtitulo + .item { border-top: 0; }
+  .item .meio { flex: 1; min-width: 0; }
+  .item .nome { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .sub { color: var(--suave); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .direita { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .item .direita small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
+  .parcela .trilho { height: 8px; margin-top: 7px; }
+  .parcela .trilho > div { background: var(--acento); }
+  .parcela .progresso { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; color: var(--suave); font-size: 12.5px; margin-top: 4px; }
+  .parcela .progresso span { white-space: nowrap; }
+  #parcMeses:not(:empty) + #parcelas .subtitulo { margin-top: 18px; }
+  .barras-mes { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end; height: 130px;
+                padding: 6px 0 0; margin-bottom: 6px; }
+  .barras-mes .bm { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; min-width: 0; }
+  .barras-mes .bm i { display: block; width: 100%; max-width: 26px; border-radius: 5px 5px 2px 2px; background: var(--acento); min-height: 3px; }
+  .barras-mes .bm.zero i { background: var(--linha); }
+  .barras-mes .bm small { color: var(--suave); font-size: 11.5px; }
+  .parc-resumo { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--suave); font-size: 13px; margin-bottom: 8px; }
+  .parc-resumo b { color: var(--texto); }
+
+  /* Visuais extras da Análise */
+  .resumo-item { transition: transform .2s ease, box-shadow .2s ease; }
+  .resumo-item:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0,0,0,.18); }
+  .resumo-item .vis { margin-left: auto; align-self: center; flex: none; }
+  .faisca { width: 92px; height: 38px; overflow: visible; }
+  .logos { display: flex; }
+  .logos .ic { width: 32px; height: 32px; box-shadow: 0 0 0 2px var(--cartao); }
+  .logos .ic + .ic { margin-left: -9px; }
+  .logos .ic svg.i { width: 15px; height: 15px; }
+  .logos .ic img { padding: 6px; }
+  .mini-barras { display: flex; align-items: flex-end; gap: 4px; height: 38px; }
+  .mini-barras i { width: 9px; border-radius: 3px 3px 1px 1px; background: var(--c); min-height: 3px; }
+  .anel-mini { width: 46px; height: 46px; }
+  .empilhada { display: flex; gap: 3px; height: 14px; margin: 2px 0 14px; }
+  .empilhada i { border-radius: 4px; min-width: 6px; }
+  .pontos { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .pontos i { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--acento); }
+  .pontos i.pago { background: var(--acento); }
+  .pontos i.atual { box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 35%, transparent); }
+  .barras-mes .bm { position: relative; }
+  .barras-mes .bm.prox i { background: var(--acento); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 25%, transparent); }
+  .barras-mes .bm:not(.prox):not(.zero) i { opacity: .55; }
+  .barras-mes .bm:hover i { opacity: 1; }
+  .barras-mes .bm::after { content: attr(data-rotulo); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+                           background: #0f4a49; color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px;
+                           white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 2; }
+  .barras-mes .bm:hover::after { opacity: 1; }
+
+  /* Início: mini visuais nos cartões do topo */
+  .composicao { display: flex; gap: 3px; height: 10px; margin: 14px 0 10px; }
+  .composicao i { border-radius: 4px; min-width: 4px; }
+  .legenda-mini { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--escuro-suave); }
+  .legenda-mini span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .legenda-mini b { width: 8px; height: 8px; border-radius: 50%; }
+  .ritmo { position: relative; height: 10px; border-radius: 999px; background: var(--cartao-2); margin: 14px 0 8px; }
+  .ritmo i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; }
+  .ritmo .proj { background: color-mix(in srgb, var(--serie-gas) 30%, transparent); }
+  .ritmo .feito { background: var(--serie-gas); }
+  .ritmo .feito.acima { background: var(--neg); }
+  .ritmo .marca { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--texto); opacity: .7; }
+  .kpi-anel { position: absolute; top: 22px; right: 22px; width: 64px; height: 64px; }
+  .kpi { transition: transform .2s ease, box-shadow .2s ease; }
+  .kpi:hover, .cc:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(0,0,0,.2); }
+  .cc { transition: transform .25s ease, box-shadow .25s ease; }
+  .bola svg { transform-origin: 50% 10%; }
+
+  /* Animações (desligadas para quem pede menos movimento no sistema) */
+  @media (prefers-reduced-motion: no-preference) {
+    .vista:not([hidden]) > section, .vista:not([hidden]) > .principal > section, .vista:not([hidden]) > aside {
+      animation: subir .55s cubic-bezier(.2,.8,.2,1) both; }
+    .vista:not([hidden]) > :nth-child(2), .vista:not([hidden]) > .principal > :nth-child(2) { animation-delay: .07s; }
+    .vista:not([hidden]) > :nth-child(3), .vista:not([hidden]) > .principal > :nth-child(3) { animation-delay: .14s; }
+    .vista:not([hidden]) > :nth-child(4) { animation-delay: .21s; }
+    .trilho > div, .empilhada i { animation: crescerX 1s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
+    .barras-mes .bm i, .mini-barras i { animation: crescerY .8s cubic-bezier(.2,.8,.2,1) both; transform-origin: bottom;
+                                        animation-delay: calc(var(--i, 0) * 45ms); }
+    svg.bolhas g { animation: estourar .7s cubic-bezier(.3,1.4,.5,1) both; transform-box: fill-box; transform-origin: center;
+                   animation-delay: calc(var(--i, 0) * 50ms); }
+    svg.anel circle { animation: desenhar 1.1s cubic-bezier(.3,.8,.3,1) both; animation-delay: calc(var(--i, 0) * 90ms); }
+    .anel-centro { animation: surgir .6s .25s ease both; }
+    .pontos i { animation: estourar .45s cubic-bezier(.3,1.4,.5,1) both; animation-delay: calc(var(--i, 0) * 25ms); }
+    .faisca polyline { stroke-dasharray: 300; animation: tracar 1.2s ease both; }
+    .faisca circle { animation: surgir .4s 1s ease both; }
+    #kpis > .kpi { animation: subir .55s cubic-bezier(.2,.8,.2,1) both; }
+    #kpis > .kpi:nth-child(2) { animation-delay: .08s; } #kpis > .kpi:nth-child(3) { animation-delay: .16s; }
+    .composicao i, .ritmo i { animation: crescerX 1.1s .2s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
+    .ritmo .marca { animation: surgir .4s 1s ease both; }
+    .kpi-anel circle + circle { animation: desenhar 1.2s .2s cubic-bezier(.3,.8,.3,1) both; }
+    #recentes .tx, aside.escuro .cc, aside.escuro li, .alerta { animation: deslizar .5s cubic-bezier(.2,.8,.2,1) both; }
+    #recentes .tx:nth-child(2), aside.escuro .cc:nth-child(2), aside.escuro li:nth-child(2), .alerta:nth-child(2) { animation-delay: .06s; }
+    #recentes .tx:nth-child(3), aside.escuro .cc:nth-child(3), aside.escuro li:nth-child(3), .alerta:nth-child(3) { animation-delay: .12s; }
+    #recentes .tx:nth-child(4), aside.escuro li:nth-child(4), .alerta:nth-child(4) { animation-delay: .18s; }
+    #recentes .tx:nth-child(5), aside.escuro li:nth-child(5), .alerta:nth-child(5) { animation-delay: .24s; }
+    #recentes .tx:nth-child(6), .alerta:nth-child(6) { animation-delay: .3s; }
+    .alerta .ponto.alto { animation: pulsar 1.8s ease-out infinite; }
+    .bola.tocar svg { animation: balancar 1.2s .6s ease-in-out 2; }
+  }
+  @keyframes deslizar { from { opacity: 0; transform: translateX(-14px); } }
+  @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(255,107,107,.6); } 70%, 100% { box-shadow: 0 0 0 8px rgba(255,107,107,0); } }
+  @keyframes balancar { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); }
+                        60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
+  @keyframes subir { from { opacity: 0; transform: translateY(16px); } }
+  @keyframes crescerX { from { transform: scaleX(0); } }
+  @keyframes crescerY { from { transform: scaleY(0); } }
+  @keyframes estourar { from { opacity: 0; transform: scale(.3); } }
+  @keyframes desenhar { from { stroke-dasharray: 0 1000; } }
+  @keyframes surgir { from { opacity: 0; } }
+  @keyframes tracar { from { stroke-dashoffset: 300; } }
+
   /* Telas */
   .vista { display: grid; gap: 24px; min-width: 0; }
   .vista[hidden] { display: none !important; }
@@ -324,6 +444,8 @@
     .segmento button { flex: 1; }
     .tx { gap: 12px; padding: 10px 4px; }
     .tx .sub .conta { display: none; }
+    .parcela .sub { white-space: normal; }
+    .barras-mes { gap: 4px; }
   }
 </style>
 </head>
@@ -389,8 +511,8 @@
     </div>
     <a href="#inicio" title="Início"><svg class="i"><use href="#i-casa"/></svg></a>
     <a href="#transacoes" title="Transações"><svg class="i"><use href="#i-troca"/></svg></a>
-    <a href="#analise" title="Categorias e orçamentos"><svg class="i"><use href="#i-grafico"/></svg></a>
-    <a href="#investimentos" title="Investimentos e parcelas"><svg class="i"><use href="#i-invest"/></svg></a>
+    <a href="#analise" title="Análise: categorias, assinaturas e parcelas"><svg class="i"><use href="#i-grafico"/></svg></a>
+    <a href="#investimentos" title="Investimentos"><svg class="i"><use href="#i-invest"/></svg></a>
     <a href="#ajustes" title="Regras e conexões"><svg class="i"><use href="#i-ajuste"/></svg></a>
     <a href="/sair" class="fim" title="Sair"><svg class="i"><use href="#i-sair"/></svg></a>
   </nav>
@@ -499,6 +621,7 @@
 
       <!-- Análise -->
       <div class="vista" data-vista="analise" hidden>
+        <section class="grade-4" id="anResumo"></section>
         <section class="grade-2">
           <div class="cartao cat-card">
             <div class="cab"><h2>Gastos por categoria</h2><span class="extra cat-mes"></span></div>
@@ -519,11 +642,20 @@
               <button class="pilula roxa">Salvar</button>
             </form>
             <div class="dica">Para remover um orçamento, salve a categoria com limite 0.</div>
+            <div class="cab" style="margin-top:30px"><h2>Onde mais gastou</h2><span class="extra">maiores do mês</span></div>
+            <ul class="lista" id="estab"></ul>
           </div>
         </section>
         <section class="grade-2">
-          <div class="cartao"><div class="cab"><h2>Assinaturas e contas fixas</h2><span class="extra" id="recTotal"></span></div><ul class="lista" id="recorrentes"></ul></div>
-          <div class="cartao"><div class="cab"><h2>Onde mais gastou</h2></div><ul class="lista" id="estab"></ul></div>
+          <div class="cartao">
+            <div class="cab"><h2>Assinaturas e contas fixas</h2><span class="extra" id="recTotal"></span></div>
+            <div id="recorrentes"></div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><h2>Parcelas dos cartões</h2><span class="extra" id="parcTotal"></span></div>
+            <div id="parcMeses"></div>
+            <div id="parcelas"></div>
+          </div>
         </section>
       </div>
 
@@ -531,7 +663,6 @@
       <div class="vista" data-vista="investimentos" hidden>
         <section class="grade-2">
           <div class="cartao"><div class="cab"><h2>Investimentos</h2><span class="extra" id="invTotal"></span></div><ul class="lista" id="investimentos"></ul></div>
-          <div class="cartao"><div class="cab"><h2>Parcelas a vencer</h2><span class="extra" id="parcTotal"></span></div><ul class="lista" id="parcelas"></ul></div>
         </section>
       </div>
 
@@ -783,10 +914,10 @@ function faixas(lista) {
   $("faixas").innerHTML = lista.map((f) => `<div class="faixa ${f.classe}">${esc(f.texto)}</div>`).join("");
 }
 
-function kpi({ rot, val, det = "", ic, destaque = false, selo = "", classe = "" }) {
+function kpi({ rot, val, det = "", ic, destaque = false, selo = "", classe = "", vis = "" }) {
   return `<div class="cartao kpi ${destaque ? "destaque" : ""}">
-    <div class="icone">${icone(ic)}</div>${selo ? `<span class="selo">${selo}</span>` : ""}
-    <div class="rot">${rot}</div><div class="val ${classe}">${val}</div>${det ? `<div class="det">${det}</div>` : ""}</div>`;
+    <div class="icone">${icone(ic)}</div>${selo ? `<span class="selo">${selo}</span>` : ""}${vis.canto || ""}
+    <div class="rot">${rot}</div><div class="val ${classe}">${val}</div>${vis.baixo || ""}${det ? `<div class="det">${det}</div>` : ""}</div>`;
 }
 
 function render() {
@@ -811,18 +942,37 @@ function render() {
 
   // KPIs
   const varG = R.gastos_anterior ? (R.gastos - R.gastos_anterior) / R.gastos_anterior : null;
+  // Patrimônio: de onde vem (contas e investimentos) e quanto as faturas tiram
+  const ativos = Math.max(0, P.saldo) + Math.max(0, P.investimentos), base = ativos + Math.max(0, P.faturas) || 1;
+  const composicao = `<div class="composicao" role="img" aria-label="Contas ${brl(P.saldo)}, investimentos ${brl(P.investimentos)}, faturas ${brl(P.faturas)}">
+      <i style="flex:${Math.max(0, P.saldo) / base} 1 0;background:#9ec7c2" title="Contas: ${brl(P.saldo)}"></i>
+      <i style="flex:${Math.max(0, P.investimentos) / base} 1 0;background:#f28c3b;animation-delay:.12s" title="Investimentos: ${brl(P.investimentos)}"></i>
+      <i style="flex:${Math.max(0, P.faturas) / base} 1 0;background:#ff7b73;animation-delay:.24s" title="Faturas: ${brl(P.faturas)}"></i></div>
+    <div class="legenda-mini"><span><b style="background:#9ec7c2"></b>contas ${brl(P.saldo)}</span><span><b style="background:#f28c3b"></b>investimentos ${brl(P.investimentos)}</span><span><b style="background:#ff7b73"></b>faturas ${brl(P.faturas)}</span></div>`;
+  // Gastos: quanto do mês já foi (projeção ou mês anterior como referência), com marca do mês anterior
+  const refG = Math.max(R.atual ? R.projecao || 0 : 0, R.gastos_anterior || 0, R.gastos, 1);
+  const ritmo = `<div class="ritmo" title="${R.atual ? "Gasto até agora, projeção do mês e" : "Gasto do mês e"} gasto do mês anterior">
+      ${R.atual && R.projecao ? `<i class="proj" style="width:${R.projecao / refG * 100}%"></i>` : ""}
+      <i class="feito ${R.gastos > (R.gastos_anterior || Infinity) ? "acima" : ""}" style="width:${R.gastos / refG * 100}%"></i>
+      ${R.gastos_anterior ? `<span class="marca" style="left:${R.gastos_anterior / refG * 100}%" title="Mês anterior: ${brl(R.gastos_anterior)}"></span>` : ""}</div>`;
+  // Sobra: anel com a taxa de poupança
+  const tx = Math.max(0, Math.min(1, R.poupanca || 0)), Ck = 2 * Math.PI * 22;
+  const anelPoup = `<svg class="kpi-anel" viewBox="0 0 56 56" role="img" aria-label="Taxa de poupança ${pct(R.poupanca)}">
+      <circle cx="28" cy="28" r="22" fill="none" stroke="var(--linha)" stroke-width="7"/>
+      <circle cx="28" cy="28" r="22" fill="none" stroke="${R.sobra < 0 ? "var(--neg)" : "var(--pos)"}" stroke-width="7" stroke-linecap="round"
+        stroke-dasharray="${tx * Ck} ${Ck}" transform="rotate(-90 28 28)"/>
+      <text x="28" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="var(--texto)">${R.poupanca == null ? "—" : Math.round(R.poupanca * 100) + "%"}</text></svg>`;
   $("kpis").innerHTML =
-    kpi({ rot: "Patrimônio líquido", val: brl(P.liquido), ic: "bolsa", destaque: true,
-          det: `contas ${brl(P.saldo)} · investimentos ${brl(P.investimentos)} · faturas ${brl(P.faturas)}` }) +
-    kpi({ rot: "Gastos do mês", val: brl(R.gastos), ic: "gasto", selo: varG != null ? pct(varG, true) : "",
+    kpi({ rot: "Patrimônio líquido", val: contar(P.liquido), ic: "bolsa", destaque: true, vis: { baixo: composicao } }) +
+    kpi({ rot: "Gastos do mês", val: contar(R.gastos), ic: "gasto", selo: varG != null ? pct(varG, true) : "", vis: { baixo: ritmo },
           det: R.atual ? `projeção ${brl(R.projecao)} até dia ${R.dias_mes}` : `mês anterior ${brl(R.gastos_anterior)}` }) +
-    kpi({ rot: "Sobra do mês", val: brl(R.sobra), ic: "carteira", classe: R.sobra < 0 ? "neg" : "",
+    kpi({ rot: "Sobra do mês", val: contar(R.sobra), ic: "carteira", classe: R.sobra < 0 ? "neg" : "", vis: { canto: anelPoup },
           det: `receitas ${brl(R.receitas)} · poupança ${pct(R.poupanca)}` });
 
   // Receitas
   const varR = R.receitas_anterior ? (R.receitas - R.receitas_anterior) / R.receitas_anterior : null;
   $("recMes").textContent = nomeMesLongo(R.mes);
-  $("recValor").textContent = brl(R.receitas);
+  $("recValor").innerHTML = contar(R.receitas);
   $("recVar").innerHTML = varR == null ? `<span class="suave">sem mês anterior para comparar</span>`
     : `<span class="seta ${varR < 0 ? "baixo" : ""}">${icone(varR < 0 ? "baixo" : "cima")}</span>${pct(varR, true)} <span class="suave" style="font-weight:500">vs mês anterior</span>`;
 
@@ -835,20 +985,10 @@ function render() {
   renderLateral();
 
   $("estab").innerHTML = R.estabelecimentos.length
-    ? R.estabelecimentos.map((e) => `<li><span class="conta-ic">${bolinha(e.nome, R.transacoes.find((t) => (t.estabelecimento || t.descricao) === e.nome)?.categoria, true)}<span>${esc(nomeTx({ descricao: e.nome }))}</span></span><span class="num">${brl(e.valor)}</span></li>`).join("")
+    ? R.estabelecimentos.slice(0, 6).map((e) => `<li><span class="conta-ic">${bolinha(e.nome, R.transacoes.find((t) => (t.estabelecimento || t.descricao) === e.nome)?.categoria, true)}<span>${esc(nomeTx({ descricao: e.nome }))}</span></span><span class="num">${brl(e.valor)}</span></li>`).join("")
     : `<li class="vazio">Sem gastos neste mês.</li>`;
 
-  const rec = D.recorrentes, totRec = rec.reduce((s, r) => s + r.media, 0);
-  $("recTotal").textContent = rec.length ? brl(totRec) + "/mês" : "";
-  $("recorrentes").innerHTML = rec.length ? rec.map((r) =>
-    `<li><span class="conta-ic">${bolinha(r.nome, r.categoria || "Assinaturas e streaming", true)}<span>${esc(nomeTx({ descricao: r.nome }))}<br><small>${esc(r.tipo)} · próxima ~${data(r.proxima).slice(0, 5)}</small></span></span><span class="num">${brl(r.media)}</span></li>`).join("")
-    : `<li class="vazio">Nenhuma cobrança recorrente clara nos últimos 6 meses.</li>`;
-
-  const totParc = D.parcelas.reduce((s, p) => s + p.falta, 0);
-  $("parcTotal").textContent = D.parcelas.length ? "faltam " + brl(totParc) : "";
-  $("parcelas").innerHTML = D.parcelas.length ? D.parcelas.map((p) =>
-    `<li><span class="conta-ic">${bolinha(p.descricao, "Compras", true)}<span>${esc(nomeTx({ descricao: p.descricao }))}<br><small>parcela ${p.parcela}/${p.total_parcelas} de ${brl(p.valor)} · faltam ${p.restantes}</small></span></span><span class="num">${brl(p.falta)}</span></li>`).join("")
-    : `<li class="vazio">Nenhuma compra parcelada em andamento.</li>`;
+  renderFixasEParcelas();
 
   const totInv = D.investimentos.reduce((s, i) => s + (i.saldo || 0), 0);
   $("invTotal").textContent = D.investimentos.length ? brl(totInv) : "";
@@ -870,6 +1010,7 @@ function render() {
   $("listaCats").innerHTML = [...cats].sort().map((c) => `<option value="${esc(c)}">`).join("");
 }
 
+const menosMovimento = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Com o zoom de 75% da página, o Chart.js lê a posição do mouse em escala errada; corrige antes de tratar o evento.
 let zoomCorrigido = false;
 function corrigirZoom() {
@@ -921,6 +1062,8 @@ function renderGraficos() {
     options: {
       maintainAspectRatio: false,
       interaction: { mode: "index", intersect: false },
+      animation: menosMovimento() ? false : { duration: 900, easing: "easeOutQuart",
+        delay: (c) => c.type === "data" && c.mode === "default" ? c.dataIndex * 55 + c.datasetIndex * 25 : 0 },
       plugins: { legend: { display: false }, tooltip: { ...tooltip, displayColors: true, boxPadding: 4, callbacks: {
         title: (it) => nomeMesLongo(ev[it[0].dataIndex].mes) + (ev[it[0].dataIndex].mes === hoje() ? " (parcial)" : ""),
         label: (c) => ` ${c.dataset.label}: ${brl(c.raw)}`,
@@ -954,6 +1097,7 @@ function renderGraficos() {
                          pointBorderColor: cor("--texto"), pointBorderWidth: 3, pointHoverRadius: 6 }] },
     options: {
       maintainAspectRatio: false, layout: { padding: 8 },
+      animation: menosMovimento() ? false : { duration: 1200, easing: "easeOutCubic" },
       plugins: { legend: { display: false }, tooltip: { ...tooltip, callbacks: { label: (c) => brl(c.raw) } } },
       scales: { x: { display: false }, y: { display: false } },
     },
@@ -990,6 +1134,21 @@ function barraCat(c, total, maior) {
 let modoCat = "grupos";  // padrão: grupos (anel)
 try { modoCat = localStorage.getItem("modoCategorias") || "grupos"; } catch (e) {}
 const brlCurto = (v) => oculto ? "R$ •••••" : v >= 1000 ? "R$ " + (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mil" : brl(v);
+// Números que "contam" até o valor quando a tela aparece
+const contar = (v, curto = false) => `<span class="contador" data-valor="${v}"${curto ? ' data-curto="1"' : ""}>${curto ? brlCurto(v) : brl(v)}</span>`;
+function animarContadores() {
+  if (oculto || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const els = [...document.querySelectorAll(".vista:not([hidden]) .contador:not([data-feito])")];
+  if (!els.length) return;
+  els.forEach((e) => { e.dataset.feito = "1"; });
+  const t0 = performance.now(), dur = 900;
+  const passo = (t) => {
+    const k = Math.min(1, (t - t0) / dur), f = 1 - Math.pow(1 - k, 3);
+    for (const e of els) { const v = +e.dataset.valor * f; e.textContent = e.dataset.curto ? brlCurto(v) : brl(v); }
+    if (k < 1) requestAnimationFrame(passo);
+  };
+  requestAnimationFrame(passo);
+}
 const pctInt = (v) => (v >= 0.01 ? Math.round(v * 100) : "<1") + "%";
 
 function renderCategorias() {
@@ -1021,14 +1180,14 @@ function pintarCategorias(card) {
     const lista = [...grupos.values()].sort((a, b) => b.valor - a.valor);
     q(".cat-total").innerHTML = "";
     q(".cat-visual").innerHTML = anel(lista, total) +
-      `<div class="anel-centro"><b>${brlCurto(total)}</b><small>gastos no mês</small></div>`;
+      `<div class="anel-centro"><b>${contar(total, true)}</b><small>gastos no mês</small></div>`;
     q(".cat-lista").innerHTML = lista.slice(0, limite).map(({ g: [nome, ic, cor], valor, cats: cs }) =>
       `<details class="grupo" data-nome-grupo="${esc(nome)}"><summary><span class="ic cheio" style="--c:${cor}">${icone(ic)}</span>
         <span class="meio">${esc(nome)}<small>${pctInt(valor / total)} · ${cs.length === 1 ? "1 categoria" : cs.length + " categorias"}</small></span>
         <span class="num">${brl(valor)}</span><svg class="i seta-grupo"><use href="#i-chevron"/></svg></summary>
         <div class="itens">${cs.map((c) => barraCat(c, valor, cs[0].valor)).join("")}</div></details>`).join("");
   } else {
-    q(".cat-total").innerHTML = `<small>Gastos em ${MESES_LONGOS[+D.resumo.mes.slice(5, 7) - 1]}</small><b>${brl(total)}</b>`;
+    q(".cat-total").innerHTML = `<small>Gastos em ${MESES_LONGOS[+D.resumo.mes.slice(5, 7) - 1]}</small><b>${contar(total)}</b>`;
     q(".cat-visual").innerHTML = bolhas(cats.slice(0, 12), total);
     q(".cat-lista").innerHTML = cats.slice(0, limite).map((c) => barraCat(c, total, maior)).join("");
   }
@@ -1064,10 +1223,10 @@ function bolhas(cats, total) {
   const x0 = Math.min(...P.map((p) => p.x - p.r)) - 2, x1 = Math.max(...P.map((p) => p.x + p.r)) + 2;
   const y0 = Math.min(...P.map((p) => p.y - p.r)) - 2, y1 = Math.max(...P.map((p) => p.y + p.r)) + 2;
   return `<svg class="bolhas" viewBox="${x0} ${y0} ${x1 - x0} ${y1 - y0}" role="img" aria-label="Gastos por categoria: ${esc(cats.map((c) => c.categoria + " " + pctInt(c.valor / total)).join(", "))}">` +
-    P.map(({ x, y, r, c }) => {
+    P.map(({ x, y, r, c }, i) => {
       const [ic, cor] = estiloCat(c.categoria), mostraPct = r >= 30, t = Math.min(r * 0.5, 26);
       const iy = mostraPct ? y - t * 0.85 : y - t / 2;
-      return `<g data-filtra="${esc(c.categoria)}"><title>${esc(c.categoria)}: ${brl(c.valor)} (${pctInt(c.valor / total)})</title>
+      return `<g data-filtra="${esc(c.categoria)}" style="--i:${i}"><title>${esc(c.categoria)}: ${brl(c.valor)} (${pctInt(c.valor / total)})</title>
         <circle cx="${x}" cy="${y}" r="${r}" style="fill:color-mix(in srgb, ${cor} 20%, var(--cartao));stroke:${cor}" stroke-width="1.5" stroke-opacity=".7"/>
         <use href="#i-${ic}" x="${x - t / 2}" y="${iy}" width="${t}" height="${t}" fill="none" stroke="${cor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         ${mostraPct ? `<text x="${x}" y="${y + r * 0.42}" text-anchor="middle" fill="${cor}" font-size="${Math.min(r * 0.36, 22)}" font-weight="600">${pctInt(c.valor / total)}</text>` : ""}</g>`;
@@ -1084,10 +1243,77 @@ function anel(lista, total) {
   const arcos = lista.map(({ g: [nome, , cor], valor }, i) => {
     const f = valor / total, vaga = vagas[i] * escala, tam = Math.max(0.01, vaga - respiro), off = ini + respiro / 2;
     ini += vaga;
-    return `<circle data-grupo="${esc(nome)}" cx="120" cy="120" r="${r}" fill="none" stroke="${cor}" stroke-width="${w}" stroke-linecap="round"
+    return `<circle data-grupo="${esc(nome)}" style="--i:${i}" cx="120" cy="120" r="${r}" fill="none" stroke="${cor}" stroke-width="${w}" stroke-linecap="round"
       stroke-dasharray="${tam} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 120 120)"><title>${esc(nome)}: ${brl(valor)} (${pctInt(f)})</title></circle>`;
   });
   return `<svg class="anel" viewBox="0 0 240 240" role="img" aria-label="Gastos por grupo: ${esc(lista.map(({ g, valor }) => g[0] + " " + pctInt(valor / total)).join(", "))}">${arcos.join("")}</svg>`;
+}
+
+// Análise: resumo no topo, assinaturas/contas fixas e compras parceladas
+function renderFixasEParcelas() {
+  const R = D.resumo, rec = D.recorrentes, P = D.parcelas;
+  const totRec = rec.reduce((s, r) => s + r.media, 0);
+  const assin = rec.filter((r) => r.tipo === "assinatura"), fixas = rec.filter((r) => r.tipo !== "assinatura");
+  const parcMes = R.transacoes.filter((t) => t.parcelas_total > 1 && t.direcao === "saida");
+  const totParcMes = parcMes.reduce((s, t) => s + t.valor, 0), falta = P.reduce((s, p) => s + p.falta, 0);
+  const fim = P.reduce((m, p) => (p.termina > m ? p.termina : m), "");
+  const varG = R.gastos_anterior ? (R.gastos - R.gastos_anterior) / R.gastos_anterior : null;
+  const mesCurto = (m) => NOMES_MES[+m.slice(5, 7) - 1] + "/" + m.slice(2, 4);
+  const resumo = (ic, cor, rot, val, det, vis = "") => `<div class="cartao resumo-item"><span class="ic" style="--c:${cor}">${icone(ic)}</span>
+    <div style="min-width:0"><div class="rot">${rot}</div><div class="val">${val}</div><div class="det">${det}</div></div>${vis ? `<div class="vis">${vis}</div>` : ""}</div>`;
+  // gastos dos últimos meses (linha), logos das assinaturas, parcelas dos próximos meses e quanto já foi pago
+  const ev = D.evolucao.filter((e) => e.gastos).slice(-6), gs = ev.map((e) => e.gastos);
+  const minG = Math.min(...gs) * 0.9, faixa = Math.max(...gs) - minG || 1;  // escala da variação, não a partir do zero
+  const pts = ev.map((e, i) => [ev.length > 1 ? i / (ev.length - 1) * 88 + 2 : 46, 34 - (e.gastos - minG) / faixa * 30]);
+  const faisca = ev.length > 1 ? `<svg class="faisca" viewBox="0 0 92 38" role="img" aria-label="Gastos dos últimos ${ev.length} meses"><title>Gastos dos últimos ${ev.length} meses</title><polyline points="${pts.map((p) => p.join(",")).join(" ")}"
+      fill="none" stroke="${G.comida}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="4" fill="var(--cartao)" stroke="${G.comida}" stroke-width="2.5"/></svg>` : "";
+  const logos = rec.length ? `<div class="logos">${rec.slice(0, 4).map((r) => bolinha(r.nome, r.categoria, true)).join("")}</div>` : "";
+  const PM6 = (D.parcelas_meses || []).slice(0, 6), maxP = Math.max(...PM6.map((m) => m.valor), 1);
+  const miniBarras = P.length ? `<div class="mini-barras" style="--c:${G.compras}" title="Parcelas dos próximos 6 meses">${PM6.map((m, i) =>
+    `<i style="--i:${i};height:${m.valor ? Math.max(8, m.valor / maxP * 100) : 8}%;${m.valor ? "" : "opacity:.3"}"></i>`).join("")}</div>` : "";
+  const totalCompras = P.reduce((s, p) => s + p.total_compra, 0), pago = totalCompras - falta;
+  const fracPago = totalCompras ? pago / totalCompras : 0, Cm = 2 * Math.PI * 18;
+  const anelMini = P.length ? `<svg class="anel-mini" viewBox="0 0 46 46" aria-label="${Math.round(fracPago * 100)}% já pago">
+      <circle cx="23" cy="23" r="18" fill="none" stroke="var(--linha)" stroke-width="6"/>
+      <circle cx="23" cy="23" r="18" fill="none" stroke="${G.banco}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${fracPago * Cm} ${Cm}" transform="rotate(-90 23 23)"/>
+      <text x="23" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="var(--texto)">${Math.round(fracPago * 100)}%</text></svg>` : "";
+  $("anResumo").innerHTML =
+    resumo("gasto", G.comida, "Gastos do mês", contar(R.gastos), varG == null ? "sem mês anterior" : pct(varG, true) + " vs mês anterior", faisca) +
+    resumo("play", G.assinatura, "Assinaturas e fixas", contar(totRec) + "<small class='suave' style='font-size:13px;font-weight:500'>/mês</small>",
+      `${assin.length} assinatura${assin.length === 1 ? "" : "s"} · ${fixas.length} conta${fixas.length === 1 ? "" : "s"} fixa${fixas.length === 1 ? "" : "s"}`, logos) +
+    resumo("cartao", G.compras, "Parcelas neste mês", contar(totParcMes), parcMes.length ? `${parcMes.length} compra${parcMes.length === 1 ? "" : "s"} parcelada${parcMes.length === 1 ? "" : "s"}` : "nenhuma parcela no mês", miniBarras) +
+    resumo("recibo", G.banco, "Falta pagar em parcelas", contar(falta), fim ? "última parcela em " + mesCurto(fim) : "nenhuma compra parcelada", anelMini);
+
+  // Assinaturas e contas fixas
+  $("recTotal").textContent = rec.length ? brl(totRec) + "/mês · " + brl(totRec * 12) + "/ano" : "";
+  const linhaRec = (r) => `<div class="item">${bolinha(r.nome, r.categoria, true)}<div class="meio">
+      <div class="nome">${esc(nomeTx({ descricao: r.nome }))}</div><div class="sub">${esc(r.categoria)} · próxima ~${data(r.proxima).slice(0, 5)}</div></div>
+      <div class="direita">${brl(r.media)}<small>por mês</small></div></div>`;
+  const bloco = (titulo, lst) => lst.length ? `<div class="subtitulo"><span>${titulo}</span><span>${brl(lst.reduce((s, r) => s + r.media, 0))}/mês</span></div>` + lst.map(linhaRec).join("") : "";
+  const empilhada = `<div class="empilhada" role="img" aria-label="Divisão das cobranças fixas">${rec.map((r, i) =>
+    `<i style="flex:${r.media} 1 0;background:${estiloCat(r.categoria)[1]};animation-delay:${i * 60}ms" title="${esc(nomeTx({ descricao: r.nome }))}: ${brl(r.media)}/mês (${pctInt(r.media / totRec)})"></i>`).join("")}</div>`;
+  $("recorrentes").innerHTML = rec.length ? empilhada + bloco("Assinaturas", assin) + bloco("Contas fixas", fixas)
+    : `<div class="vazio">Nenhuma cobrança recorrente clara nos últimos 6 meses.</div>`;
+
+  // Compras parceladas e quanto cai em cada mês
+  $("parcTotal").textContent = P.length ? "faltam " + brl(falta) : "";
+  const PM = D.parcelas_meses || [], maior = Math.max(...PM.map((m) => m.valor), 1);
+  $("parcMeses").innerHTML = P.length && PM.length ? `<div class="parc-resumo"><span>Parcelas nos próximos 12 meses</span><span>próximo mês: <b>${brl(PM[0].valor)}</b></span></div>
+    <div class="barras-mes" role="img" aria-label="${esc(PM.map((m) => nomeMesLongo(m.mes) + " " + brl(m.valor)).join(", "))}">${PM.map((m, i) =>
+      `<div class="bm${m.valor ? "" : " zero"}${i === 0 && m.valor ? " prox" : ""}" data-rotulo="${NOMES_MES[+m.mes.slice(5, 7) - 1]}: ${brl(m.valor)}"><i style="--i:${i};height:${m.valor ? Math.max(4, m.valor / maior * 100) : 3}%"></i><small>${NOMES_MES[+m.mes.slice(5, 7) - 1]}</small></div>`).join("")}</div>` : "";
+  $("parcelas").innerHTML = P.length ? `<div class="subtitulo"><span>Compras em andamento</span><span>${P.length}</span></div>` + P.map((p) => {
+    const nome = nomeTx({ descricao: p.descricao, estabelecimento: p.estabelecimento });
+    const onde = p.banco ? (p.cartao ? "Cartão " : "Conta ") + p.banco : "";
+    return `<div class="item parcela">${bolinha((p.estabelecimento || "") + " " + p.descricao, "Compras", true)}<div class="meio">
+      <div class="nome">${esc(nome)}</div><div class="sub">${esc(onde)}${onde ? " · " : ""}compra de ${brl(p.total_compra)} · termina em ${mesCurto(p.termina)}</div>
+      ${p.total_parcelas <= 24
+        ? `<div class="pontos" aria-label="${p.parcela} de ${p.total_parcelas} parcelas pagas">${Array.from({ length: p.total_parcelas }, (_, i) =>
+            `<i class="${i < p.parcela ? "pago" : ""}${i === p.parcela - 1 ? " atual" : ""}" style="--i:${i}"></i>`).join("")}</div>`
+        : `<div class="trilho"><div style="width:${p.parcela / p.total_parcelas * 100}%"></div></div>`}
+      <div class="progresso"><span>${p.parcela} de ${p.total_parcelas} pagas</span><span>faltam ${p.restantes} · ${brl(p.falta)}</span></div></div>
+      <div class="direita">${brl(p.valor)}<small>por mês</small></div></div>`;
+  }).join("") : `<div class="vazio">Nenhuma compra parcelada em andamento.</div>`;
 }
 
 function renderOrcamentos() {
@@ -1126,6 +1352,7 @@ function renderLateral() {
     `<li><span class="conta-ic">${bolinha(c.banco, "Tarifas bancárias", true)}<span>${esc(c.banco)}<br><small>${esc(c.nome)}</small></span></span><span class="num">${brl(c.saldo)}</span></li>`).join("")
     : `<li class="tudo-ok">Nenhuma conta ainda.</li>`;
 
+  document.querySelector("aside.escuro .bola").classList.toggle("tocar", D.alertas.length > 0);
   $("qtdAlertas").textContent = D.alertas.length ? (D.alertas.length === 1 ? "1 aviso" : D.alertas.length + " avisos") : "tudo em ordem";
   $("alertas").innerHTML = D.alertas.length
     ? D.alertas.map((a) => `<div class="alerta"><span class="ponto ${a.nivel}"></span><span>${esc(oculto ? a.texto.replace(/R\$\s?-?[\d.]+(,\d+)?/g, "R$ •••••") : a.texto)}</span></div>`).join("")
@@ -1197,8 +1424,8 @@ function trocarMes(m) { $("mes").value = m; carregar(m); }
 const VISTAS = {
   inicio: [null, "Seu resumo financeiro"],
   transacoes: ["Transações", null],
-  analise: ["Análise", "Categorias, orçamentos e gastos fixos"],
-  investimentos: ["Investimentos", "Aplicações e compras parceladas"],
+  analise: ["Análise", "Categorias, assinaturas, parcelas e orçamentos"],
+  investimentos: ["Investimentos", "Suas aplicações e quanto renderam"],
   ajustes: ["Ajustes", "Regras de categoria e conexões com os bancos"],
 };
 function mostrarVista() {
@@ -1210,6 +1437,7 @@ function mostrarVista() {
   $("subtitulo").textContent = sub || (D ? nomeMesLongo(D.resumo.mes)[0].toUpperCase() + nomeMesLongo(D.resumo.mes).slice(1) : "");
   document.title = (titulo ? titulo + " · " : "") + "Meu Pierre";
   if (v === "inicio") graficos.ev?.resize();
+  requestAnimationFrame(animarContadores);
 }
 function irPara(v) {
   if (location.hash === "#" + v) mostrarVista(); else location.hash = v;
@@ -1233,6 +1461,7 @@ document.addEventListener("click", (e) => {
     modoCat = b.dataset.modo;
     try { localStorage.setItem("modoCategorias", modoCat); } catch (err) {}
     renderCategorias();
+    animarContadores();
   }
   const g = e.target.closest(".cat-visual [data-grupo]");  // clicar num arco abre o grupo na lista
   if (g) {

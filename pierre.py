@@ -389,6 +389,97 @@ def investimentos() -> list[dict]:
     return out
 
 
+_FLUXO_INVEST = re.compile(r"aplica|resgate|caixinha|cofrinho|\brdb\b|\bcdb\b|tesouro|invest", re.I)
+
+
+def rendimento_investimentos() -> dict:
+    """Quanto a carteira rendeu de verdade em cada mês, pela variação do saldo guardado a cada atualização.
+
+    rendimento do mês = saldo no fim do mês - saldo no fim do mês anterior - (aplicações - resgates).
+    As aplicações e os resgates vêm das transações do mesmo banco (item da Pluggy).
+    """
+    rows = store.con.execute("SELECT invest_id, item_id, data, saldo FROM invest_historico ORDER BY data").fetchall()
+    if not rows:
+        return {"meses": [], "inicio": None}
+    ultimo: dict[tuple[str, str], tuple[str, float]] = {}   # (mês, invest) -> (data, saldo) mais recente do mês
+    item_de: dict[str, str] = {}
+    for r in rows:
+        m = r["data"][:7]
+        ultimo[(m, r["invest_id"])] = (r["data"], r["saldo"] or 0.0)
+        item_de[r["invest_id"]] = r["item_id"]
+    meses = sorted({m for m, _ in ultimo})
+    # aplicações (-) e resgates (+) por banco e mês
+    fluxos: dict[tuple[str, str], float] = defaultdict(float)
+    for t in store.con.execute(
+            """SELECT t.data, t.valor, t.direcao, t.descricao, t.estabelecimento, t.categoria_origem, a.item_id
+               FROM transactions t JOIN accounts a ON a.id = t.account_id
+               WHERE t.data >= ? AND a.subtipo <> 'CREDIT_CARD'""", (meses[0] + "-01",)).fetchall():
+        cat = store.categoria(t)
+        if cat == "Investimentos" or _FLUXO_INVEST.search(_sem_acento(t["descricao"] or "")):
+            fluxos[(t["data"][:7], t["item_id"])] += t["valor"] if t["direcao"] == "saida" else -t["valor"]
+    out = []
+    for i, m in enumerate(meses):
+        saldo = sum(v[1] for (mm, _), v in ultimo.items() if mm == m)
+        item = {"mes": m, "saldo": saldo, "aportes": None, "rendimento": None, "rend_pct": None, "parcial": m == hoje_br().strftime("%Y-%m")}
+        if i:
+            ant = meses[i - 1]
+            ids = [k for (mm, k) in ultimo if mm == m and (ant, k) in ultimo]   # só quem existe nos dois meses
+            if ids:
+                s0 = sum(ultimo[(ant, k)][1] for k in ids)
+                s1 = sum(ultimo[(m, k)][1] for k in ids)
+                aportes = sum(fluxos.get((m, it), 0.0) for it in {item_de[k] for k in ids})
+                rend = s1 - s0 - aportes
+                item.update(aportes=aportes, rendimento=rend, rend_pct=rend / s0 if s0 else None)
+        out.append(item)
+    return {"meses": out[-13:], "inicio": rows[0]["data"]}
+
+
+def _sgs(serie: int, n: int) -> list[tuple[str, float]]:
+    """Últimos n valores de uma série do Banco Central (SGS): [(AAAA-MM-DD, valor em %)]."""
+    import urllib.request
+
+    url = f"https://api.bcb.gov.br/dados/serie/bcdata.sgs.{serie}/dados/ultimos/{n}?formato=json"
+    with urllib.request.urlopen(urllib.request.Request(url, headers={"Accept": "application/json"}), timeout=6) as r:
+        dados = json.loads(r.read().decode())
+    return [(f"{d['data'][6:10]}-{d['data'][3:5]}-{d['data'][0:2]}", float(d["valor"])) for d in dados]
+
+
+def indicadores() -> dict | None:
+    """Selic, CDI (mês a mês e em 12 meses) e IPCA do Banco Central. Guardados por 12 horas."""
+    if DEMO:
+        cdi = [(f"{_somar_mes_str(hoje_br(), -k)}", 0.0089 + 0.0003 * (k % 3)) for k in range(12, 0, -1)]
+        return _montar_indicadores(cdi, 0.15, 0.0478, "demonstração")
+    guardado = store.get_meta("indicadores")
+    if guardado:
+        g = json.loads(guardado)
+        if datetime.fromisoformat(g["buscado_em"]) > agora_br() - timedelta(hours=12):
+            return g
+    try:
+        cdi = [(d[:7], v / 100) for d, v in _sgs(4391, 13)]      # CDI acumulado no mês (%)
+        selic = _sgs(432, 1)[-1][1] / 100                          # meta Selic (% a.a.)
+        ipca12 = _sgs(13522, 1)[-1][1] / 100                       # IPCA acumulado em 12 meses (%)
+    except Exception:  # noqa: BLE001  (Banco Central fora do ar: usa o último que deu certo)
+        return json.loads(guardado) if guardado else None
+    ind = _montar_indicadores(cdi, selic, ipca12, agora_br().isoformat())
+    store.set_meta("indicadores", json.dumps(ind))
+    return ind
+
+
+def _somar_mes_str(d: date, n: int) -> str:
+    m = d.month - 1 + n
+    return f"{d.year + m // 12}-{m % 12 + 1:02d}"
+
+
+def _montar_indicadores(cdi: list[tuple[str, float]], selic: float, ipca12: float, quando: str) -> dict:
+    ult12 = cdi[-12:]
+    acum = 1.0
+    for _, v in ult12:
+        acum *= 1 + v
+    return {"cdi_meses": [{"mes": m, "taxa": v} for m, v in cdi], "cdi_12m": acum - 1, "selic": selic,
+            "ipca_12m": ipca12, "juro_real": (1 + selic) / (1 + ipca12) - 1,
+            "buscado_em": quando if quando != "demonstração" else agora_br().isoformat(), "fonte": "Banco Central (SGS)"}
+
+
 def definir_orcamento(categoria: str, valor_mensal: float) -> None:
     """Cria ou altera o limite mensal de uma categoria. valor_mensal <= 0 remove o orçamento."""
     if valor_mensal <= 0:
@@ -475,6 +566,13 @@ def alertas() -> list[dict]:
     return al
 
 
+def _seguro(fn):
+    try:
+        return fn()
+    except Exception:  # noqa: BLE001  (um indicador fora do ar não pode derrubar o painel)
+        return None
+
+
 def painel(mes: str = "") -> dict:
     """Tudo que o painel mostra, de uma vez."""
     aviso = garantir_dados()
@@ -496,6 +594,8 @@ def painel(mes: str = "") -> dict:
         "parcelas_meses": parcelas_por_mes(parc),
         "faturas": faturas(),
         "investimentos": investimentos(),
+        "rendimento_investimentos": rendimento_investimentos(),
+        "indicadores": _seguro(indicadores),
         "regras": regras(),
         "alertas": alertas(),
         "neutras": sorted(NEUTRAS),

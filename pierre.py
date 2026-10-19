@@ -119,11 +119,17 @@ def garantir_dados() -> str:
 
 
 def _sync(dias: int) -> dict:
-    itens = _itens()
-    if not itens:
-        raise RuntimeError("Nenhum item configurado em PLUGGY_ITEMS.")
-    cli = PluggyClient(os.environ.get("PLUGGY_CLIENT_ID", ""), os.environ.get("PLUGGY_CLIENT_SECRET", ""))
-    return store.sincronizar(cli, itens, dias)
+    try:
+        itens = _itens()
+        if not itens:
+            raise RuntimeError("Nenhum item configurado em PLUGGY_ITEMS.")
+        cli = PluggyClient(os.environ.get("PLUGGY_CLIENT_ID", ""), os.environ.get("PLUGGY_CLIENT_SECRET", ""))
+        return store.sincronizar(cli, itens, dias)
+    except Exception as e:
+        # Guarda o motivo para o painel mostrar, inclusive quando a atualização foi automática.
+        store.registrar_resultado({"em": agora_br().isoformat(), "dias": dias, "contas": 0, "transacoes": 0,
+                                   "investimentos": 0, "faturas": 0, "erros": [str(e)], "status": {}})
+        raise
 
 
 def sincronizar(dias: int = 30) -> dict:

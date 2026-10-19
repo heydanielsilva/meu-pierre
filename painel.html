@@ -318,6 +318,8 @@
   <symbol id="i-etiqueta" viewBox="0 0 24 24"><path d="M3.5 12.5v-8a1 1 0 0 1 1-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.4"/></symbol>
   <symbol id="i-dinheiro" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></symbol>
   <symbol id="i-seta-dir" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-olho" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-olho-off" viewBox="0 0 24 24"><path d="M10.6 5.6A9 9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.7 3.4M6.6 6.6C4 8.3 2.5 12 2.5 12S6 18.5 12 18.5c1.9 0 3.5-.6 4.9-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2M3.5 3.5l17 17"/></symbol>
   <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
 </svg>
 
@@ -342,6 +344,7 @@
       </div>
       <div class="acoes">
         <select id="mes" class="pilula" aria-label="Mês"></select>
+        <button class="pilula redonda" id="btnOlho" type="button"><svg class="i"><use href="#i-olho"/></svg></button>
         <button class="pilula redonda" id="btnTema" type="button"><svg class="i"><use href="#i-sol"/></svg></button>
         <a class="pilula redonda" id="btnExcel" href="/exportar.xlsx?meses=6" title="Baixar Excel (6 meses)"><svg class="i"><use href="#i-baixar"/></svg></a>
         <button id="btnSync" class="pilula roxa"><svg class="i"><use href="#i-atualizar"/></svg><span>Atualizar</span></button>
@@ -472,7 +475,10 @@
 <script>
 const $ = (id) => document.getElementById(id);
 const fmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-const brl = (v) => v == null ? "—" : fmt.format(v);
+// Olho: com os valores ocultos, todo valor em R$ vira "R$ •••••" (a escolha fica salva neste navegador).
+let oculto = false;
+try { oculto = localStorage.getItem("ocultar") === "1"; } catch (e) {}
+const brl = (v) => v == null ? "—" : oculto ? "R$ •••••" : fmt.format(v);
 const pct = (v, sinal = false) => v == null ? "—" : (sinal && v > 0 ? "+" : "") + (v * 100).toFixed(1).replace(".", ",") + "%";
 const data = (s) => s ? s.slice(8, 10) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4) : "—";
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -629,7 +635,8 @@ function kpi({ rot, val, det = "", ic, destaque = false, selo = "", classe = "" 
 
 function render() {
   const R = D.resumo, P = D.patrimonio;
-  $("mes").innerHTML = D.meses.map((m) => `<option value="${m}" ${m === R.mes ? "selected" : ""}>${nomeMesLongo(m)}</option>`).join("");
+  const estreito = matchMedia("(max-width: 760px)").matches;  // no celular, "out/2026" cabe ao lado dos botões
+  $("mes").innerHTML = D.meses.map((m) => `<option value="${m}" ${m === R.mes ? "selected" : ""}>${estreito ? NOMES_MES[+m.slice(5, 7) - 1] + "/" + m.slice(0, 4) : nomeMesLongo(m)}</option>`).join("");
   $("sync").textContent = D.demo ? "Modo demonstração (dados fictícios)"
     : "Última atualização: " + (D.ultima_sync ? data(D.ultima_sync) + " às " + D.ultima_sync.slice(11, 16) : "nunca");
 
@@ -750,7 +757,7 @@ function renderGraficos() {
       scales: {
         x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 6 } },
         y: { beginAtZero: true, border: { display: false }, grid: { color: cor("--linha") },
-             ticks: { maxTicksLimit: 5, callback: (v) => "R$ " + curto(v) } },
+             ticks: { maxTicksLimit: 5, callback: (v) => oculto ? "" : "R$ " + curto(v) } },
       },
       onClick: (_, el) => { if (el.length) trocarMes(ev[el[0].index].mes); },
       onHover: (e, el) => { e.native.target.style.cursor = el.length ? "pointer" : "default"; },
@@ -825,7 +832,7 @@ function renderLateral() {
 
   $("qtdAlertas").textContent = D.alertas.length ? (D.alertas.length === 1 ? "1 aviso" : D.alertas.length + " avisos") : "tudo em ordem";
   $("alertas").innerHTML = D.alertas.length
-    ? D.alertas.map((a) => `<div class="alerta"><span class="ponto ${a.nivel}"></span><span>${esc(a.texto)}</span></div>`).join("")
+    ? D.alertas.map((a) => `<div class="alerta"><span class="ponto ${a.nivel}"></span><span>${esc(oculto ? a.texto.replace(/R\$\s?-?[\d.]+(,\d+)?/g, "R$ •••••") : a.texto)}</span></div>`).join("")
     : `<div class="tudo-ok">Nenhum alerta por enquanto.</div>`;
 }
 
@@ -986,6 +993,19 @@ function aplicarTema(t) {
   $("btnTema").title = escuro ? "Mudar para o tema claro" : "Mudar para o tema escuro";
   document.querySelector('meta[name="theme-color"]').content = escuro ? "#071817" : "#0f4a49";
 }
+function aplicarOlho() {
+  $("btnOlho").innerHTML = icone(oculto ? "olho-off" : "olho");
+  $("btnOlho").title = oculto ? "Mostrar valores" : "Ocultar valores";
+  $("btnOlho").setAttribute("aria-pressed", String(oculto));
+}
+$("btnOlho").addEventListener("click", () => {
+  oculto = !oculto;
+  try { localStorage.setItem("ocultar", oculto ? "1" : "0"); } catch (e) {}
+  aplicarOlho();
+  if (D) render();
+});
+aplicarOlho();
+
 $("btnTema").addEventListener("click", () => {
   const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   try { localStorage.setItem("tema", t); } catch (e) {}

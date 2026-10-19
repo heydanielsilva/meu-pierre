@@ -230,6 +230,37 @@
   .grupo .itens { padding: 14px 2px 4px; }
   .ic.cheio { background: var(--c); color: #fff; }
 
+  /* Análise: resumo, assinaturas e parcelas */
+  .grade-4 { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
+  .resumo-item { display: flex; gap: 14px; align-items: flex-start; padding: 20px; }
+  .resumo-item .ic { width: 46px; height: 46px; }
+  .resumo-item .rot { color: var(--suave); font-size: 14px; font-weight: 500; }
+  .resumo-item .val { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .resumo-item .det { color: var(--suave); font-size: 12.5px; margin-top: 2px; }
+  .subtitulo { display: flex; justify-content: space-between; gap: 10px; color: var(--suave); font-size: 12.5px; font-weight: 700;
+               text-transform: uppercase; letter-spacing: .05em; margin: 18px 0 6px; }
+  .subtitulo:first-child { margin-top: 0; }
+  .item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--linha); }
+  .subtitulo + .item { border-top: 0; }
+  .item .meio { flex: 1; min-width: 0; }
+  .item .nome { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .sub { color: var(--suave); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .direita { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .item .direita small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
+  .parcela .trilho { height: 8px; margin-top: 7px; }
+  .parcela .trilho > div { background: var(--acento); }
+  .parcela .progresso { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; color: var(--suave); font-size: 12.5px; margin-top: 4px; }
+  .parcela .progresso span { white-space: nowrap; }
+  #parcMeses:not(:empty) + #parcelas .subtitulo { margin-top: 18px; }
+  .barras-mes { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end; height: 130px;
+                padding: 6px 0 0; margin-bottom: 6px; }
+  .barras-mes .bm { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; min-width: 0; }
+  .barras-mes .bm i { display: block; width: 100%; max-width: 26px; border-radius: 5px 5px 2px 2px; background: var(--acento); min-height: 3px; }
+  .barras-mes .bm.zero i { background: var(--linha); }
+  .barras-mes .bm small { color: var(--suave); font-size: 11.5px; }
+  .parc-resumo { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--suave); font-size: 13px; margin-bottom: 8px; }
+  .parc-resumo b { color: var(--texto); }
+
   /* Telas */
   .vista { display: grid; gap: 24px; min-width: 0; }
   .vista[hidden] { display: none !important; }
@@ -324,6 +355,8 @@
     .segmento button { flex: 1; }
     .tx { gap: 12px; padding: 10px 4px; }
     .tx .sub .conta { display: none; }
+    .parcela .sub { white-space: normal; }
+    .barras-mes { gap: 4px; }
   }
 </style>
 </head>
@@ -389,8 +422,8 @@
     </div>
     <a href="#inicio" title="Início"><svg class="i"><use href="#i-casa"/></svg></a>
     <a href="#transacoes" title="Transações"><svg class="i"><use href="#i-troca"/></svg></a>
-    <a href="#analise" title="Categorias e orçamentos"><svg class="i"><use href="#i-grafico"/></svg></a>
-    <a href="#investimentos" title="Investimentos e parcelas"><svg class="i"><use href="#i-invest"/></svg></a>
+    <a href="#analise" title="Análise: categorias, assinaturas e parcelas"><svg class="i"><use href="#i-grafico"/></svg></a>
+    <a href="#investimentos" title="Investimentos"><svg class="i"><use href="#i-invest"/></svg></a>
     <a href="#ajustes" title="Regras e conexões"><svg class="i"><use href="#i-ajuste"/></svg></a>
     <a href="/sair" class="fim" title="Sair"><svg class="i"><use href="#i-sair"/></svg></a>
   </nav>
@@ -499,6 +532,7 @@
 
       <!-- Análise -->
       <div class="vista" data-vista="analise" hidden>
+        <section class="grade-4" id="anResumo"></section>
         <section class="grade-2">
           <div class="cartao cat-card">
             <div class="cab"><h2>Gastos por categoria</h2><span class="extra cat-mes"></span></div>
@@ -519,11 +553,20 @@
               <button class="pilula roxa">Salvar</button>
             </form>
             <div class="dica">Para remover um orçamento, salve a categoria com limite 0.</div>
+            <div class="cab" style="margin-top:30px"><h2>Onde mais gastou</h2><span class="extra">maiores do mês</span></div>
+            <ul class="lista" id="estab"></ul>
           </div>
         </section>
         <section class="grade-2">
-          <div class="cartao"><div class="cab"><h2>Assinaturas e contas fixas</h2><span class="extra" id="recTotal"></span></div><ul class="lista" id="recorrentes"></ul></div>
-          <div class="cartao"><div class="cab"><h2>Onde mais gastou</h2></div><ul class="lista" id="estab"></ul></div>
+          <div class="cartao">
+            <div class="cab"><h2>Assinaturas e contas fixas</h2><span class="extra" id="recTotal"></span></div>
+            <div id="recorrentes"></div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><h2>Parcelas dos cartões</h2><span class="extra" id="parcTotal"></span></div>
+            <div id="parcMeses"></div>
+            <div id="parcelas"></div>
+          </div>
         </section>
       </div>
 
@@ -531,7 +574,6 @@
       <div class="vista" data-vista="investimentos" hidden>
         <section class="grade-2">
           <div class="cartao"><div class="cab"><h2>Investimentos</h2><span class="extra" id="invTotal"></span></div><ul class="lista" id="investimentos"></ul></div>
-          <div class="cartao"><div class="cab"><h2>Parcelas a vencer</h2><span class="extra" id="parcTotal"></span></div><ul class="lista" id="parcelas"></ul></div>
         </section>
       </div>
 
@@ -835,20 +877,10 @@ function render() {
   renderLateral();
 
   $("estab").innerHTML = R.estabelecimentos.length
-    ? R.estabelecimentos.map((e) => `<li><span class="conta-ic">${bolinha(e.nome, R.transacoes.find((t) => (t.estabelecimento || t.descricao) === e.nome)?.categoria, true)}<span>${esc(nomeTx({ descricao: e.nome }))}</span></span><span class="num">${brl(e.valor)}</span></li>`).join("")
+    ? R.estabelecimentos.slice(0, 6).map((e) => `<li><span class="conta-ic">${bolinha(e.nome, R.transacoes.find((t) => (t.estabelecimento || t.descricao) === e.nome)?.categoria, true)}<span>${esc(nomeTx({ descricao: e.nome }))}</span></span><span class="num">${brl(e.valor)}</span></li>`).join("")
     : `<li class="vazio">Sem gastos neste mês.</li>`;
 
-  const rec = D.recorrentes, totRec = rec.reduce((s, r) => s + r.media, 0);
-  $("recTotal").textContent = rec.length ? brl(totRec) + "/mês" : "";
-  $("recorrentes").innerHTML = rec.length ? rec.map((r) =>
-    `<li><span class="conta-ic">${bolinha(r.nome, r.categoria || "Assinaturas e streaming", true)}<span>${esc(nomeTx({ descricao: r.nome }))}<br><small>${esc(r.tipo)} · próxima ~${data(r.proxima).slice(0, 5)}</small></span></span><span class="num">${brl(r.media)}</span></li>`).join("")
-    : `<li class="vazio">Nenhuma cobrança recorrente clara nos últimos 6 meses.</li>`;
-
-  const totParc = D.parcelas.reduce((s, p) => s + p.falta, 0);
-  $("parcTotal").textContent = D.parcelas.length ? "faltam " + brl(totParc) : "";
-  $("parcelas").innerHTML = D.parcelas.length ? D.parcelas.map((p) =>
-    `<li><span class="conta-ic">${bolinha(p.descricao, "Compras", true)}<span>${esc(nomeTx({ descricao: p.descricao }))}<br><small>parcela ${p.parcela}/${p.total_parcelas} de ${brl(p.valor)} · faltam ${p.restantes}</small></span></span><span class="num">${brl(p.falta)}</span></li>`).join("")
-    : `<li class="vazio">Nenhuma compra parcelada em andamento.</li>`;
+  renderFixasEParcelas();
 
   const totInv = D.investimentos.reduce((s, i) => s + (i.saldo || 0), 0);
   $("invTotal").textContent = D.investimentos.length ? brl(totInv) : "";
@@ -1090,6 +1122,51 @@ function anel(lista, total) {
   return `<svg class="anel" viewBox="0 0 240 240" role="img" aria-label="Gastos por grupo: ${esc(lista.map(({ g, valor }) => g[0] + " " + pctInt(valor / total)).join(", "))}">${arcos.join("")}</svg>`;
 }
 
+// Análise: resumo no topo, assinaturas/contas fixas e compras parceladas
+function renderFixasEParcelas() {
+  const R = D.resumo, rec = D.recorrentes, P = D.parcelas;
+  const totRec = rec.reduce((s, r) => s + r.media, 0);
+  const assin = rec.filter((r) => r.tipo === "assinatura"), fixas = rec.filter((r) => r.tipo !== "assinatura");
+  const parcMes = R.transacoes.filter((t) => t.parcelas_total > 1 && t.direcao === "saida");
+  const totParcMes = parcMes.reduce((s, t) => s + t.valor, 0), falta = P.reduce((s, p) => s + p.falta, 0);
+  const fim = P.reduce((m, p) => (p.termina > m ? p.termina : m), "");
+  const varG = R.gastos_anterior ? (R.gastos - R.gastos_anterior) / R.gastos_anterior : null;
+  const mesCurto = (m) => NOMES_MES[+m.slice(5, 7) - 1] + "/" + m.slice(2, 4);
+  const resumo = (ic, cor, rot, val, det) => `<div class="cartao resumo-item"><span class="ic" style="--c:${cor}">${icone(ic)}</span>
+    <div style="min-width:0"><div class="rot">${rot}</div><div class="val">${val}</div><div class="det">${det}</div></div></div>`;
+  $("anResumo").innerHTML =
+    resumo("gasto", G.comida, "Gastos do mês", brl(R.gastos), varG == null ? "sem mês anterior" : pct(varG, true) + " vs mês anterior") +
+    resumo("play", G.assinatura, "Assinaturas e fixas", brl(totRec) + "<small class='suave' style='font-size:13px;font-weight:500'>/mês</small>",
+      `${assin.length} assinatura${assin.length === 1 ? "" : "s"} · ${fixas.length} conta${fixas.length === 1 ? "" : "s"} fixa${fixas.length === 1 ? "" : "s"}`) +
+    resumo("cartao", G.compras, "Parcelas neste mês", brl(totParcMes), parcMes.length ? `${parcMes.length} compra${parcMes.length === 1 ? "" : "s"} parcelada${parcMes.length === 1 ? "" : "s"}` : "nenhuma parcela no mês") +
+    resumo("recibo", G.banco, "Falta pagar em parcelas", brl(falta), fim ? "última parcela em " + mesCurto(fim) : "nenhuma compra parcelada");
+
+  // Assinaturas e contas fixas
+  $("recTotal").textContent = rec.length ? brl(totRec) + "/mês · " + brl(totRec * 12) + "/ano" : "";
+  const linhaRec = (r) => `<div class="item">${bolinha(r.nome, r.categoria, true)}<div class="meio">
+      <div class="nome">${esc(nomeTx({ descricao: r.nome }))}</div><div class="sub">${esc(r.categoria)} · próxima ~${data(r.proxima).slice(0, 5)}</div></div>
+      <div class="direita">${brl(r.media)}<small>por mês</small></div></div>`;
+  const bloco = (titulo, lst) => lst.length ? `<div class="subtitulo"><span>${titulo}</span><span>${brl(lst.reduce((s, r) => s + r.media, 0))}/mês</span></div>` + lst.map(linhaRec).join("") : "";
+  $("recorrentes").innerHTML = rec.length ? bloco("Assinaturas", assin) + bloco("Contas fixas", fixas)
+    : `<div class="vazio">Nenhuma cobrança recorrente clara nos últimos 6 meses.</div>`;
+
+  // Compras parceladas e quanto cai em cada mês
+  $("parcTotal").textContent = P.length ? "faltam " + brl(falta) : "";
+  const PM = D.parcelas_meses || [], maior = Math.max(...PM.map((m) => m.valor), 1);
+  $("parcMeses").innerHTML = P.length && PM.length ? `<div class="parc-resumo"><span>Parcelas nos próximos 12 meses</span><span>próximo mês: <b>${brl(PM[0].valor)}</b></span></div>
+    <div class="barras-mes" role="img" aria-label="${esc(PM.map((m) => nomeMesLongo(m.mes) + " " + brl(m.valor)).join(", "))}">${PM.map((m) =>
+      `<div class="bm${m.valor ? "" : " zero"}" title="${nomeMesLongo(m.mes)}: ${brl(m.valor)}"><i style="height:${m.valor ? Math.max(4, m.valor / maior * 100) : 3}%"></i><small>${NOMES_MES[+m.mes.slice(5, 7) - 1]}</small></div>`).join("")}</div>` : "";
+  $("parcelas").innerHTML = P.length ? `<div class="subtitulo"><span>Compras em andamento</span><span>${P.length}</span></div>` + P.map((p) => {
+    const nome = nomeTx({ descricao: p.descricao, estabelecimento: p.estabelecimento });
+    const onde = p.banco ? (p.cartao ? "Cartão " : "Conta ") + p.banco : "";
+    return `<div class="item parcela">${bolinha((p.estabelecimento || "") + " " + p.descricao, "Compras", true)}<div class="meio">
+      <div class="nome">${esc(nome)}</div><div class="sub">${esc(onde)}${onde ? " · " : ""}compra de ${brl(p.total_compra)} · termina em ${mesCurto(p.termina)}</div>
+      <div class="trilho"><div style="width:${p.parcela / p.total_parcelas * 100}%"></div></div>
+      <div class="progresso"><span>${p.parcela} de ${p.total_parcelas} pagas</span><span>faltam ${p.restantes} · ${brl(p.falta)}</span></div></div>
+      <div class="direita">${brl(p.valor)}<small>por mês</small></div></div>`;
+  }).join("") : `<div class="vazio">Nenhuma compra parcelada em andamento.</div>`;
+}
+
 function renderOrcamentos() {
   $("orcMes").textContent = nomeMesLongo(D.resumo.mes);
   $("orcamentos").innerHTML = D.orcamentos.length ? D.orcamentos.map((o) => {
@@ -1197,8 +1274,8 @@ function trocarMes(m) { $("mes").value = m; carregar(m); }
 const VISTAS = {
   inicio: [null, "Seu resumo financeiro"],
   transacoes: ["Transações", null],
-  analise: ["Análise", "Categorias, orçamentos e gastos fixos"],
-  investimentos: ["Investimentos", "Aplicações e compras parceladas"],
+  analise: ["Análise", "Categorias, assinaturas, parcelas e orçamentos"],
+  investimentos: ["Investimentos", "Suas aplicações e quanto renderam"],
   ajustes: ["Ajustes", "Regras de categoria e conexões com os bancos"],
 };
 function mostrarVista() {

@@ -314,9 +314,16 @@ def _projecao_mes(txs_mes: list[dict]) -> float:
     return atual + variavel / hoje.day * (dias_mes - hoje.day) + pendentes
 
 
+def _somar_meses(d: date, n: int) -> str:
+    m = d.month - 1 + n
+    return f"{d.year + m // 12}-{m % 12 + 1:02d}"
+
+
 def parcelas_futuras() -> list[dict]:
-    """Compras parceladas em andamento e quanto ainda falta pagar em cada uma."""
-    rows = store.con.execute("SELECT * FROM transactions WHERE parcelas_total > 1 ORDER BY data DESC").fetchall()
+    """Compras parceladas em andamento: em que parcela estão, quanto falta e quando terminam."""
+    rows = store.con.execute(
+        """SELECT t.*, a.banco, a.subtipo FROM transactions t LEFT JOIN accounts a ON a.id = t.account_id
+           WHERE t.parcelas_total > 1 ORDER BY t.data DESC""").fetchall()
     ultimas: dict = {}
     for r in rows:
         k = _chave_recorrente(dict(r))
@@ -326,9 +333,26 @@ def parcelas_futuras() -> list[dict]:
     for r in ultimas.values():
         rest = r["parcelas_total"] - r["parcela_atual"]
         if rest > 0:
-            out.append({"descricao": r["descricao"], "parcela": r["parcela_atual"], "total_parcelas": r["parcelas_total"],
-                        "valor": r["valor"], "restantes": rest, "falta": rest * r["valor"]})
+            d = date.fromisoformat(r["data"][:10])
+            out.append({"descricao": r["descricao"], "estabelecimento": r["estabelecimento"], "banco": r["banco"],
+                        "cartao": r["subtipo"] == "CREDIT_CARD", "parcela": r["parcela_atual"],
+                        "total_parcelas": r["parcelas_total"], "valor": r["valor"], "restantes": rest,
+                        "falta": rest * r["valor"], "total_compra": r["parcelas_total"] * r["valor"],
+                        "ultima": r["data"][:10], "proxima": _somar_meses(d, 1), "termina": _somar_meses(d, rest)})
     return sorted(out, key=lambda p: -p["falta"])
+
+
+def parcelas_por_mes(parcelas: list[dict], meses: int = 12) -> list[dict]:
+    """Quanto das compras parceladas cai em cada um dos próximos meses."""
+    hoje = hoje_br()
+    soma: dict[str, float] = {_somar_meses(hoje, i): 0.0 for i in range(1, meses + 1)}
+    for p in parcelas:
+        d = date.fromisoformat(p["ultima"])
+        for i in range(1, p["restantes"] + 1):
+            m = _somar_meses(d, i)
+            if m in soma:
+                soma[m] += p["valor"]
+    return [{"mes": m, "valor": v} for m, v in soma.items()]
 
 
 def faturas() -> list[dict]:
@@ -452,7 +476,8 @@ def painel(mes: str = "") -> dict:
         "conexoes": status_conexoes(),
         "orcamentos": status_orcamentos(mes),
         "recorrentes": recorrentes(),
-        "parcelas": parcelas_futuras(),
+        "parcelas": (parc := parcelas_futuras()),
+        "parcelas_meses": parcelas_por_mes(parc),
         "faturas": faturas(),
         "investimentos": investimentos(),
         "regras": regras(),

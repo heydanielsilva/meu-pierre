@@ -9,6 +9,7 @@ SOMENTE LEITURA: nada aqui movimenta dinheiro.
 from __future__ import annotations
 
 import calendar
+import json
 import os
 import re
 import statistics
@@ -435,6 +436,8 @@ def painel(mes: str = "") -> dict:
         "aviso": aviso,
         "demo": DEMO,
         "ultima_sync": store.get_meta("ultima_sync"),
+        "ultimo_resultado": json.loads(store.get_meta("ultimo_resultado") or "null"),
+        "total_transacoes": store.con.execute("SELECT COUNT(*) n FROM transactions").fetchone()["n"],
         "meses": meses_disponiveis(),
         "patrimonio": patrimonio(),
         "resumo": resumo_mes(mes),

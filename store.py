@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import json
 import random
 import re
 import sqlite3
@@ -287,7 +288,7 @@ class Store:
         hoje = hoje_br()
         de = (hoje - timedelta(days=dias)).isoformat()
         ate = hoje.isoformat()
-        resumo = {"contas": 0, "transacoes": 0, "investimentos": 0, "faturas": 0, "erros": []}
+        resumo = {"contas": 0, "transacoes": 0, "investimentos": 0, "faturas": 0, "erros": [], "status": {}}
         agora = agora_br().isoformat()
 
         for item_id, banco_cfg in itens.items():
@@ -299,6 +300,7 @@ class Store:
                     (item_id, banco_cfg or None, it.get("status"), it.get("lastUpdatedAt"),
                      it.get("consentExpiresAt"), erro),
                 )
+                resumo["status"][banco_cfg or item_id] = it.get("status")
             except Exception as e:  # noqa: BLE001
                 resumo["erros"].append(f"Item {item_id}: {e}")
 
@@ -356,6 +358,7 @@ class Store:
 
         self.con.commit()
         self.set_meta("ultima_sync", agora)
+        self.set_meta("ultimo_resultado", json.dumps({"em": agora, "dias": dias, **resumo}, ensure_ascii=False))
         return resumo
 
     def _salvar_tx(self, conta: dict, t: dict) -> None:

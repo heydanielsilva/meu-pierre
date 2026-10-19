@@ -211,6 +211,14 @@ function render() {
   const f = [];
   if (D.aviso) f.push({ classe: "aviso", texto: D.aviso });
   if (!D.contas.length) f.push({ classe: "aviso", texto: "Ainda não há dados. Clique em Atualizar para buscar seus bancos na Pluggy." });
+  const U = D.ultimo_resultado;
+  if (U?.erros?.length) f.push({ classe: "erro", texto: "Problemas na última atualização: " + U.erros.join(" | ") });
+  if (D.contas.length && !D.total_transacoes) {
+    const st = U?.status ? Object.entries(U.status).map(([b, s]) => b + ": " + s).join(", ") : "";
+    f.push({ classe: "aviso", texto: "As contas chegaram, mas nenhuma transação ainda" +
+      (U ? ` (última busca: ${U.dias} dias, ${U.transacoes} transações` + (st ? "; status " + st : "") + ")" : "") +
+      ". Se os bancos foram conectados há pouco, o Meu Pluggy ainda pode estar baixando o histórico: tente Atualizar mais tarde." });
+  }
   faixas(f);
 
   // Patrimônio
@@ -379,11 +387,10 @@ $("btnSync").addEventListener("click", async () => {
   const b = $("btnSync");
   b.disabled = true; b.textContent = "Atualizando…";
   try {
-    const dias = D && D.contas.length ? 30 : 90;
+    const dias = D && D.total_transacoes ? 30 : 90;
     const r = await api("/api/sincronizar", { dias });
-    const msg = [`Atualizado: ${r.contas} contas, ${r.transacoes} transações, ${r.investimentos} investimentos.`];
     await carregar();
-    if (r.erros?.length) faixas([{ classe: "aviso", texto: msg[0] + " Problemas: " + r.erros.join(" | ") }]);
+    $("faixas").insertAdjacentHTML("afterbegin", `<div class="faixa">${esc(`Atualizado: ${r.contas} contas, ${r.transacoes} transações, ${r.investimentos} investimentos.`)}</div>`);
   } catch (e) {
     faixas([{ classe: "erro", texto: "Falha ao atualizar: " + e.message }]);
   } finally {

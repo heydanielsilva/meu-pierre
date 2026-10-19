@@ -24,7 +24,7 @@
     --app: #eef3f2; --cartao: #fff; --cartao-2: #f3f7f6; --texto: #0f2e2d; --suave: #6b8583; --linha: #e1eae8;
     --escuro: #0f4a49; --escuro-2: #175957; --escuro-texto: #fff; --escuro-suave: #9ec7c2;
     --acento: #f28c3b; --acento-claro: #fdeddf; --acento-texto: #b85a14; --menta: #cfe3e0; --menta-2: #9ec7c2; --menta-texto: #0f4a49;
-    --barra: #0f4a49; --pos: #1e8a5a; --neg: #d9534f; --aviso: #e08a1e; --hachura: #b5d3cf;
+    --barra: #0f4a49; --pos: #1e8a5a; --neg: #d9534f; --aviso: #e08a1e; --hachura: #b5d3cf; --serie-rec: #009688; --serie-gas: #d96a14;
     --raio: 26px; --sombra: 0 1px 2px rgba(0,0,0,.03);
     color-scheme: light;
   }
@@ -33,14 +33,14 @@
       color-scheme: dark;
       --app: #0a1f1f; --cartao: #112c2b; --cartao-2: #173836; --texto: #eaf3f2; --suave: #8fb0ac; --linha: #1f4240;
       --escuro: #071817; --escuro-2: #12302f; --acento: #f59a4e; --acento-claro: #3a2a1c; --acento-texto: #f7a865;
-      --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c;
+      --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c; --serie-rec: #36a597; --serie-gas: #d8691a;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
     --app: #0a1f1f; --cartao: #112c2b; --cartao-2: #173836; --texto: #eaf3f2; --suave: #8fb0ac; --linha: #1f4240;
     --escuro: #071817; --escuro-2: #12302f; --acento: #f59a4e; --acento-claro: #3a2a1c; --acento-texto: #f7a865;
-    --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c;
+    --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c; --serie-rec: #36a597; --serie-gas: #d8691a;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
@@ -114,6 +114,14 @@
   .seta svg { width: 14px; height: 14px; stroke-width: 2.4; }
   .mini { position: relative; height: 96px; min-width: 0; }
   .grafico { position: relative; height: 250px; }
+  .grafico.alto { height: 270px; }
+  .legenda { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--suave); font-weight: 500; margin: -6px 0 14px; }
+  .legenda span { display: inline-flex; align-items: center; gap: 7px; }
+  .legenda i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+  .medias { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .medias div { background: var(--cartao-2); border-radius: 14px; padding: 10px 12px; min-width: 0; }
+  .medias small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
+  .medias b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* Lista de transações (estilo cartão) */
   .tx-item { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--cartao-2); border-radius: 18px; }
@@ -232,6 +240,9 @@
     .receita { grid-template-columns: 1fr; }
     aside.escuro { border-radius: 26px; padding: 22px 18px; }
     th:nth-child(4), td:nth-child(4) { display: none; }
+    .medias { gap: 8px; }
+    .medias div { padding: 9px 10px; }
+    .medias b { font-size: 13px; white-space: normal; overflow: visible; }
   }
 </style>
 </head>
@@ -306,8 +317,10 @@
               </div>
             </div>
             <div class="cartao">
-              <div class="cab"><h2>Gastos por mês</h2><span class="extra">últimos 12 meses</span></div>
-              <div class="grafico"><canvas id="gEvolucao"></canvas></div>
+              <div class="cab"><h2>Receitas x gastos</h2><span class="extra" id="evPeriodo">últimos 12 meses</span></div>
+              <div class="legenda"><span><i style="background:var(--serie-rec)"></i>Receitas</span><span><i style="background:var(--serie-gas)"></i>Gastos</span></div>
+              <div class="medias" id="evMedias"></div>
+              <div class="grafico alto" role="img" id="evGrafico"><canvas id="gEvolucao"></canvas></div>
             </div>
           </div>
           <div class="cartao">
@@ -406,6 +419,7 @@ const MESES_LONGOS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho"
 const nomeMes = (m) => NOMES_MES[+m.slice(5, 7) - 1] + "/" + m.slice(2, 4);
 const nomeMesLongo = (m) => MESES_LONGOS[+m.slice(5, 7) - 1] + " de " + m.slice(0, 4);
 const cor = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hoje = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
 const icone = (id) => `<svg class="i"><use href="#i-${id}"/></svg>`;
 
 // Avatar com iniciais e cor fixa por nome (as transações não trazem logotipo).
@@ -538,18 +552,6 @@ function render() {
   $("listaCats").innerHTML = [...cats].sort().map((c) => `<option value="${esc(c)}">`).join("");
 }
 
-function hachura() {
-  const c = document.createElement("canvas");
-  c.width = c.height = 10;
-  const x = c.getContext("2d");
-  x.strokeStyle = cor("--hachura");
-  x.lineWidth = 2;
-  x.beginPath();
-  for (const d of [-10, 0, 10]) { x.moveTo(d, 10); x.lineTo(d + 10, 0); }
-  x.stroke();
-  return x.createPattern(c, "repeat");
-}
-
 function renderGraficos() {
   if (!window.Chart) return;
   const R = D.resumo;
@@ -559,24 +561,49 @@ function renderGraficos() {
   Chart.defaults.font.size = 13;
   const tooltip = { backgroundColor: "#0f4a49", padding: 10, cornerRadius: 12, displayColors: false, titleFont: { weight: "600" } };
 
-  // Gastos por mês: o mês escolhido em roxo, os outros hachurados
-  const ev = D.evolucao, padrao = hachura();
+  // Receitas x gastos por mês: o mês escolhido em cor cheia, os outros esmaecidos
+  const todos = D.evolucao, inicio = todos.findIndex((e) => e.receitas || e.gastos);
+  const ev = inicio < 0 ? todos.slice(-1) : todos.slice(inicio);  // sem os meses vazios do começo
+  const fechados = ev.filter((e) => e.mes !== hoje());
+  const media = (k) => fechados.length ? fechados.reduce((s, e) => s + e[k], 0) / fechados.length : null;
+  const azul = fechados.filter((e) => e.sobra >= 0).length;
+  $("evPeriodo").textContent = ev.length > 1 ? `${nomeMes(ev[0].mes)} a ${nomeMes(ev[ev.length - 1].mes)}` : "este mês";
+  $("evMedias").innerHTML =
+    `<div><small>Média de receitas</small><b>${brl(media("receitas"))}</b></div>` +
+    `<div><small>Média de gastos</small><b>${brl(media("gastos"))}</b></div>` +
+    `<div><small>Meses no azul</small><b>${fechados.length ? `${azul} de ${fechados.length}` : "—"}</b></div>`;
+  $("evGrafico").setAttribute("aria-label", "Receitas e gastos por mês: " +
+    ev.map((e) => `${nomeMesLongo(e.mes)}, receitas ${brl(e.receitas)}, gastos ${brl(e.gastos)}`).join("; "));
+  const tom = (v, i) => ev[i].mes === R.mes ? cor(v) : cor(v) + "66";
+  const barra = { borderRadius: { topLeft: 4, topRight: 4 }, borderSkipped: "bottom", maxBarThickness: 16,
+                  categoryPercentage: 0.7, barPercentage: 0.86 };
+  const curto = (v) => Math.abs(v) >= 1000 ? (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mil" : v;
   graficos.ev?.destroy();
   graficos.ev = new Chart($("gEvolucao"), {
     type: "bar",
     data: {
       labels: ev.map((e) => NOMES_MES[+e.mes.slice(5, 7) - 1]),
-      datasets: [{ data: ev.map((e) => e.gastos), borderRadius: 999, borderSkipped: false, maxBarThickness: 34,
-                   backgroundColor: ev.map((e) => e.mes === R.mes ? cor("--acento") : padrao) }],
+      datasets: [
+        { label: "Receitas", data: ev.map((e) => e.receitas), backgroundColor: ev.map((_, i) => tom("--serie-rec", i)), ...barra },
+        { label: "Gastos", data: ev.map((e) => e.gastos), backgroundColor: ev.map((_, i) => tom("--serie-gas", i)), ...barra },
+      ],
     },
     options: {
       maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { ...tooltip, callbacks: {
-        title: (it) => nomeMesLongo(ev[it[0].dataIndex].mes),
-        label: (c) => "Gastos: " + brl(c.raw),
-        afterLabel: (c) => "Receitas: " + brl(ev[c.dataIndex].receitas) + "\nSobra: " + brl(ev[c.dataIndex].sobra) } } },
-      scales: { x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 6 } },
-                y: { display: false, beginAtZero: true } },
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { ...tooltip, displayColors: true, boxPadding: 4, callbacks: {
+        title: (it) => nomeMesLongo(ev[it[0].dataIndex].mes) + (ev[it[0].dataIndex].mes === hoje() ? " (parcial)" : ""),
+        label: (c) => ` ${c.dataset.label}: ${brl(c.raw)}`,
+        labelColor: (c) => { const k = cor(c.datasetIndex ? "--serie-gas" : "--serie-rec"); return { backgroundColor: k, borderColor: k }; },
+        footer: (it) => {
+          const sobra = ev[it[0].dataIndex].sobra;
+          return (sobra >= 0 ? "▲ Sobrou " : "▼ Faltou ") + brl(Math.abs(sobra)) + (sobra >= 0 ? " (no azul)" : " (no vermelho)");
+        } } } },
+      scales: {
+        x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkipPadding: 6 } },
+        y: { beginAtZero: true, border: { display: false }, grid: { color: cor("--linha") },
+             ticks: { maxTicksLimit: 5, callback: (v) => "R$ " + curto(v) } },
+      },
       onClick: (_, el) => { if (el.length) trocarMes(ev[el[0].index].mes); },
       onHover: (e, el) => { e.native.target.style.cursor = el.length ? "pointer" : "default"; },
     },

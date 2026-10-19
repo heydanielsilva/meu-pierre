@@ -1,0 +1,5 @@
+mcp>=1.2
+openpyxl>=3.1
+psycopg[binary]>=3.1
+fastapi>=0.110
+tzdata

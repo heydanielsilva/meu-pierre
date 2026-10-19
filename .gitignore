@@ -1,0 +1,6 @@
+# Segredos e dados financeiros: NUNCA vão para o GitHub
+.env
+*.db
+exportacoes/
+__pycache__/
+.vercel/

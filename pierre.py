@@ -53,11 +53,24 @@ def _itens() -> dict[str, str]:
     return out
 
 
-DB_URL = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or ""
+def _db_url() -> str:
+    """DATABASE_URL ou POSTGRES_URL, inclusive com o prefixo que a Vercel adiciona ao conectar o Neon
+    (ex.: DATABASE_URL_DATABASE_URL, STORAGE_POSTGRES_URL)."""
+    postgres = ("postgres://", "postgresql://")
+    for nome in ("DATABASE_URL", "POSTGRES_URL"):
+        if os.environ.get(nome, "").startswith(postgres):
+            return os.environ[nome]
+    for nome, valor in sorted(os.environ.items()):
+        if nome.endswith(("DATABASE_URL", "POSTGRES_URL")) and valor.startswith(postgres):
+            return valor
+    return ""
+
+
+DB_URL = _db_url()
 if DB_URL and not DEMO:
     store = Store(DB_URL)
 elif NUVEM and not DEMO:
-    raise RuntimeError("Na Vercel é preciso um banco Postgres: configure DATABASE_URL (ex.: Neon).")
+    raise RuntimeError("Na Vercel é preciso um banco Postgres: conecte um banco Neon em Storage e faça Redeploy.")
 else:
     db_nome = "/tmp/meu_pierre_demo.db" if (DEMO and NUVEM) else PASTA / ("meu_pierre_demo.db" if DEMO else "meu_pierre.db")
     store = Store(os.environ.get("MEU_PIERRE_DB", db_nome))

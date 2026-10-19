@@ -441,13 +441,21 @@ class Store:
             ("cc-nu", "demo-nu", "Nubank", "Conta Nubank", "BANK", "CHECKING_ACCOUNT", "1234", 3180.45, None, None, None, None, agora),
             ("card-nu", "demo-nu", "Nubank", "Cartão Nubank", "CREDIT", "CREDIT_CARD", "5678", 2350.10, 9000, 6649.90, venc.isoformat(), (venc - timedelta(days=7)).isoformat(), agora),
             ("cc-itau", "demo-itau", "Itaú", "Conta Itaú", "BANK", "CHECKING_ACCOUNT", "9012", 412.80, None, None, None, None, agora),
+            ("card-itau", "demo-itau", "Itaú", "Cartão Itaú", "CREDIT", "CREDIT_CARD", "3344", 1184.37, 6000, 4815.63, (venc + timedelta(days=5)).isoformat(), venc.isoformat(), agora),
         ])
         self.con.executemany("INSERT OR REPLACE INTO investments VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [
             ("inv1", "demo-nu", "Nubank", "Caixinha Reserva", "FIXED_INCOME", "CDB", 18450.32, 17000, 0.0095, 0.118, None, agora),
             ("inv2", "demo-itau", "Itaú", "Tesouro Selic 2029", "FIXED_INCOME", "TREASURY", 12010.77, 11000, 0.0091, 0.114, "2029-03-01", agora),
             ("inv3", "demo-itau", "Itaú", "Fundo Imobiliário XPML11", "EQUITY", "REAL_ESTATE_FUND", 4870.00, 5200, -0.012, 0.031, None, agora),
         ])
-        self.con.execute("INSERT OR REPLACE INTO bills VALUES (?,?,?,?,?)", ("bill1", "card-nu", venc.isoformat(), 2350.10, 352.52))
+        # faturas dos últimos 6 meses de cada cartão
+        contas_bills = []
+        for i in range(1, 7):
+            v = (venc.replace(day=1) - timedelta(days=31 * i)).replace(day=10)
+            vn, vi = 1900 + (i * 377) % 900, 800 + (i * 211) % 600
+            contas_bills += [(f"bill-nu{i}", "card-nu", v.isoformat(), vn, round(vn * 0.15, 2)),
+                             (f"bill-it{i}", "card-itau", v.replace(day=15).isoformat(), vi, round(vi * 0.15, 2))]
+        self.con.executemany("INSERT OR REPLACE INTO bills VALUES (?,?,?,?,?)", contas_bills)
 
         txs = []
         n = 0
@@ -499,6 +507,11 @@ class Store:
             add("card-nu", (celular + timedelta(days=30 * i + 4)), "AMAZON MARKETPLACE", 249.90, "saida", "Online shopping", "Amazon", i + 1, 12)
         add("card-nu", hoje.replace(day=min(5, hoje.day)), "DECATHLON BICICLETA", 183.33, "saida", "Sports practice", "Decathlon", 1, 6)
         add("card-nu", hoje - timedelta(days=min(3, hoje.day - 1)), "IFD*IFOOD", 389.00, "saida", "Food delivery", "iFood")
+        geladeira = hoje.replace(day=1) - timedelta(days=90)
+        for i in range(4):
+            add("card-itau", (geladeira + timedelta(days=30 * i + 8)), "CASAS BAHIA GELADEIRA", 329.90, "saida", "Electronics", "Casas Bahia", i + 1, 10)
+        for d in (3, 9, 16, 22):
+            add("card-itau", hoje.replace(day=min(d, hoje.day)), "PAG*PADARIA DO BAIRRO", 23.5 + d, "saida", "Eating out")
         txs = [t for t in txs if t[4] > 0]
         self.con.executemany("INSERT OR REPLACE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?)", txs)
         self.con.executemany("INSERT OR REPLACE INTO orcamentos VALUES (?,?)", [

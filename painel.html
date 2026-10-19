@@ -130,6 +130,8 @@
   .tx .nome { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tx .sub { color: var(--suave); font-size: 13px; display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
   .tx .sub > span { overflow: hidden; text-overflow: ellipsis; }
+  .tx .sub .tipo { color: var(--texto); opacity: .75; font-weight: 500; flex: none; }
+  .tx .valor.neg { color: var(--neg); }
   .tx .valor { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .tx .valor small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
   .tx.neutra .nome, .tx.neutra .valor { color: var(--suave); }
@@ -325,7 +327,7 @@
   <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3 5 6v5.5c0 4.5 3 7.7 7 9.5 4-1.8 7-5 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="i-pata" viewBox="0 0 24 24"><circle cx="6.5" cy="10.5" r="1.7"/><circle cx="10" cy="6.5" r="1.7"/><circle cx="14" cy="6.5" r="1.7"/><circle cx="17.5" cy="10.5" r="1.7"/><path d="M12 12c-2.5 0-5 3.2-5 5.3 0 1.7 1.5 2.2 2.6 2.2 1 0 1.5-.5 2.4-.5s1.4.5 2.4.5c1.1 0 2.6-.5 2.6-2.2 0-2.1-2.5-5.3-5-5.3z"/></symbol>
   <symbol id="i-presente" viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9c-1-2.8-5-3.8-5-1.3C7 9 10.5 9 12 9zm0 0c1-2.8 5-3.8 5-1.3C17 9 13.5 9 12 9z"/></symbol>
-  <symbol id="i-chave" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5l-8.4 8.4a2.1 2.1 0 0 1-3-3l8.4-8.4a4 4 0 0 1-2-2zM14.7 6.3l2-2"/></symbol>
+  <symbol id="i-chave" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.4-3.4a5.5 5.5 0 0 1-7.3 7.3l-6.5 6.5a2.1 2.1 0 0 1-3-3l6.5-6.5a5.5 5.5 0 0 1 7.3-7.3z"/></symbol>
   <symbol id="i-etiqueta" viewBox="0 0 24 24"><path d="M3.5 12.5v-8a1 1 0 0 1 1-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.4"/></symbol>
   <symbol id="i-dinheiro" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></symbol>
   <symbol id="i-seta-dir" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
@@ -506,7 +508,7 @@ const semAcento = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLo
 // Empresas conhecidas: [padrão no texto da transação, nome, site de onde vem o logotipo]
 const MARCAS = [
   [/prime ?video/, "Prime Video", "primevideo.com"], [/amazon|amzn/, "Amazon", "amazon.com.br"],
-  [/shopee/, "Shopee", "shopee.com.br"], [/mercado ?livre|\bmeli\b/, "Mercado Livre", "mercadolivre.com.br"],
+  [/shopee|shpp brasil/, "Shopee", "shopee.com.br"], [/mercado ?livre|\bmeli\b/, "Mercado Livre", "mercadolivre.com.br"],
   [/mercado ?pago/, "Mercado Pago", "mercadopago.com.br"], [/youtube/, "YouTube", "youtube.com"], [/google/, "Google", "google.com"],
   [/ifood|\bifd\b/, "iFood", "ifood.com.br"], [/\buber\b/, "Uber", "uber.com"], [/\b99 ?(app|pop|taxi|food)\b/, "99", "99app.com"],
   [/rappi/, "Rappi", "rappi.com.br"], [/ze ?delivery/, "Zé Delivery", "ze.delivery"], [/netflix/, "Netflix", "netflix.com"],
@@ -538,7 +540,7 @@ const MARCAS = [
   [/unimed/, "Unimed", "unimed.coop.br"], [/\bamil\b/, "Amil", "amil.com.br"], [/sulamerica/, "SulAmérica", "sulamerica.com.br"],
   [/hapvida/, "Hapvida", "hapvida.com.br"], [/porto seguro/, "Porto", "portoseguro.com.br"], [/energisa/, "Energisa", "energisa.com.br"],
   [/\benel\b/, "Enel", "enel.com.br"], [/sabesp/, "Sabesp", "sabesp.com.br"], [/cemig/, "Cemig", "cemig.com.br"], [/copel/, "Copel", "copel.com"],
-  [/comgas/, "Comgás", "comgas.com.br"], [/\bsky\b/, "SKY", "sky.com.br"], [/renner/, "Renner", "lojasrenner.com.br"],
+  [/comgas/, "Comgás", "comgas.com.br"], [/brisanet/, "Brisanet", "brisanet.com.br"], [/banco pan\b/, "Banco PAN", "bancopan.com.br"], [/\bsky\b/, "SKY", "sky.com.br"], [/renner/, "Renner", "lojasrenner.com.br"],
   [/riachuelo/, "Riachuelo", "riachuelo.com.br"], [/\bzara\b/, "Zara", "zara.com"], [/centauro/, "Centauro", "centauro.com.br"],
   [/decathlon/, "Decathlon", "decathlon.com.br"], [/\bnike\b/, "Nike", "nike.com.br"], [/adidas/, "Adidas", "adidas.com.br"],
   [/leroy/, "Leroy Merlin", "leroymerlin.com.br"], [/dafiti/, "Dafiti", "dafiti.com.br"], [/boticario/, "O Boticário", "boticario.com.br"],
@@ -557,7 +559,7 @@ function marca(texto) {
 
 // Ícone e cor de cada categoria (usados quando a empresa não é conhecida)
 const G = { comida: "#e07a2f", mercado: "#c58a12", transporte: "#3b82c4", saude: "#d6455d", casa: "#2a9d8f", compras: "#8b5cf6",
-            assinatura: "#d14d9b", lazer: "#0ea5b7", educacao: "#5b6ee1", transf: "#64808a", receita: "#1e9e5a", banco: "#a0703a", outros: "#7d8b89" };
+            assinatura: "#d14d9b", lazer: "#0ea5b7", educacao: "#5b6ee1", transf: "#64808a", receita: "#1e9e5a", banco: "#a0703a", servico: "#4f8fd6", outros: "#7d8b89" };
 const CATS = {
   "Alimentação": ["garfo", G.comida], "Restaurantes": ["garfo", G.comida], "Delivery": ["garfo", G.comida], "Supermercado": ["carrinho", G.mercado],
   "Transporte": ["carro", G.transporte], "Transporte por app": ["carro", G.transporte], "Carro": ["carro", G.transporte],
@@ -580,7 +582,7 @@ const CATS = {
   "Tarifas bancárias": ["banco", G.banco], "Juros e multas": ["banco", G.banco], "Empréstimos e financiamentos": ["banco", G.banco],
   "Impostos": ["recibo", G.banco], "Boletos": ["recibo", G.banco], "Obrigações legais": ["recibo", G.banco],
   "Seguros": ["escudo", G.banco], "Previdência": ["escudo", G.banco],
-  "Doações": ["presente", G.outros], "Serviços": ["chave", G.outros], "Outros": ["etiqueta", G.outros],
+  "Doações": ["presente", G.outros], "Serviços": ["chave", G.servico], "Outros": ["etiqueta", G.outros],
 };
 const estiloCat = (c) => CATS[c] || ["etiqueta", G.outros];
 
@@ -625,15 +627,49 @@ function estiloBanco(nome) {
 
 // Nome legível: marca conhecida, ou a descrição sem prefixos de maquininha e sem CAIXA ALTA.
 const PREFIXOS = /^(ifd|pag|pg|mp|ec|dl|htm|pp|paypal|ebanx|pagseguro|sumup|stone|cielo|rede)\s*\*\s*/i;
-function nomeTx(t) {
-  const bruto = t.estabelecimento || t.descricao || "";
-  const m = marca(bruto + " " + (t.descricao || ""));
-  if (m) return m.nome;
-  let s = bruto.replace(PREFIXOS, "").replace(/\s+/g, " ").trim();
+// Tipo da operação, que os bancos colocam antes de "|" ("Transferência enviada pelo Pix|Fulano") ou no começo do texto
+const TIPOS = [
+  [/^(transferencia )?(enviada|enviado) pelo pix|^pix (enviado|enviada|transf)|^pagamento pix|^pix saida/, "Pix enviado"],
+  [/^(transferencia )?(recebida|recebido) pelo pix|^pix (recebido|recebida)|^recebimento pix|^pix entrada/, "Pix recebido"],
+  [/^(transferencia|ted|doc) (recebida|recebido)/, "Transferência recebida"],
+  [/^(transferencia|ted|doc) (enviada|enviado)|^transf(erencia)? /, "Transferência enviada"],
+  [/^compra (no |a )?credito/, "Compra no crédito"],
+  [/^compra (no |a )?debito/, "Compra no débito"],
+  [/^pagamento (de )?boleto|^pagto boleto/, "Boleto pago"],
+  [/^pagamento efetuado/, "Pagamento"],
+  [/^saque/, "Saque"],
+];
+const bonito = (s) => {
+  s = s.replace(PREFIXOS, "").replace(/\s+/g, " ").trim();
+  if (!s.includes(" ") && /[a-z][A-Z]/.test(s)) s = s.replace(/([a-z])([A-Z])/g, "$1 $2");  // "FernandoRodrigo"
+  s = s.replace(/[\s,.-]+(ltda|s\.?\/?a|s a|me|epp|eireli)\.?$/i, "").replace(/\s+instituicao de pagamento.*$/i, "");
   if (s === s.toUpperCase()) s = s.toLowerCase().replace(/(^|[\s\-/(])\p{L}/gu, (x) => x.toUpperCase())
     .replace(/\b(De|Da|Do|Das|Dos|E|Em|Para)\b/g, (x) => x.toLowerCase());
-  return s || "Sem descrição";
+  return s.trim();
+};
+const _detalhes = new Map();
+function detalharTx(t) {
+  const chave = (t.estabelecimento || "") + "§" + (t.descricao || "");
+  if (_detalhes.has(chave)) return _detalhes.get(chave);
+  const desc = (t.descricao || "").trim();
+  let tipo = "", resto = desc;
+  const [antes, ...depois] = desc.split("|");
+  const achado = TIPOS.find(([re]) => re.test(semAcento(antes.trim())));
+  if (depois.length) {
+    tipo = achado ? achado[1] : antes.trim();
+    resto = depois.join(" ").trim();
+  } else if (achado) {
+    tipo = achado[1];
+    resto = desc.slice(semAcento(desc).match(achado[0])[0].length).replace(/^[\s:*-]+/, "");
+  }
+  const m = marca((t.estabelecimento || "") + " " + resto);
+  let nome = m ? m.nome : bonito(t.estabelecimento || resto);
+  if (!nome) { nome = tipo || bonito(desc) || "Sem descrição"; tipo = ""; }
+  const r = { nome, tipo };
+  _detalhes.set(chave, r);
+  return r;
 }
+const nomeTx = (t) => detalharTx(t).nome;
 const contaTx = (t) => (t.subtipo === "CREDIT_CARD" ? "Cartão " : "Conta ") + (t.banco || "");
 
 let D = null, graficos = {}, txLimite = 60, txTipo = "";
@@ -807,15 +843,15 @@ function renderGraficos() {
 
 // Uma linha de transação (Início e tela de Transações)
 function linhaTx(t, editavel = false) {
-  const nome = nomeTx(t), saida = t.direcao === "saida";
+  const { nome, tipo } = detalharTx(t), saida = t.direcao === "saida";
   const parc = t.parcelas_total ? `<span>· ${t.parcela_atual}/${t.parcelas_total}</span>` : "";
   const cat = editavel
     ? `<button class="tag" data-desc="${esc(t.estabelecimento || t.descricao)}" data-cat="${esc(t.categoria)}" title="Corrigir categoria">${esc(t.categoria)}</button>`
-    : `<span>${esc(t.categoria)}</span>`;
+    : `<span>${tipo ? "· " : ""}${esc(t.categoria)}</span>`;
   return `<div class="tx${t.neutra ? " neutra" : ""}" title="${esc(t.descricao)}">${bolinha(t.estabelecimento + " " + t.descricao, t.categoria)}
     <div class="meio"><div class="nome">${esc(nome)}</div>
-      <div class="sub">${cat}<span class="conta">· ${esc(contaTx(t))}</span>${parc}</div></div>
-    <div class="valor ${!t.neutra && !saida ? "pos" : ""}">${saida ? "−" : "+"}${brl(t.valor)}${t.neutra ? "<small>não conta</small>" : ""}</div></div>`;
+      <div class="sub">${tipo ? `<span class="tipo">${esc(tipo)}</span>` : ""}${cat}<span class="conta">· ${esc(contaTx(t))}</span>${parc}</div></div>
+    <div class="valor ${t.neutra ? "" : saida ? "neg" : "pos"}">${saida ? "−" : "+"}${brl(t.valor)}${t.neutra ? "<small>não conta</small>" : ""}</div></div>`;
 }
 
 function renderRecentes() {

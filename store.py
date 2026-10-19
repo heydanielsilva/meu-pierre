@@ -90,7 +90,7 @@ TRADUCAO = {
     "music streaming": "Assinaturas e streaming", "groceries": "Supermercado",
     "food and drinks": "Alimentação", "eating out": "Restaurantes",
     "food delivery": "Delivery", "travel": "Viagens", "airport and airlines": "Viagens",
-    "accommodation": "Viagens", "mileage programs": "Viagens", "bus tickets": "Viagens",
+    "accommodation": "Viagens", "accomodation": "Viagens", "mileage programs": "Viagens", "bus tickets": "Viagens",
     "donations": "Doações", "gambling": "Apostas", "lottery": "Apostas", "online bet": "Apostas",
     "taxes": "Impostos", "income taxes": "Impostos", "taxes on investments": "Impostos",
     "tax on financial operations": "Impostos", "bank fees": "Tarifas bancárias",
@@ -115,6 +115,10 @@ NEUTRAS = {
     "Pagamento de fatura", "Transferência entre contas próprias", "Investimentos",
     "Saldo bloqueado",
 }
+
+# Sobe quando muda a forma de interpretar as transações da Pluggy: a próxima
+# atualização busca 12 meses e regrava tudo com a regra nova.
+VERSAO_TRANSACOES = "2"
 
 PADROES_FATURA = re.compile(r"(PAG(AMEN)?T?O?\.?\s*(DE\s*)?FATURA|PGTO\.?\s*FATURA|FATURA\s+PAGA)", re.I)
 
@@ -286,6 +290,9 @@ class Store:
     # ------------------------------------------------------------- sync
     def sincronizar(self, cliente, itens: dict[str, str], dias: int) -> dict:
         hoje = hoje_br()
+        reprocessar = self.get_meta("versao_transacoes") != VERSAO_TRANSACOES
+        if reprocessar:
+            dias = max(dias, 365)  # regrava o histórico gravado com a regra antiga
         de = (hoje - timedelta(days=dias)).isoformat()
         ate = hoje.isoformat()
         resumo = {"contas": 0, "transacoes": 0, "investimentos": 0, "faturas": 0, "erros": [], "status": {}}
@@ -302,6 +309,8 @@ class Store:
                 resumo["erros"].append(f"{banco_cfg or item_id}: falha ao gravar no banco de dados: {e}")
 
         self.set_meta("ultima_sync", agora)
+        if reprocessar and not resumo["erros"]:
+            self.set_meta("versao_transacoes", VERSAO_TRANSACOES)
         self.registrar_resultado({"em": agora, "dias": dias, **resumo})
         return resumo
 
@@ -389,7 +398,11 @@ class Store:
     def _linha_tx(conta: dict, t: dict) -> tuple:
         valor = float(t.get("amount") or 0)
         tipo = (t.get("type") or "").upper()
-        if tipo in ("DEBIT", "CREDIT"):
+        if conta.get("subtype") == "CREDIT_CARD" or conta.get("type") == "CREDIT":
+            # No cartão a Pluggy usa o sinal ao contrário da conta: positivo é compra,
+            # negativo é pagamento da fatura ou estorno.
+            direcao = "saida" if valor > 0 else "entrada"
+        elif tipo in ("DEBIT", "CREDIT"):
             direcao = "saida" if tipo == "DEBIT" else "entrada"
         else:
             direcao = "saida" if valor < 0 else "entrada"

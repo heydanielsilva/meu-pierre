@@ -76,22 +76,20 @@ class PluggyClient:
         return self._get("/accounts", itemId=item_id).get("results", [])
 
     def transactions(self, account_id: str, date_from: str, date_to: str) -> list[dict]:
-        """Todas as transações da conta no período, seguindo a paginação."""
+        """Todas as transações da conta no período (GET /v2/transactions, paginação por cursor)."""
         out: list[dict] = []
-        page = 1
+        params = {"accountId": account_id, "dateFrom": date_from, "dateTo": date_to}
+        vistos: set[str] = set()
         while True:
-            data = self._get(
-                "/transactions",
-                accountId=account_id,
-                **{"from": date_from, "to": date_to},
-                pageSize=500,
-                page=page,
-            )
+            data = self._get("/v2/transactions", **params)
             out.extend(data.get("results", []))
-            total_pages = data.get("totalPages", 1) or 1
-            if page >= total_pages:
+            # "next" é um link para a próxima página com o cursor no parâmetro "after"
+            proximo = data.get("next")
+            after = urllib.parse.parse_qs(urllib.parse.urlparse(proximo).query).get("after", [None])[0] if proximo else None
+            if not after or after in vistos:
                 break
-            page += 1
+            vistos.add(after)
+            params["after"] = after
         return out
 
     def investments(self, item_id: str) -> list[dict]:

@@ -186,6 +186,31 @@
   .totais small { display: block; color: var(--suave); font-size: 13px; font-weight: 500; }
   .totais b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+  /* Gastos por categoria: bolhas (categorias) e anel (grupos) */
+  .cat-total small { display: block; color: var(--suave); font-size: 14px; font-weight: 500; }
+  .cat-total b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+  .cat-visual { position: relative; margin: 10px 0 18px; display: grid; place-items: center; }
+  .cat-visual svg.bolhas { width: 100%; height: auto; max-height: 320px; overflow: visible; }
+  .cat-visual svg.anel { width: min(100%, 280px); height: auto; overflow: visible; }
+  .cat-visual [data-filtra], .cat-visual [data-grupo] { cursor: pointer; }
+  .cat-visual [data-filtra]:hover circle, .cat-visual [data-grupo]:hover { opacity: .85; }
+  .anel-centro { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
+  .anel-centro b { font-size: 30px; font-weight: 800; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+  .anel-centro small { color: var(--suave); font-size: 14px; font-weight: 500; }
+  .segmento.largo { display: flex; width: 100%; margin-bottom: 18px; }
+  .segmento.largo button { flex: 1; height: 40px; }
+  .grupo { background: var(--cartao-2); border-radius: 18px; padding: 12px 14px; }
+  .grupo + .grupo { margin-top: 10px; }
+  .grupo summary { display: flex; align-items: center; gap: 12px; cursor: pointer; list-style: none; }
+  .grupo summary::-webkit-details-marker { display: none; }
+  .grupo summary .meio { flex: 1; min-width: 0; font-weight: 600; }
+  .grupo summary .meio small { display: block; color: var(--suave); font-weight: 500; font-size: 13px; }
+  .grupo summary .num { font-weight: 700; }
+  .grupo .seta-grupo { width: 18px; height: 18px; color: var(--suave); transition: transform .2s; }
+  .grupo[open] .seta-grupo { transform: rotate(180deg); }
+  .grupo .itens { padding: 14px 2px 4px; }
+  .ic.cheio { background: var(--c); color: #fff; }
+
   /* Telas */
   .vista { display: grid; gap: 24px; min-width: 0; }
   .vista[hidden] { display: none !important; }
@@ -333,6 +358,7 @@
   <symbol id="i-seta-dir" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
   <symbol id="i-olho" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-olho-off" viewBox="0 0 24 24"><path d="M10.6 5.6A9 9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.7 3.4M6.6 6.6C4 8.3 2.5 12 2.5 12S6 18.5 12 18.5c1.9 0 3.5-.6 4.9-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2M3.5 3.5l17 17"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
   <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
 </svg>
 
@@ -437,7 +463,13 @@
       <div class="vista" data-vista="analise" hidden>
         <section class="grade-2">
           <div class="cartao">
-            <div class="cab"><h2>Gastos por categoria</h2><span class="extra" id="catTotal"></span></div>
+            <div class="cab"><h2>Gastos por categoria</h2><span class="extra" id="catMes"></span></div>
+            <div class="cat-total" id="catTotal"></div>
+            <div class="cat-visual" id="catVisual"></div>
+            <div class="segmento largo" role="group" aria-label="Agrupar por" id="catModo">
+              <button type="button" data-modo="categorias" aria-pressed="true">Categorias</button>
+              <button type="button" data-modo="grupos" aria-pressed="false">Grupos</button>
+            </div>
             <div id="categorias"></div>
           </div>
           <div class="cartao">
@@ -559,7 +591,7 @@ function marca(texto) {
 
 // Ícone e cor de cada categoria (usados quando a empresa não é conhecida)
 const G = { comida: "#e07a2f", mercado: "#c58a12", transporte: "#3b82c4", saude: "#d6455d", casa: "#2a9d8f", compras: "#8b5cf6",
-            assinatura: "#d14d9b", lazer: "#0ea5b7", educacao: "#5b6ee1", transf: "#64808a", receita: "#1e9e5a", banco: "#a0703a", servico: "#4f8fd6", outros: "#7d8b89" };
+            assinatura: "#d14d9b", lazer: "#0ea5b7", educacao: "#5b6ee1", transf: "#64808a", receita: "#1e9e5a", banco: "#a0703a", servico: "#4f8fd6", outros: "#9c8f7a" };
 const CATS = {
   "Alimentação": ["garfo", G.comida], "Restaurantes": ["garfo", G.comida], "Delivery": ["garfo", G.comida], "Supermercado": ["carrinho", G.mercado],
   "Transporte": ["carro", G.transporte], "Transporte por app": ["carro", G.transporte], "Carro": ["carro", G.transporte],
@@ -585,6 +617,16 @@ const CATS = {
   "Doações": ["presente", G.outros], "Serviços": ["chave", G.servico], "Outros": ["etiqueta", G.outros],
 };
 const estiloCat = (c) => CATS[c] || ["etiqueta", G.outros];
+// Grupos de categorias: [nome, ícone, cor, cores das categorias que entram nele]
+const GRUPOS = [
+  ["Alimentação", "garfo", G.comida, [G.comida, G.mercado]], ["Transporte", "carro", G.transporte, [G.transporte]],
+  ["Saúde", "coracao", G.saude, [G.saude]], ["Moradia", "casa", G.casa, [G.casa]], ["Compras", "sacola", G.compras, [G.compras]],
+  ["Assinaturas", "play", G.assinatura, [G.assinatura]], ["Lazer e viagens", "ingresso", G.lazer, [G.lazer]],
+  ["Educação", "capelo", G.educacao, [G.educacao]], ["Serviços", "chave", G.servico, [G.servico]],
+  ["Finanças", "banco", G.banco, [G.banco]], ["Transferências", "troca", G.transf, [G.transf]],
+  ["Receitas", "entrada", G.receita, [G.receita]], ["Outros", "etiqueta", G.outros, [G.outros]],
+];
+const grupoDe = (cat) => GRUPOS.find((g) => g[3].includes(estiloCat(cat)[1])) || GRUPOS.at(-1);
 
 // Bolinha da transação: logotipo da empresa, se for conhecida; senão o ícone da categoria.
 function bolinha(texto, categoria, peq = false) {
@@ -868,13 +910,100 @@ function barraCat(c, total, maior) {
       <div class="det">${pct(c.valor / total)} do total · ${v == null ? "novo neste mês" : pct(v, true) + " vs mês anterior"}</div></span></button>`;
 }
 
+let modoCat = "categorias";
+try { modoCat = localStorage.getItem("modoCat") || "categorias"; } catch (e) {}
+const brlCurto = (v) => oculto ? "R$ •••••" : v >= 1000 ? "R$ " + (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mil" : brl(v);
+const pctInt = (v) => (v >= 0.01 ? Math.round(v * 100) : "<1") + "%";
+
 function renderCategorias() {
   const cats = D.resumo.categorias.filter((c) => c.valor > 0);
   const total = cats.reduce((s, c) => s + c.valor, 0), maior = cats[0]?.valor || 1;
-  $("catTotal").textContent = total ? "total " + brl(total) : "";
   const vazio = `<div class="vazio">Sem gastos neste mês.</div>`;
-  $("categorias").innerHTML = cats.length ? cats.map((c) => barraCat(c, total, maior)).join("") : vazio;
   $("topCats").innerHTML = cats.length ? cats.slice(0, 5).map((c) => barraCat(c, total, maior)).join("") : vazio;
+
+  $("catMes").textContent = nomeMesLongo(D.resumo.mes);
+  $("catModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === modoCat)));
+  $("catModo").hidden = !cats.length;
+  if (!cats.length) { $("catTotal").innerHTML = ""; $("catVisual").innerHTML = ""; $("categorias").innerHTML = vazio; return; }
+
+  if (modoCat === "grupos") {
+    const grupos = new Map();
+    for (const c of cats) {
+      const g = grupoDe(c.categoria);
+      if (!grupos.has(g)) grupos.set(g, { g, valor: 0, cats: [] });
+      grupos.get(g).valor += c.valor;
+      grupos.get(g).cats.push(c);
+    }
+    const lista = [...grupos.values()].sort((a, b) => b.valor - a.valor);
+    $("catTotal").innerHTML = "";
+    $("catVisual").innerHTML = anel(lista, total) +
+      `<div class="anel-centro"><b>${brlCurto(total)}</b><small>gastos no mês</small></div>`;
+    $("categorias").innerHTML = lista.map(({ g: [nome, ic, cor], valor, cats: cs }) =>
+      `<details class="grupo" data-nome-grupo="${esc(nome)}"><summary><span class="ic cheio" style="--c:${cor}">${icone(ic)}</span>
+        <span class="meio">${esc(nome)}<small>${pctInt(valor / total)} · ${cs.length === 1 ? "1 categoria" : cs.length + " categorias"}</small></span>
+        <span class="num">${brl(valor)}</span><svg class="i seta-grupo"><use href="#i-chevron"/></svg></summary>
+        <div class="itens">${cs.map((c) => barraCat(c, valor, cs[0].valor)).join("")}</div></details>`).join("");
+  } else {
+    $("catTotal").innerHTML = `<small>Gastos em ${MESES_LONGOS[+D.resumo.mes.slice(5, 7) - 1]}</small><b>${brl(total)}</b>`;
+    $("catVisual").innerHTML = bolhas(cats.slice(0, 12), total);
+    $("categorias").innerHTML = cats.map((c) => barraCat(c, total, maior)).join("");
+  }
+}
+
+// Bolhas: área proporcional ao gasto, encaixadas umas nas outras perto do centro
+function bolhas(cats, total) {
+  const R = 64, folga = 5, maior = cats[0].valor;
+  const tangentes = (a, b, r) => {
+    const ra = a.r + r, rb = b.r + r, dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+    if (!d || d > ra + rb || d < Math.abs(ra - rb)) return [];
+    const l = (ra * ra - rb * rb + d * d) / (2 * d), h = Math.sqrt(Math.max(0, ra * ra - l * l));
+    const mx = a.x + dx * l / d, my = a.y + dy * l / d;
+    return [{ x: mx - dy * h / d, y: my + dx * h / d }, { x: mx + dy * h / d, y: my - dx * h / d }];
+  };
+  const P = [];
+  for (const c of cats) {
+    const r = Math.max(20, R * Math.sqrt(c.valor / maior));
+    let pos = { x: 0, y: 0 };
+    if (P.length === 1) pos = { x: P[0].r + r + folga, y: 0 };
+    else if (P.length > 1) {
+      let melhor = null;
+      for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++)
+        for (const t of tangentes(P[i], P[j], r + folga)) {
+          if (!P.every((q) => Math.hypot(q.x - t.x, q.y - t.y) >= q.r + r + folga - 0.01)) continue;
+          const custo = t.x * t.x * 0.25 + t.y * t.y * 2.2;  // prefere espalhar na horizontal
+          if (!melhor || custo < melhor.custo) melhor = { ...t, custo };
+        }
+      pos = melhor || { x: 0, y: P.reduce((m, q) => Math.max(m, q.y + q.r), 0) + r + folga };
+    }
+    P.push({ ...pos, r, c });
+  }
+  const x0 = Math.min(...P.map((p) => p.x - p.r)) - 2, x1 = Math.max(...P.map((p) => p.x + p.r)) + 2;
+  const y0 = Math.min(...P.map((p) => p.y - p.r)) - 2, y1 = Math.max(...P.map((p) => p.y + p.r)) + 2;
+  return `<svg class="bolhas" viewBox="${x0} ${y0} ${x1 - x0} ${y1 - y0}" role="img" aria-label="Gastos por categoria: ${esc(cats.map((c) => c.categoria + " " + pctInt(c.valor / total)).join(", "))}">` +
+    P.map(({ x, y, r, c }) => {
+      const [ic, cor] = estiloCat(c.categoria), mostraPct = r >= 30, t = Math.min(r * 0.5, 26);
+      const iy = mostraPct ? y - t * 0.85 : y - t / 2;
+      return `<g data-filtra="${esc(c.categoria)}"><title>${esc(c.categoria)}: ${brl(c.valor)} (${pctInt(c.valor / total)})</title>
+        <circle cx="${x}" cy="${y}" r="${r}" style="fill:color-mix(in srgb, ${cor} 20%, var(--cartao));stroke:${cor}" stroke-width="1.5" stroke-opacity=".7"/>
+        <use href="#i-${ic}" x="${x - t / 2}" y="${iy}" width="${t}" height="${t}" fill="none" stroke="${cor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        ${mostraPct ? `<text x="${x}" y="${y + r * 0.42}" text-anchor="middle" fill="${cor}" font-size="${Math.min(r * 0.36, 22)}" font-weight="600">${pctInt(c.valor / total)}</text>` : ""}</g>`;
+    }).join("") + `</svg>`;
+}
+
+// Anel: um arco por grupo, com pontas arredondadas e um respiro entre eles
+function anel(lista, total) {
+  const r = 100, w = 18, C = 2 * Math.PI * r, respiro = lista.length > 1 ? w + 9 : 0;
+  // grupos pequenos ganham um espaço mínimo para virar um ponto sem encostar no vizinho
+  const vagas = lista.map(({ valor }) => Math.max(valor / total * C, respiro + 4));
+  const escala = C / vagas.reduce((a, b) => a + b, 0);
+  let ini = 0;
+  const arcos = lista.map(({ g: [nome, , cor], valor }, i) => {
+    const f = valor / total, vaga = vagas[i] * escala, tam = Math.max(0.01, vaga - respiro), off = ini + respiro / 2;
+    ini += vaga;
+    return `<circle data-grupo="${esc(nome)}" cx="120" cy="120" r="${r}" fill="none" stroke="${cor}" stroke-width="${w}" stroke-linecap="round"
+      stroke-dasharray="${tam} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 120 120)"><title>${esc(nome)}: ${brl(valor)} (${pctInt(f)})</title></circle>`;
+  });
+  return `<svg class="anel" viewBox="0 0 240 240" role="img" aria-label="Gastos por grupo: ${esc(lista.map(({ g, valor }) => g[0] + " " + pctInt(valor / total)).join(", "))}">${arcos.join("")}</svg>`;
 }
 
 function renderOrcamentos() {
@@ -1014,6 +1143,19 @@ $("txTipo").addEventListener("click", (e) => {
   if (b) { marcarTipo(b.dataset.tipo); txLimite = 60; renderTransacoes(); }
 });
 $("txMais").addEventListener("click", () => { txLimite += 100; renderTransacoes(); });
+$("catModo").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  modoCat = b.dataset.modo;
+  try { localStorage.setItem("modoCat", modoCat); } catch (err) {}
+  renderCategorias();
+});
+$("catVisual").addEventListener("click", (e) => {  // clicar num arco abre o grupo na lista
+  const g = e.target.closest("[data-grupo]");
+  if (!g) return;
+  const d = [...document.querySelectorAll("details.grupo")].find((x) => x.dataset.nomeGrupo === g.dataset.grupo);
+  if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
+});
 
 $("btnSync").addEventListener("click", async () => {
   const b = $("btnSync");

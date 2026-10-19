@@ -105,15 +105,6 @@
   :root[data-theme="dark"] .kpi.destaque { box-shadow: inset 0 0 0 1px #1f4240; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .kpi.destaque { box-shadow: inset 0 0 0 1px #1f4240; } }
 
-  /* Receitas */
-  .receita { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
-  .receita .val { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .variacao { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-weight: 600; }
-  .seta { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--menta); color: var(--menta-texto); }
-  .seta.baixo { background: #ffd9d9; color: #b42318; }
-  .seta svg { width: 14px; height: 14px; stroke-width: 2.4; }
-  .mini { position: relative; height: 96px; min-width: 0; }
-  .grafico { position: relative; height: 250px; }
   .grafico.alto { height: 270px; }
   .legenda { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--suave); font-weight: 500; margin: -6px 0 14px; }
   .legenda span { display: inline-flex; align-items: center; gap: 7px; }
@@ -123,16 +114,40 @@
   .medias small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
   .medias b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* Lista de transações (estilo cartão) */
-  .tx-item { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--cartao-2); border-radius: 18px; }
-  .tx-item + .tx-item { margin-top: 10px; }
-  .avatar { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none;
-            color: #fff; font-weight: 700; font-size: 15px; }
-  .tx-item .nome { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tx-item .sub { color: var(--suave); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tx-item .meio { flex: 1; min-width: 0; }
-  .tx-item .num { font-weight: 700; }
-  .link { background: none; border: 0; color: var(--acento-texto); font-weight: 600; cursor: pointer; padding: 0; text-decoration: none; }
+
+  /* Transações: logo da empresa ou ícone da categoria */
+  .ic { --c: #7d8b89; position: relative; width: 44px; height: 44px; border-radius: 50%; flex: none; display: grid; place-items: center;
+        background: color-mix(in srgb, var(--c) 18%, var(--cartao)); color: var(--c); overflow: hidden; }
+  .ic svg.i { width: 21px; height: 21px; }
+  .ic img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 9px; object-fit: contain; background: #fff; border-radius: 50%;
+            box-shadow: inset 0 0 0 1px rgba(15,46,45,.08); }
+  .ic.peq { width: 36px; height: 36px; }
+  .ic.peq svg.i { width: 18px; height: 18px; }
+  .ic.peq img { padding: 7px; }
+  .tx { display: flex; align-items: center; gap: 14px; padding: 11px 10px; border-radius: 16px; }
+  .tx:hover { background: var(--cartao-2); }
+  .tx .meio { flex: 1; min-width: 0; }
+  .tx .nome { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx .sub { color: var(--suave); font-size: 13px; display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; }
+  .tx .sub > span { overflow: hidden; text-overflow: ellipsis; }
+  .tx .valor { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tx .valor small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
+  .tx.neutra .nome, .tx.neutra .valor { color: var(--suave); }
+  .tx.neutra .ic { filter: grayscale(1); opacity: .7; }
+  .dia + .dia { margin-top: 18px; }
+  .dia-cab { display: flex; justify-content: space-between; gap: 12px; padding: 0 10px 6px; margin-bottom: 4px; border-bottom: 1px solid var(--linha);
+             font-size: 13px; font-weight: 600; color: var(--suave); }
+  .dia-cab b { color: var(--texto); font-weight: 700; }
+  .tag { border: 0; padding: 2px 9px; border-radius: 999px; background: var(--cartao-2); color: var(--suave); cursor: pointer;
+         font-size: 12px; font-weight: 600; flex: none; }
+  .tag:hover { background: var(--acento-claro); color: var(--acento-texto); }
+  .tx:hover .tag { background: var(--cartao); }
+  .tx:hover .tag:hover { background: var(--acento-claro); }
+  .link { background: none; border: 0; color: var(--acento-texto); font-weight: 600; cursor: pointer; padding: 0; text-decoration: none;
+          display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .link:hover { text-decoration: underline; }
+  .rodape-cartao { margin-top: 14px; text-align: center; }
+  .rodape-cartao .pilula { background: var(--cartao-2); box-shadow: none; }
 
   /* Barras (categorias, orçamentos) */
   .barra-item + .barra-item { margin-top: 16px; }
@@ -156,22 +171,24 @@
   .form-linha .pilula { height: 44px; }
   .dica { color: var(--suave); font-size: 12.5px; margin-top: 8px; }
 
-  /* Tabela */
-  .filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-  .filtros .campo { flex: 1 1 160px; }
-  .tabela-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 11px 10px; border-top: 1px solid var(--linha); vertical-align: middle; }
-  th { color: var(--suave); font-weight: 500; border-top: 0; white-space: nowrap; font-size: 13px; }
-  td.num, th.num { text-align: right; }
-  td.num { font-weight: 600; }
-  tr.neutra td { color: var(--suave); }
-  .tag { border: 0; padding: 4px 10px; border-radius: 999px; background: var(--acento-claro); color: var(--acento-texto);
-         cursor: pointer; font-size: 12.5px; font-weight: 600; text-align: left; }
-  tr.neutra .tag { background: var(--cartao-2); color: var(--suave); }
-  .desc-cel { display: flex; align-items: center; gap: 10px; min-width: 180px; }
-  .desc-cel .avatar { width: 34px; height: 34px; font-size: 12px; }
-  .x { border: 0; background: var(--cartao-2); color: var(--suave); cursor: pointer; width: 30px; height: 30px; border-radius: 50%; flex: none; }
+
+  /* Filtros da tela de transações */
+  .filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .filtros .campo { flex: 1 1 170px; }
+  .filtros .busca { flex: 2 1 240px; }
+  .segmento { display: inline-flex; padding: 4px; gap: 4px; border-radius: 14px; background: var(--cartao-2); border: 1px solid var(--linha); flex: none; }
+  .segmento button { border: 0; background: none; height: 34px; padding: 0 14px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--suave); }
+  .segmento button[aria-pressed="true"] { background: var(--cartao); color: var(--texto); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .totais { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .totais div { background: var(--cartao-2); border-radius: 16px; padding: 14px 16px; min-width: 0; }
+  .totais small { display: block; color: var(--suave); font-size: 13px; font-weight: 500; }
+  .totais b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Telas */
+  .vista { display: grid; gap: 24px; min-width: 0; }
+  .vista[hidden] { display: none !important; }
+  button.barra-item.cat-linha { display: flex; align-items: center; gap: 12px; color: inherit; }
+  .cat-linha .meio { flex: 1; min-width: 0; }
 
   /* Painel escuro */
   aside.escuro { background: var(--escuro); color: var(--escuro-texto); border-radius: 32px; padding: 28px 24px; display: grid; gap: 34px;
@@ -201,6 +218,7 @@
   .contas-escuras li { border-color: #1f5a58 !important; }
   .contas-escuras small { color: var(--escuro-suave) !important; }
   .conta-ic { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .x { border: 0; background: var(--cartao-2); color: var(--suave); cursor: pointer; width: 30px; height: 30px; border-radius: 50%; flex: none; }
   .alerta { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 16px; background: var(--escuro-2); font-size: 14px; }
   .alerta + .alerta { margin-top: 10px; }
   .alerta .ponto { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex: none; background: #fbbf24; }
@@ -234,15 +252,20 @@
     #btnSync { width: 46px; padding: 0; justify-content: center; }
     #btnSync span { display: none; }
     .sync { text-align: left; }
-    .cartao { padding: 20px; border-radius: 22px; }
+    .cartao { padding: 20px 16px; border-radius: 22px; }
+    .kpi { padding: 20px; }
     .kpi .icone { width: 52px; height: 52px; margin-bottom: 18px; }
     .kpi .val { font-size: 25px; }
-    .receita { grid-template-columns: 1fr; }
     aside.escuro { border-radius: 26px; padding: 22px 18px; }
-    th:nth-child(4), td:nth-child(4) { display: none; }
-    .medias { gap: 8px; }
-    .medias div { padding: 9px 10px; }
+    .medias, .totais { gap: 8px; }
+    .medias div, .totais div { padding: 9px 10px; }
     .medias b { font-size: 13px; white-space: normal; overflow: visible; }
+    .totais b { font-size: 14px; white-space: normal; overflow: visible; }
+    .dia-cab span:last-child { white-space: nowrap; }
+    .segmento { width: 100%; }
+    .segmento button { flex: 1; }
+    .tx { gap: 12px; padding: 10px 4px; }
+    .tx .sub .conta { display: none; }
   }
 </style>
 </head>
@@ -266,27 +289,56 @@
   <symbol id="i-lua" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
   <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
   <symbol id="i-sinal" viewBox="0 0 24 24"><path d="M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17"/></symbol>
+  <symbol id="i-garfo" viewBox="0 0 24 24"><path d="M7 3v6a2 2 0 0 0 2 2v10M11 3v6a2 2 0 0 1-2 2M9 3v5M17 21V3c-2 1.5-3 4.2-3 7.2 0 1.6 1.3 2.8 3 2.8"/></symbol>
+  <symbol id="i-carrinho" viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 10.3a1.5 1.5 0 0 0 1.5 1.2h8.2a1.5 1.5 0 0 0 1.5-1.1L21 8H6.3"/><circle cx="10" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></symbol>
+  <symbol id="i-carro" viewBox="0 0 24 24"><path d="M4 15.5v-3.2L6.2 7h11.6l2.2 5.3v3.2a1 1 0 0 1-1 1h-1V19h-3v-2.5H9V19H6v-2.5H5a1 1 0 0 1-1-1zM4.5 12.3h15M7.5 14.2h1.5M15 14.2h1.5"/></symbol>
+  <symbol id="i-bomba" viewBox="0 0 24 24"><path d="M5 20.5V5.5A1.5 1.5 0 0 1 6.5 4h6A1.5 1.5 0 0 1 14 5.5v15M3.5 20.5h12M5 10h9M14 8.5l3 2.5v6a1.5 1.5 0 0 0 3 0V9l-3-3"/></symbol>
+  <symbol id="i-coracao" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.4 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/><path d="M8 12.5h2.2l1.1-2.2 1.6 4.2 1.1-2h1.9"/></symbol>
+  <symbol id="i-pilula" viewBox="0 0 24 24"><path d="M10.3 19.7a4.6 4.6 0 0 1-6.5-6.5l7.4-7.4a4.6 4.6 0 0 1 6.5 6.5zM7.5 9.5l7 7"/></symbol>
+  <symbol id="i-haltere" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3.5 9.5a12.5 12.5 0 0 1 17 0M6.8 13a7.8 7.8 0 0 1 10.4 0M9.9 16.4a3.2 3.2 0 0 1 4.2 0"/><circle cx="12" cy="19.3" r=".8"/></symbol>
+  <symbol id="i-lampada" viewBox="0 0 24 24"><path d="M9.5 18h5M10.5 21h3M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.1v.1h5v-.1c0-.8.4-1.6 1.1-2.1A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="i-sacola" viewBox="0 0 24 24"><path d="M5 8h14l-1.1 12H6.1zM9 10.5V7a3 3 0 0 1 6 0v3.5"/></symbol>
+  <symbol id="i-roupa" viewBox="0 0 24 24"><path d="M8.5 4 4 6.5l1.6 4.2L7.5 10v10h9V10l1.9.7L20 6.5 15.5 4c-.6 1.4-1.9 2.3-3.5 2.3S9.1 5.4 8.5 4z"/></symbol>
+  <symbol id="i-notebook" viewBox="0 0 24 24"><rect x="4.5" y="5" width="15" height="10.5" rx="1.5"/><path d="M2.5 19h19"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.2v5.6l4.8-2.8z"/></symbol>
+  <symbol id="i-aviao" viewBox="0 0 24 24"><path d="M21 3.5 3 10.8l7 2.6 2.6 7.1zM10 13.4l4.6-4.6"/></symbol>
+  <symbol id="i-ingresso" viewBox="0 0 24 24"><path d="M3.5 7h17v3a2 2 0 0 0 0 4v3h-17v-3a2 2 0 0 0 0-4zM14.5 7v2M14.5 11v2M14.5 15v2"/></symbol>
+  <symbol id="i-controle" viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="11" rx="5.5"/><path d="M7.5 10.8v3.4M5.8 12.5h3.4M15.5 11.5h.01M17.5 13.5h.01"/></symbol>
+  <symbol id="i-dado" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 8.5h.01M15.5 15.5h.01M12 12h.01M15.5 8.5h.01M8.5 15.5h.01"/></symbol>
+  <symbol id="i-capelo" viewBox="0 0 24 24"><path d="M2.5 9.5 12 5l9.5 4.5L12 14zM6.5 11.6V16c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.4M21.5 9.5V15"/></symbol>
+  <symbol id="i-livro" viewBox="0 0 24 24"><path d="M4.5 18.5v-13A1.5 1.5 0 0 1 6 4h13.5v13H6a1.5 1.5 0 0 0-1.5 1.5A1.5 1.5 0 0 0 6 20h13.5"/></symbol>
+  <symbol id="i-entrada" viewBox="0 0 24 24"><path d="M12 3.5v10M8 9.5l4 4 4-4M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"/></symbol>
+  <symbol id="i-banco" viewBox="0 0 24 24"><path d="M3 9.5 12 4l9 5.5M5 10.5v7M9.7 10.5v7M14.3 10.5v7M19 10.5v7M3 20.5h18"/></symbol>
+  <symbol id="i-recibo" viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5L6 21zM9 8h6M9 12h6M9 16h3"/></symbol>
+  <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3 5 6v5.5c0 4.5 3 7.7 7 9.5 4-1.8 7-5 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-pata" viewBox="0 0 24 24"><circle cx="6.5" cy="10.5" r="1.7"/><circle cx="10" cy="6.5" r="1.7"/><circle cx="14" cy="6.5" r="1.7"/><circle cx="17.5" cy="10.5" r="1.7"/><path d="M12 12c-2.5 0-5 3.2-5 5.3 0 1.7 1.5 2.2 2.6 2.2 1 0 1.5-.5 2.4-.5s1.4.5 2.4.5c1.1 0 2.6-.5 2.6-2.2 0-2.1-2.5-5.3-5-5.3z"/></symbol>
+  <symbol id="i-presente" viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9c-1-2.8-5-3.8-5-1.3C7 9 10.5 9 12 9zm0 0c1-2.8 5-3.8 5-1.3C17 9 13.5 9 12 9z"/></symbol>
+  <symbol id="i-chave" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5l-8.4 8.4a2.1 2.1 0 0 1-3-3l8.4-8.4a4 4 0 0 1-2-2zM14.7 6.3l2-2"/></symbol>
+  <symbol id="i-etiqueta" viewBox="0 0 24 24"><path d="M3.5 12.5v-8a1 1 0 0 1 1-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.4"/></symbol>
+  <symbol id="i-dinheiro" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></symbol>
+  <symbol id="i-seta-dir" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
 </svg>
 
 <div class="app">
-  <nav class="lateral" aria-label="Seções">
+  <nav class="lateral" aria-label="Telas">
     <div class="logo" aria-hidden="true">
       <svg width="34" height="34" viewBox="0 0 892 892" aria-hidden="true"><rect x="0" y="0" width="262" height="262" rx="34" fill="#fff"/><rect x="315" y="0" width="262" height="262" rx="34" fill="#fff"/><rect x="630" y="0" width="262" height="262" rx="34" fill="#f28c3b"/><rect x="0" y="315" width="262" height="262" rx="34" fill="#cfe3e0"/><rect x="0" y="630" width="262" height="262" rx="34" fill="#9ec7c2"/><rect x="315" y="630" width="262" height="262" rx="34" fill="#9ec7c2"/><rect x="630" y="630" width="262" height="262" rx="34" fill="#9ec7c2"/></svg>
     </div>
-    <a href="#inicio" class="ativo" title="Início"><svg class="i"><use href="#i-casa"/></svg></a>
-    <a href="#secCartoes" title="Cartões e contas"><svg class="i"><use href="#i-cartao"/></svg></a>
-    <a href="#secTx" title="Transações"><svg class="i"><use href="#i-troca"/></svg></a>
-    <a href="#secAnalise" title="Categorias e orçamentos"><svg class="i"><use href="#i-grafico"/></svg></a>
-    <a href="#secInv" title="Investimentos"><svg class="i"><use href="#i-invest"/></svg></a>
-    <a href="#secAjustes" title="Regras e conexões"><svg class="i"><use href="#i-ajuste"/></svg></a>
+    <a href="#inicio" title="Início"><svg class="i"><use href="#i-casa"/></svg></a>
+    <a href="#transacoes" title="Transações"><svg class="i"><use href="#i-troca"/></svg></a>
+    <a href="#analise" title="Categorias e orçamentos"><svg class="i"><use href="#i-grafico"/></svg></a>
+    <a href="#investimentos" title="Investimentos e parcelas"><svg class="i"><use href="#i-invest"/></svg></a>
+    <a href="#ajustes" title="Regras e conexões"><svg class="i"><use href="#i-ajuste"/></svg></a>
     <a href="/sair" class="fim" title="Sair"><svg class="i"><use href="#i-sair"/></svg></a>
   </nav>
 
-  <div class="area" id="inicio">
+  <div class="area">
     <header class="topo">
       <div class="titulo">
-        <h1 id="saudacao">Olá!</h1>
-        <p>Seu painel financeiro</p>
+        <h1 id="titulo">Olá!</h1>
+        <p id="subtitulo">Seu painel financeiro</p>
       </div>
       <div class="acoes">
         <select id="mes" class="pilula" aria-label="Mês"></select>
@@ -300,36 +352,74 @@
     <div id="faixas"></div>
     <div id="carregando">Carregando suas finanças…</div>
 
-    <div class="layout" id="conteudo" hidden>
-      <div class="principal">
-        <section class="grade-3" id="kpis"></section>
+    <div id="conteudo" hidden>
+      <!-- Início: só o essencial; o resto fica nas outras telas -->
+      <div class="vista layout" data-vista="inicio">
+        <div class="principal">
+          <section class="grade-3" id="kpis"></section>
 
-        <section class="grade-2">
-          <div class="coluna">
-            <div class="cartao">
-              <div class="cab"><h2>Receitas</h2><span class="extra" id="recMes"></span></div>
-              <div class="receita">
-                <div>
-                  <div class="val" id="recValor"></div>
-                  <div class="variacao" id="recVar"></div>
-                </div>
-                <div class="mini"><canvas id="gReceitas"></canvas></div>
-              </div>
-            </div>
+          <section class="grade-2">
             <div class="cartao">
               <div class="cab"><h2>Receitas x gastos</h2><span class="extra" id="evPeriodo">últimos 12 meses</span></div>
               <div class="legenda"><span><i style="background:var(--serie-rec)"></i>Receitas</span><span><i style="background:var(--serie-gas)"></i>Gastos</span></div>
               <div class="medias" id="evMedias"></div>
               <div class="grafico alto" role="img" id="evGrafico"><canvas id="gEvolucao"></canvas></div>
             </div>
-          </div>
-          <div class="cartao">
-            <div class="cab"><h2>Transações</h2><a class="link" href="#secTx">Ver todas</a></div>
-            <div id="recentes"></div>
-          </div>
-        </section>
+            <div class="cartao">
+              <div class="cab"><h2>Para onde foi o dinheiro</h2><a class="link" href="#analise">Ver análise</a></div>
+              <div id="topCats"></div>
+            </div>
+          </section>
 
-        <section class="grade-2" id="secAnalise">
+          <section class="cartao">
+            <div class="cab"><h2>Últimas transações</h2><a class="link" href="#transacoes">Ver todas<svg class="i" style="width:16px;height:16px"><use href="#i-seta-dir"/></svg></a></div>
+            <div id="recentes"></div>
+          </section>
+        </div>
+
+        <aside class="escuro">
+          <div>
+            <div class="cab"><div><h2>Meus cartões</h2><small id="qtdCartoes"></small></div></div>
+            <div id="cartoes"></div>
+            <div class="botoes-cc">
+              <a href="#transacoes" data-tipo="saida"><svg class="i"><use href="#i-cima"/></svg>Gastos</a>
+              <a href="#transacoes" data-tipo="entrada"><svg class="i"><use href="#i-baixo"/></svg>Entradas</a>
+            </div>
+          </div>
+          <div>
+            <div class="cab"><div><h2>Contas</h2><small id="qtdContas"></small></div></div>
+            <ul class="lista contas-escuras" id="contas"></ul>
+          </div>
+          <div>
+            <div class="cab"><div><h2>Alertas</h2><small id="qtdAlertas"></small></div><span class="bola" aria-hidden="true"><svg class="i"><use href="#i-sino"/></svg></span></div>
+            <div id="alertas"></div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Transações -->
+      <div class="vista" data-vista="transacoes" hidden>
+        <section class="cartao">
+          <div class="totais" id="txTotais"></div>
+          <div class="filtros">
+            <input class="campo busca" id="txBusca" type="search" placeholder="Buscar empresa, pessoa ou descrição">
+            <div class="segmento" role="group" aria-label="Tipo" id="txTipo">
+              <button type="button" data-tipo="" aria-pressed="true">Tudo</button>
+              <button type="button" data-tipo="saida" aria-pressed="false">Saídas</button>
+              <button type="button" data-tipo="entrada" aria-pressed="false">Entradas</button>
+            </div>
+            <select class="campo" id="txCat" aria-label="Categoria"><option value="">Todas as categorias</option></select>
+            <select class="campo" id="txConta" aria-label="Conta"><option value="">Todas as contas</option></select>
+          </div>
+          <div id="txLista"></div>
+          <div class="rodape-cartao"><button class="pilula" id="txMais" hidden>Mostrar mais</button></div>
+          <p class="dica">Clique na categoria de uma transação para corrigi-la. As transações em cinza (pagamento de fatura, transferências entre suas contas e aplicações) não contam como gasto nem receita.</p>
+        </section>
+      </div>
+
+      <!-- Análise -->
+      <div class="vista" data-vista="analise" hidden>
+        <section class="grade-2">
           <div class="cartao">
             <div class="cab"><h2>Gastos por categoria</h2><span class="extra" id="catTotal"></span></div>
             <div id="categorias"></div>
@@ -340,68 +430,40 @@
             <form class="form-linha" id="formOrc">
               <input class="campo" id="orcCat" list="listaCats" placeholder="Categoria (ex.: Delivery)" required>
               <input class="campo" id="orcVal" type="number" min="0" step="10" placeholder="Limite R$" required style="flex:0 1 120px">
-              <button class="pilula roxa" type="submit">Salvar</button>
+              <button class="pilula roxa">Salvar</button>
             </form>
-            <div class="dica">Limite 0 remove o orçamento.</div>
+            <div class="dica">Para remover um orçamento, salve a categoria com limite 0.</div>
           </div>
         </section>
-
-        <section class="cartao" id="secTx">
-          <div class="cab"><h2>Todas as transações</h2><span class="extra" id="txResumo"></span></div>
-          <div class="filtros">
-            <input class="campo" id="txBusca" type="search" placeholder="Buscar descrição ou estabelecimento">
-            <select class="campo" id="txCat"><option value="">Todas as categorias</option></select>
-            <select class="campo" id="txTipo"><option value="">Entradas e saídas</option><option value="saida">Só saídas</option><option value="entrada">Só entradas</option></select>
-          </div>
-          <div class="tabela-wrap"><table>
-            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Banco</th><th class="num">Valor</th></tr></thead>
-            <tbody id="txCorpo"></tbody>
-          </table></div>
-          <button class="pilula" id="txMais" hidden style="margin-top:14px">Mostrar mais</button>
-          <div class="dica">Clique na categoria para corrigir. Linhas em cinza (fatura, transferência entre contas próprias, aplicações) não contam como gasto.</div>
-        </section>
-
         <section class="grade-2">
           <div class="cartao"><div class="cab"><h2>Assinaturas e contas fixas</h2><span class="extra" id="recTotal"></span></div><ul class="lista" id="recorrentes"></ul></div>
           <div class="cartao"><div class="cab"><h2>Onde mais gastou</h2></div><ul class="lista" id="estab"></ul></div>
         </section>
+      </div>
 
-        <section class="grade-2" id="secInv">
+      <!-- Investimentos e parcelas -->
+      <div class="vista" data-vista="investimentos" hidden>
+        <section class="grade-2">
           <div class="cartao"><div class="cab"><h2>Investimentos</h2><span class="extra" id="invTotal"></span></div><ul class="lista" id="investimentos"></ul></div>
           <div class="cartao"><div class="cab"><h2>Parcelas a vencer</h2><span class="extra" id="parcTotal"></span></div><ul class="lista" id="parcelas"></ul></div>
         </section>
+      </div>
 
-        <section class="grade-2" id="secAjustes">
+      <!-- Regras e conexões -->
+      <div class="vista" data-vista="ajustes" hidden>
+        <section class="grade-2">
           <div class="cartao"><div class="cab"><h2>Regras de categoria</h2></div>
             <ul class="lista" id="regras"></ul>
             <form class="form-linha" id="formRegra">
               <input class="campo" id="regraTexto" placeholder="Texto (ex.: PIX JOAO)" required>
               <input class="campo" id="regraCat" list="listaCats" placeholder="Categoria (ex.: Aluguel)" required>
-              <button class="pilula roxa" type="submit">Criar</button>
+              <button class="pilula roxa">Criar regra</button>
             </form>
+            <div class="dica">Toda transação que contém o texto passa a usar a categoria escolhida.</div>
           </div>
           <div class="cartao"><div class="cab"><h2>Conexões com os bancos</h2></div><ul class="lista" id="conexoes"></ul></div>
         </section>
       </div>
-
-      <aside class="escuro" id="secCartoes">
-        <div>
-          <div class="cab"><div><h2>Meus cartões</h2><small id="qtdCartoes"></small></div></div>
-          <div id="cartoes"></div>
-          <div class="botoes-cc">
-            <a href="#secTx" id="verGastos"><svg class="i"><use href="#i-cima"/></svg>Gastos</a>
-            <a href="#secTx" id="verEntradas"><svg class="i"><use href="#i-baixo"/></svg>Entradas</a>
-          </div>
-        </div>
-        <div>
-          <div class="cab"><div><h2>Contas</h2><small id="qtdContas"></small></div></div>
-          <ul class="lista contas-escuras" id="contas"></ul>
-        </div>
-        <div>
-          <div class="cab"><div><h2>Alertas</h2><small id="qtdAlertas"></small></div><span class="bola" aria-hidden="true"><svg class="i"><use href="#i-sino"/></svg></span></div>
-          <div id="alertas"></div>
-        </div>
-      </aside>
     </div>
   </div>
 </div>
@@ -419,22 +481,116 @@ const MESES_LONGOS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho"
 const nomeMes = (m) => NOMES_MES[+m.slice(5, 7) - 1] + "/" + m.slice(2, 4);
 const nomeMesLongo = (m) => MESES_LONGOS[+m.slice(5, 7) - 1] + " de " + m.slice(0, 4);
 const cor = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const hoje = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
+const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const hoje = () => iso(new Date()).slice(0, 7);
 const icone = (id) => `<svg class="i"><use href="#i-${id}"/></svg>`;
+const semAcento = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-// Avatar com iniciais e cor fixa por nome (as transações não trazem logotipo).
-const CORES_AVATAR = ["#0f4a49", "#f28c3b", "#2f7f7a", "#c9661f", "#5b9e97", "#1e8a5a", "#8c5a3c", "#3e6b8a", "#b85450", "#4f8a72"];
-function avatar(nome) {
-  const bruto = String(nome || "?");
-  const limpo = bruto.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, " ").replace(/\b(PIX|TED|DOC|PAG|PGTO|COMPRA|ENVIADO|RECEBIDO|IFD)\b/gi, " ").trim() || bruto;
-  const partes = limpo.split(/\s+/);
-  const ini = (partes[0][0] + (partes[1]?.[0] || partes[0][1] || "")).toUpperCase();
-  let h = 0;
-  for (const c of limpo.toLowerCase()) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return `<span class="avatar" style="background:${CORES_AVATAR[h % CORES_AVATAR.length]}">${esc(ini)}</span>`;
+// Empresas conhecidas: [padrão no texto da transação, nome, site de onde vem o logotipo]
+const MARCAS = [
+  [/prime ?video/, "Prime Video", "primevideo.com"], [/amazon|amzn/, "Amazon", "amazon.com.br"],
+  [/shopee/, "Shopee", "shopee.com.br"], [/mercado ?livre|\bmeli\b/, "Mercado Livre", "mercadolivre.com.br"],
+  [/mercado ?pago/, "Mercado Pago", "mercadopago.com.br"], [/youtube/, "YouTube", "youtube.com"], [/google/, "Google", "google.com"],
+  [/ifood|\bifd\b/, "iFood", "ifood.com.br"], [/\buber\b/, "Uber", "uber.com"], [/\b99 ?(app|pop|taxi|food)\b/, "99", "99app.com"],
+  [/rappi/, "Rappi", "rappi.com.br"], [/ze ?delivery/, "Zé Delivery", "ze.delivery"], [/netflix/, "Netflix", "netflix.com"],
+  [/spotify/, "Spotify", "spotify.com"], [/apple|itunes/, "Apple", "apple.com"], [/microsoft|xbox/, "Microsoft", "microsoft.com"],
+  [/disney/, "Disney+", "disneyplus.com"], [/hbo ?max|\bhbo\b|\bmax\.com/, "Max", "max.com"], [/globoplay/, "Globoplay", "globoplay.globo.com"],
+  [/deezer/, "Deezer", "deezer.com"], [/crunchyroll/, "Crunchyroll", "crunchyroll.com"], [/paramount/, "Paramount+", "paramountplus.com"],
+  [/magalu|magazine ?luiza/, "Magalu", "magazineluiza.com.br"], [/americanas/, "Americanas", "americanas.com.br"],
+  [/casas ?bahia/, "Casas Bahia", "casasbahia.com.br"], [/aliexpress/, "AliExpress", "aliexpress.com"], [/shein/, "Shein", "shein.com"],
+  [/\btemu\b/, "Temu", "temu.com"], [/kabum/, "KaBuM!", "kabum.com.br"], [/netshoes/, "Netshoes", "netshoes.com.br"],
+  [/carrefour/, "Carrefour", "carrefour.com.br"], [/pao de acucar/, "Pão de Açúcar", "paodeacucar.com"], [/assai/, "Assaí", "assai.com.br"],
+  [/atacadao/, "Atacadão", "atacadao.com.br"], [/drogasil/, "Drogasil", "drogasil.com.br"], [/droga ?raia/, "Droga Raia", "drogaraia.com.br"],
+  [/pague ?menos/, "Pague Menos", "paguemenos.com.br"], [/panvel/, "Panvel", "panvel.com"], [/ipiranga/, "Ipiranga", "ipiranga.com.br"],
+  [/\bshell\b/, "Shell", "shell.com.br"], [/petrobras/, "Petrobras", "petrobras.com.br"], [/sem ?parar/, "Sem Parar", "semparar.com.br"],
+  [/conectcar/, "ConectCar", "conectcar.com"], [/veloe/, "Veloe", "veloe.com.br"], [/\bvivo\b|telefonica/, "Vivo", "vivo.com.br"],
+  [/\bclaro\b/, "Claro", "claro.com.br"], [/\btim\b/, "TIM", "tim.com.br"], [/nubank|nu pagamentos/, "Nubank", "nubank.com.br"],
+  [/bradesco/, "Bradesco", "bradesco.com.br"], [/\bitau\b/, "Itaú", "itau.com.br"], [/santander/, "Santander", "santander.com.br"],
+  [/caixa econ/, "Caixa", "caixa.gov.br"], [/banco do brasil/, "Banco do Brasil", "bb.com.br"], [/banco inter\b/, "Inter", "bancointer.com.br"],
+  [/\bc6 ?bank/, "C6 Bank", "c6bank.com.br"], [/picpay/, "PicPay", "picpay.com"], [/paypal/, "PayPal", "paypal.com"],
+  [/airbnb/, "Airbnb", "airbnb.com.br"], [/booking/, "Booking", "booking.com"], [/latam/, "LATAM", "latamairlines.com"],
+  [/voegol|gol linhas/, "GOL", "voegol.com.br"], [/voeazul|azul linhas/, "Azul", "voeazul.com.br"], [/decolar/, "Decolar", "decolar.com"],
+  [/smiles/, "Smiles", "smiles.com.br"], [/mc ?donald/, "McDonald's", "mcdonalds.com.br"], [/burger ?king/, "Burger King", "burgerking.com.br"],
+  [/starbucks/, "Starbucks", "starbucks.com.br"], [/outback/, "Outback", "outback.com.br"], [/\bkfc\b/, "KFC", "kfcbrasil.com.br"],
+  [/subway/, "Subway", "subway.com"], [/habib/, "Habib's", "habibs.com.br"], [/coco bambu/, "Coco Bambu", "cocobambu.com"],
+  [/cinemark/, "Cinemark", "cinemark.com.br"], [/steam/, "Steam", "steampowered.com"], [/playstation|\bpsn\b/, "PlayStation", "playstation.com"],
+  [/nintendo/, "Nintendo", "nintendo.com"], [/epic ?games/, "Epic Games", "epicgames.com"], [/openai|chatgpt/, "ChatGPT", "openai.com"],
+  [/anthropic|claude\.ai/, "Claude", "claude.ai"], [/github/, "GitHub", "github.com"], [/canva/, "Canva", "canva.com"],
+  [/adobe/, "Adobe", "adobe.com"], [/dropbox/, "Dropbox", "dropbox.com"], [/notion/, "Notion", "notion.so"], [/linkedin/, "LinkedIn", "linkedin.com"],
+  [/smart ?fit/, "Smart Fit", "smartfit.com.br"], [/wellhub|gympass/, "Wellhub", "wellhub.com"], [/totalpass/, "TotalPass", "totalpass.com"],
+  [/unimed/, "Unimed", "unimed.coop.br"], [/\bamil\b/, "Amil", "amil.com.br"], [/sulamerica/, "SulAmérica", "sulamerica.com.br"],
+  [/hapvida/, "Hapvida", "hapvida.com.br"], [/porto seguro/, "Porto", "portoseguro.com.br"], [/energisa/, "Energisa", "energisa.com.br"],
+  [/\benel\b/, "Enel", "enel.com.br"], [/sabesp/, "Sabesp", "sabesp.com.br"], [/cemig/, "Cemig", "cemig.com.br"], [/copel/, "Copel", "copel.com"],
+  [/comgas/, "Comgás", "comgas.com.br"], [/\bsky\b/, "SKY", "sky.com.br"], [/renner/, "Renner", "lojasrenner.com.br"],
+  [/riachuelo/, "Riachuelo", "riachuelo.com.br"], [/\bzara\b/, "Zara", "zara.com"], [/centauro/, "Centauro", "centauro.com.br"],
+  [/decathlon/, "Decathlon", "decathlon.com.br"], [/\bnike\b/, "Nike", "nike.com.br"], [/adidas/, "Adidas", "adidas.com.br"],
+  [/leroy/, "Leroy Merlin", "leroymerlin.com.br"], [/dafiti/, "Dafiti", "dafiti.com.br"], [/boticario/, "O Boticário", "boticario.com.br"],
+  [/\bnatura\b/, "Natura", "natura.com.br"], [/sephora/, "Sephora", "sephora.com.br"], [/correios/, "Correios", "correios.com.br"],
+  [/sympla/, "Sympla", "sympla.com.br"], [/ingresso ?\.?com/, "Ingresso.com", "ingresso.com"],
+];
+const _marcas = new Map();
+function marca(texto) {
+  const t = semAcento(texto);
+  if (!_marcas.has(t)) {
+    const m = MARCAS.find(([re]) => re.test(t));
+    _marcas.set(t, m ? { nome: m[1], dominio: m[2] } : null);
+  }
+  return _marcas.get(t);
 }
 
-let D = null, graficos = {}, txLimite = 50;
+// Ícone e cor de cada categoria (usados quando a empresa não é conhecida)
+const G = { comida: "#e07a2f", mercado: "#c58a12", transporte: "#3b82c4", saude: "#d6455d", casa: "#2a9d8f", compras: "#8b5cf6",
+            assinatura: "#d14d9b", lazer: "#0ea5b7", educacao: "#5b6ee1", transf: "#64808a", receita: "#1e9e5a", banco: "#a0703a", outros: "#7d8b89" };
+const CATS = {
+  "Alimentação": ["garfo", G.comida], "Restaurantes": ["garfo", G.comida], "Delivery": ["garfo", G.comida], "Supermercado": ["carrinho", G.mercado],
+  "Transporte": ["carro", G.transporte], "Transporte por app": ["carro", G.transporte], "Carro": ["carro", G.transporte],
+  "Pedágio": ["carro", G.transporte], "Combustível": ["bomba", G.transporte],
+  "Saúde": ["coracao", G.saude], "Saúde e bem-estar": ["coracao", G.saude], "Plano de saúde": ["coracao", G.saude],
+  "Farmácia": ["pilula", G.saude], "Academia": ["haltere", G.saude], "Esportes": ["haltere", G.saude],
+  "Moradia": ["casa", G.casa], "Aluguel": ["casa", G.casa], "Casa": ["casa", G.casa], "Contas da casa": ["lampada", G.casa],
+  "Internet e telefone": ["wifi", G.casa],
+  "Compras": ["sacola", G.compras], "Compras online": ["sacola", G.compras], "Roupas": ["roupa", G.compras],
+  "Eletrônicos": ["notebook", G.compras], "Papelaria": ["livro", G.compras], "Pets": ["pata", G.compras],
+  "Assinaturas e streaming": ["play", G.assinatura],
+  "Lazer": ["ingresso", G.lazer], "Viagens": ["aviao", G.lazer], "Jogos": ["controle", G.lazer], "Apostas": ["dado", G.lazer],
+  "Educação": ["capelo", G.educacao], "Livros": ["livro", G.educacao],
+  "Transferências": ["troca", G.transf], "Transferência entre contas próprias": ["troca", G.transf], "Saques": ["dinheiro", G.transf],
+  "Câmbio": ["troca", G.transf], "Pensão": ["troca", G.transf], "Pagamento de fatura": ["cartao", G.transf], "Investimentos": ["invest", G.transf],
+  "Saldo bloqueado": ["escudo", G.transf],
+  "Salário": ["carteira", G.receita], "Receitas": ["entrada", G.receita], "Receitas eventuais": ["entrada", G.receita],
+  "Renda extra": ["entrada", G.receita], "Rendimentos": ["invest", G.receita], "Benefícios": ["entrada", G.receita],
+  "Aposentadoria": ["entrada", G.receita], "Estornos": ["entrada", G.receita],
+  "Tarifas bancárias": ["banco", G.banco], "Juros e multas": ["banco", G.banco], "Empréstimos e financiamentos": ["banco", G.banco],
+  "Impostos": ["recibo", G.banco], "Boletos": ["recibo", G.banco], "Obrigações legais": ["recibo", G.banco],
+  "Seguros": ["escudo", G.banco], "Previdência": ["escudo", G.banco],
+  "Doações": ["presente", G.outros], "Serviços": ["chave", G.outros], "Outros": ["etiqueta", G.outros],
+};
+const estiloCat = (c) => CATS[c] || ["etiqueta", G.outros];
+
+// Bolinha da transação: logotipo da empresa, se for conhecida; senão o ícone da categoria.
+function bolinha(texto, categoria, peq = false) {
+  const [ic, c] = estiloCat(categoria), m = marca(texto);
+  const img = m ? `<img src="https://www.google.com/s2/favicons?domain=${m.dominio}&sz=64" alt="" loading="lazy" referrerpolicy="no-referrer">` : "";
+  return `<span class="ic${peq ? " peq" : ""}" style="--c:${c}" title="${esc(m ? m.nome : categoria)}">${icone(ic)}${img}</span>`;
+}
+// Sem logotipo de verdade (erro ou o globo genérico de 16px), fica o ícone da categoria.
+document.addEventListener("error", (e) => { if (e.target.matches?.(".ic img")) e.target.remove(); }, true);
+document.addEventListener("load", (e) => { if (e.target.matches?.(".ic img") && e.target.naturalWidth <= 16) e.target.remove(); }, true);
+
+// Nome legível: marca conhecida, ou a descrição sem prefixos de maquininha e sem CAIXA ALTA.
+const PREFIXOS = /^(ifd|pag|pg|mp|ec|dl|htm|pp|paypal|ebanx|pagseguro|sumup|stone|cielo|rede)\s*\*\s*/i;
+function nomeTx(t) {
+  const bruto = t.estabelecimento || t.descricao || "";
+  const m = marca(bruto + " " + (t.descricao || ""));
+  if (m) return m.nome;
+  let s = bruto.replace(PREFIXOS, "").replace(/\s+/g, " ").trim();
+  if (s === s.toUpperCase()) s = s.toLowerCase().replace(/(^|[\s\-/(])\p{L}/gu, (x) => x.toUpperCase())
+    .replace(/\b(De|Da|Do|Das|Dos|E|Em|Para)\b/g, (x) => x.toLowerCase());
+  return s || "Sem descrição";
+}
+const contaTx = (t) => (t.subtipo === "CREDIT_CARD" ? "Cartão " : "Conta ") + (t.banco || "");
+
+let D = null, graficos = {}, txLimite = 60, txTipo = "";
 
 async function api(url, corpo) {
   const r = await fetch(url, corpo === undefined ? {} : {
@@ -456,8 +612,9 @@ async function carregar(mes = $("mes").value || "") {
   }
   $("carregando").hidden = true;
   $("conteudo").hidden = false;
-  txLimite = 50;
+  txLimite = 60;
   render();
+  mostrarVista();
 }
 
 function faixas(lista) {
@@ -472,8 +629,6 @@ function kpi({ rot, val, det = "", ic, destaque = false, selo = "", classe = "" 
 
 function render() {
   const R = D.resumo, P = D.patrimonio;
-  const h = new Date().getHours();
-  $("saudacao").textContent = h < 12 ? "Bom dia!" : h < 18 ? "Boa tarde!" : "Boa noite!";
   $("mes").innerHTML = D.meses.map((m) => `<option value="${m}" ${m === R.mes ? "selected" : ""}>${nomeMesLongo(m)}</option>`).join("");
   $("sync").textContent = D.demo ? "Modo demonstração (dados fictícios)"
     : "Última atualização: " + (D.ultima_sync ? data(D.ultima_sync) + " às " + D.ultima_sync.slice(11, 16) : "nunca");
@@ -499,14 +654,7 @@ function render() {
     kpi({ rot: "Gastos do mês", val: brl(R.gastos), ic: "gasto", selo: varG != null ? pct(varG, true) : "",
           det: R.atual ? `projeção ${brl(R.projecao)} até dia ${R.dias_mes}` : `mês anterior ${brl(R.gastos_anterior)}` }) +
     kpi({ rot: "Sobra do mês", val: brl(R.sobra), ic: "carteira", classe: R.sobra < 0 ? "neg" : "",
-          det: "taxa de poupança " + pct(R.poupanca) });
-
-  // Receitas
-  const varR = R.receitas_anterior ? (R.receitas - R.receitas_anterior) / R.receitas_anterior : null;
-  $("recMes").textContent = nomeMesLongo(R.mes);
-  $("recValor").textContent = brl(R.receitas);
-  $("recVar").innerHTML = varR == null ? `<span class="suave">sem mês anterior para comparar</span>`
-    : `<span class="seta ${varR < 0 ? "baixo" : ""}">${icone(varR < 0 ? "baixo" : "cima")}</span>${pct(varR, true)} <span class="suave" style="font-weight:500">vs mês anterior</span>`;
+          det: `receitas ${brl(R.receitas)} · poupança ${pct(R.poupanca)}` });
 
   renderGraficos();
   renderRecentes();
@@ -517,35 +665,35 @@ function render() {
   renderLateral();
 
   $("estab").innerHTML = R.estabelecimentos.length
-    ? R.estabelecimentos.map((e) => `<li><span class="conta-ic">${avatar(e.nome)}<span>${esc(e.nome)}</span></span><span class="num">${brl(e.valor)}</span></li>`).join("")
+    ? R.estabelecimentos.map((e) => `<li><span class="conta-ic">${bolinha(e.nome, R.transacoes.find((t) => (t.estabelecimento || t.descricao) === e.nome)?.categoria, true)}<span>${esc(nomeTx({ descricao: e.nome }))}</span></span><span class="num">${brl(e.valor)}</span></li>`).join("")
     : `<li class="vazio">Sem gastos neste mês.</li>`;
 
   const rec = D.recorrentes, totRec = rec.reduce((s, r) => s + r.media, 0);
   $("recTotal").textContent = rec.length ? brl(totRec) + "/mês" : "";
   $("recorrentes").innerHTML = rec.length ? rec.map((r) =>
-    `<li><span class="conta-ic">${avatar(r.nome)}<span>${esc(r.nome)}<br><small>${esc(r.tipo)} · próxima ~${data(r.proxima).slice(0, 5)}</small></span></span><span class="num">${brl(r.media)}</span></li>`).join("")
+    `<li><span class="conta-ic">${bolinha(r.nome, r.categoria || "Assinaturas e streaming", true)}<span>${esc(nomeTx({ descricao: r.nome }))}<br><small>${esc(r.tipo)} · próxima ~${data(r.proxima).slice(0, 5)}</small></span></span><span class="num">${brl(r.media)}</span></li>`).join("")
     : `<li class="vazio">Nenhuma cobrança recorrente clara nos últimos 6 meses.</li>`;
 
   const totParc = D.parcelas.reduce((s, p) => s + p.falta, 0);
   $("parcTotal").textContent = D.parcelas.length ? "faltam " + brl(totParc) : "";
   $("parcelas").innerHTML = D.parcelas.length ? D.parcelas.map((p) =>
-    `<li><span>${esc(p.descricao)}<br><small>parcela ${p.parcela}/${p.total_parcelas} de ${brl(p.valor)} · faltam ${p.restantes}</small></span><span class="num">${brl(p.falta)}</span></li>`).join("")
+    `<li><span class="conta-ic">${bolinha(p.descricao, "Compras", true)}<span>${esc(nomeTx({ descricao: p.descricao }))}<br><small>parcela ${p.parcela}/${p.total_parcelas} de ${brl(p.valor)} · faltam ${p.restantes}</small></span></span><span class="num">${brl(p.falta)}</span></li>`).join("")
     : `<li class="vazio">Nenhuma compra parcelada em andamento.</li>`;
 
   const totInv = D.investimentos.reduce((s, i) => s + (i.saldo || 0), 0);
   $("invTotal").textContent = D.investimentos.length ? brl(totInv) : "";
   $("investimentos").innerHTML = D.investimentos.length ? D.investimentos.map((i) => {
     const ganho = i.aplicado ? i.saldo - i.aplicado : null;
-    return `<li><span>${esc(i.nome)}<br><small>${esc(i.banco || "")} · mês ${pct(i.rent_mes, true)} · 12m ${pct(i.rent_12m, true)}${ganho != null ? " · resultado " + brl(ganho) : ""}</small></span><span class="num">${brl(i.saldo)}</span></li>`;
+    return `<li><span class="conta-ic">${bolinha(i.banco || "", "Investimentos", true)}<span>${esc(i.nome)}<br><small>${esc(i.banco || "")} · mês ${pct(i.rent_mes, true)} · 12m ${pct(i.rent_12m, true)}${ganho != null ? " · resultado " + brl(ganho) : ""}</small></span></span><span class="num">${brl(i.saldo)}</span></li>`;
   }).join("") : `<li class="vazio">Nenhum investimento compartilhado pelos bancos.</li>`;
 
   $("regras").innerHTML = D.regras.length ? D.regras.map((r) =>
-    `<li><span>"${esc(r.texto)}" → <b>${esc(r.categoria)}</b></span><button class="x" title="Remover" data-regra="${esc(r.texto)}">✕</button></li>`).join("")
+    `<li><span class="conta-ic">${bolinha(r.texto, r.categoria, true)}<span>"${esc(r.texto)}" → <b>${esc(r.categoria)}</b></span></span><button class="x" title="Remover" data-regra="${esc(r.texto)}">✕</button></li>`).join("")
     : `<li class="vazio">Nenhuma regra. Clique na categoria de uma transação para corrigir.</li>`;
 
   $("conexoes").innerHTML = D.conexoes.length ? D.conexoes.map((c) => {
     const exp = c.dias_para_expirar != null && c.dias_para_expirar <= 30 ? ` <span class="neg">· expira em ${c.dias_para_expirar} dias</span>` : "";
-    return `<li><span class="conta-ic">${avatar(c.banco)}<span>${esc(c.banco)}<br><small>${esc(c.status || "")} · atualizado ${data(c.atualizado)} · autorização até ${data(c.expira)}${exp}</small>${c.erro ? `<br><small class="neg">${esc(c.erro)}</small>` : ""}</span></span></li>`;
+    return `<li><span class="conta-ic">${bolinha(c.banco, "Tarifas bancárias", true)}<span>${esc(c.banco)}<br><small>${esc(c.status || "")} · atualizado ${data(c.atualizado)} · autorização até ${data(c.expira)}${exp}</small>${c.erro ? `<br><small class="neg">${esc(c.erro)}</small>` : ""}</span></span></li>`;
   }).join("") : `<li class="vazio">Nenhuma conexão sincronizada ainda.</li>`;
 
   const cats = new Set([...R.transacoes.map((t) => t.categoria), ...D.regras.map((r) => r.categoria), ...D.neutras, ...D.orcamentos.map((o) => o.categoria)]);
@@ -608,48 +756,42 @@ function renderGraficos() {
       onHover: (e, el) => { e.native.target.style.cursor = el.length ? "pointer" : "default"; },
     },
   });
+}
 
-  // Receitas: linha suave dos últimos 6 meses
-  const ult = ev.slice(-6);
-  const ctx = $("gReceitas").getContext("2d");
-  const grad = ctx.createLinearGradient(0, 0, ctx.canvas.clientWidth || 300, 0);
-  grad.addColorStop(0, cor("--barra") + "33");
-  grad.addColorStop(1, cor("--acento"));
-  graficos.rec?.destroy();
-  graficos.rec = new Chart(ctx, {
-    type: "line",
-    data: { labels: ult.map((e) => nomeMesLongo(e.mes)),
-            datasets: [{ data: ult.map((e) => e.receitas), borderColor: grad, borderWidth: 3, tension: 0.45, fill: false,
-                         pointRadius: ult.map((e) => e.mes === R.mes ? 6 : 0), pointBackgroundColor: cor("--cartao"),
-                         pointBorderColor: cor("--texto"), pointBorderWidth: 3, pointHoverRadius: 6 }] },
-    options: {
-      maintainAspectRatio: false, layout: { padding: 8 },
-      plugins: { legend: { display: false }, tooltip: { ...tooltip, callbacks: { label: (c) => brl(c.raw) } } },
-      scales: { x: { display: false }, y: { display: false } },
-    },
-  });
+// Uma linha de transação (Início e tela de Transações)
+function linhaTx(t, editavel = false) {
+  const nome = nomeTx(t), saida = t.direcao === "saida";
+  const parc = t.parcelas_total ? `<span>· ${t.parcela_atual}/${t.parcelas_total}</span>` : "";
+  const cat = editavel
+    ? `<button class="tag" data-desc="${esc(t.estabelecimento || t.descricao)}" data-cat="${esc(t.categoria)}" title="Corrigir categoria">${esc(t.categoria)}</button>`
+    : `<span>${esc(t.categoria)}</span>`;
+  return `<div class="tx${t.neutra ? " neutra" : ""}" title="${esc(t.descricao)}">${bolinha(t.estabelecimento + " " + t.descricao, t.categoria)}
+    <div class="meio"><div class="nome">${esc(nome)}</div>
+      <div class="sub">${cat}<span class="conta">· ${esc(contaTx(t))}</span>${parc}</div></div>
+    <div class="valor ${!t.neutra && !saida ? "pos" : ""}">${saida ? "−" : "+"}${brl(t.valor)}${t.neutra ? "<small>não conta</small>" : ""}</div></div>`;
 }
 
 function renderRecentes() {
   const lst = D.resumo.transacoes.filter((t) => !t.neutra).slice(0, 6);
-  $("recentes").innerHTML = lst.length ? lst.map((t) => {
-    const nome = t.estabelecimento || t.descricao;
-    return `<div class="tx-item">${avatar(nome)}<div class="meio"><div class="nome">${esc(nome)}</div>
-      <div class="sub">${data(t.data).slice(0, 5)} · ${esc(t.categoria)}</div></div>
-      <div class="num ${t.direcao === "saida" ? "" : "pos"}">${t.direcao === "saida" ? "" : "+"}${brl(t.valor)}</div></div>`;
-  }).join("") : `<div class="vazio">Nenhuma transação neste mês.</div>`;
+  $("recentes").innerHTML = lst.length ? lst.map((t) => linhaTx(t)).join("") : `<div class="vazio">Nenhuma transação neste mês.</div>`;
+}
+
+function barraCat(c, total, maior) {
+  const [ic, k] = estiloCat(c.categoria);
+  const v = c.anterior ? (c.valor - c.anterior) / c.anterior : null;
+  return `<button class="barra-item cat-linha" data-filtra="${esc(c.categoria)}"><span class="ic peq" style="--c:${k}">${icone(ic)}</span>
+    <span class="meio"><div class="linha"><span>${esc(c.categoria)}</span><span class="num">${brl(c.valor)}</span></div>
+      <div class="trilho"><div style="width:${(c.valor / maior) * 100}%;background:${k}"></div></div>
+      <div class="det">${pct(c.valor / total)} do total · ${v == null ? "novo neste mês" : pct(v, true) + " vs mês anterior"}</div></span></button>`;
 }
 
 function renderCategorias() {
   const cats = D.resumo.categorias.filter((c) => c.valor > 0);
   const total = cats.reduce((s, c) => s + c.valor, 0), maior = cats[0]?.valor || 1;
   $("catTotal").textContent = total ? "total " + brl(total) : "";
-  $("categorias").innerHTML = cats.length ? cats.slice(0, 10).map((c) => {
-    const v = c.anterior ? (c.valor - c.anterior) / c.anterior : null;
-    return `<button class="barra-item" data-filtra="${esc(c.categoria)}"><div class="linha"><span>${esc(c.categoria)}</span><span class="num">${brl(c.valor)}</span></div>
-      <div class="trilho"><div style="width:${(c.valor / maior) * 100}%"></div></div>
-      <div class="det">${pct(c.valor / total)} do total · ${v == null ? "novo neste mês" : pct(v, true) + " vs mês anterior"}</div></button>`;
-  }).join("") : `<div class="vazio">Sem gastos neste mês.</div>`;
+  const vazio = `<div class="vazio">Sem gastos neste mês.</div>`;
+  $("categorias").innerHTML = cats.length ? cats.map((c) => barraCat(c, total, maior)).join("") : vazio;
+  $("topCats").innerHTML = cats.length ? cats.slice(0, 5).map((c) => barraCat(c, total, maior)).join("") : vazio;
 }
 
 function renderOrcamentos() {
@@ -678,7 +820,7 @@ function renderLateral() {
 
   $("qtdContas").textContent = contas.length === 1 ? "1 conta" : contas.length + " contas";
   $("contas").innerHTML = contas.length ? contas.map((c) =>
-    `<li><span class="conta-ic">${avatar(c.banco)}<span>${esc(c.banco)}<br><small>${esc(c.nome)}</small></span></span><span class="num">${brl(c.saldo)}</span></li>`).join("")
+    `<li><span class="conta-ic">${bolinha(c.banco, "Tarifas bancárias", true)}<span>${esc(c.banco)}<br><small>${esc(c.nome)}</small></span></span><span class="num">${brl(c.saldo)}</span></li>`).join("")
     : `<li class="tudo-ok">Nenhuma conta ainda.</li>`;
 
   $("qtdAlertas").textContent = D.alertas.length ? (D.alertas.length === 1 ? "1 aviso" : D.alertas.length + " avisos") : "tudo em ordem";
@@ -688,49 +830,100 @@ function renderLateral() {
 }
 
 function renderFiltros() {
-  const atual = $("txCat").value;
-  const cats = [...new Set(D.resumo.transacoes.map((t) => t.categoria))].sort();
-  $("txCat").innerHTML = `<option value="">Todas as categorias</option>` + cats.map((c) => `<option ${c === atual ? "selected" : ""}>${esc(c)}</option>`).join("");
+  const T = D.resumo.transacoes;
+  const opcoes = (el, todos, valores) => {
+    const atual = el.value;
+    el.innerHTML = `<option value="">${todos}</option>` + [...new Set(valores)].sort()
+      .map((v) => `<option ${v === atual ? "selected" : ""}>${esc(v)}</option>`).join("");
+  };
+  opcoes($("txCat"), "Todas as categorias", T.map((t) => t.categoria));
+  opcoes($("txConta"), "Todas as contas", T.map(contaTx));
 }
 
-function semAcento(s) { return (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+// Transações do mês agrupadas por dia, com os filtros
+function nomeDia(s) {
+  const d = new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)), h = new Date();
+  const ontem = new Date(h.getFullYear(), h.getMonth(), h.getDate() - 1);
+  const longo = d.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+  if (s === iso(h)) return "Hoje · " + longo;
+  if (s === iso(ontem)) return "Ontem · " + longo;
+  return longo[0].toUpperCase() + longo.slice(1);
+}
 
 function renderTransacoes() {
-  const q = semAcento($("txBusca").value), cat = $("txCat").value, tipo = $("txTipo").value;
+  const q = semAcento($("txBusca").value), cat = $("txCat").value, conta = $("txConta").value;
   const lst = D.resumo.transacoes.filter((t) =>
-    (!q || semAcento(t.descricao + " " + (t.estabelecimento || "")).includes(q)) &&
-    (!cat || t.categoria === cat) && (!tipo || t.direcao === tipo));
-  const saidas = lst.filter((t) => t.direcao === "saida" && !t.neutra).reduce((s, t) => s + t.valor, 0);
-  const entradas = lst.filter((t) => t.direcao === "entrada" && !t.neutra).reduce((s, t) => s + t.valor, 0);
-  $("txResumo").textContent = `${lst.length} · saídas ${brl(saidas)} · entradas ${brl(entradas)}`;
-  $("txCorpo").innerHTML = lst.length ? lst.slice(0, txLimite).map((t) => {
-    const parc = t.parcelas_total ? ` <small class="suave">(${t.parcela_atual}/${t.parcelas_total})</small>` : "";
-    const sinal = t.direcao === "saida" ? "−" : "+";
-    return `<tr class="${t.neutra ? "neutra" : ""}"><td class="suave">${data(t.data).slice(0, 5)}</td>
-      <td><div class="desc-cel">${avatar(t.estabelecimento || t.descricao)}<span>${esc(t.descricao)}${parc}</span></div></td>
-      <td><button class="tag" data-desc="${esc(t.estabelecimento || t.descricao)}" data-cat="${esc(t.categoria)}">${esc(t.categoria)}</button></td>
-      <td class="suave">${esc(t.banco || "")}</td><td class="num ${!t.neutra && t.direcao === "entrada" ? "pos" : ""}">${sinal}${brl(t.valor)}</td></tr>`;
-  }).join("") : `<tr><td colspan="5" class="vazio">Nenhuma transação.</td></tr>`;
+    (!q || semAcento(t.descricao + " " + (t.estabelecimento || "") + " " + nomeTx(t) + " " + t.categoria).includes(q)) &&
+    (!cat || t.categoria === cat) && (!conta || contaTx(t) === conta) && (!txTipo || t.direcao === txTipo));
+  const soma = (dir) => lst.filter((t) => t.direcao === dir && !t.neutra).reduce((s, t) => s + t.valor, 0);
+  const saidas = soma("saida"), entradas = soma("entrada");
+  $("txTotais").innerHTML =
+    `<div><small>Saídas</small><b>${brl(saidas)}</b></div>` +
+    `<div><small>Entradas</small><b class="pos">${brl(entradas)}</b></div>` +
+    `<div><small>Transações</small><b>${lst.length}</b></div>`;
+
+  const dias = [];
+  for (const t of lst.slice(0, txLimite)) {
+    if (dias.at(-1)?.data !== t.data) dias.push({ data: t.data, itens: [] });
+    dias.at(-1).itens.push(t);
+  }
+  $("txLista").innerHTML = dias.length ? dias.map((d) => {
+    const gasto = d.itens.filter((t) => t.direcao === "saida" && !t.neutra).reduce((s, t) => s + t.valor, 0);
+    return `<div class="dia"><div class="dia-cab"><span>${nomeDia(d.data)}</span>${gasto ? `<span>gastos <b class="num">${brl(gasto)}</b></span>` : ""}</div>
+      ${d.itens.map((t) => linhaTx(t, true)).join("")}</div>`;
+  }).join("") : `<div class="vazio">Nenhuma transação com esses filtros.</div>`;
   $("txMais").hidden = lst.length <= txLimite;
 }
 
 function filtrar({ cat = "", tipo = "" }) {
   $("txCat").value = cat;
-  $("txTipo").value = tipo;
+  $("txConta").value = "";
   $("txBusca").value = "";
-  txLimite = 50;
+  marcarTipo(tipo);
+  txLimite = 60;
   renderTransacoes();
+}
+function marcarTipo(tipo) {
+  txTipo = tipo;
+  $("txTipo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tipo === tipo)));
 }
 
 function trocarMes(m) { $("mes").value = m; carregar(m); }
 
+// Telas: cada link da barra lateral abre uma tela (#inicio, #transacoes, …)
+const VISTAS = {
+  inicio: [null, "Seu resumo financeiro"],
+  transacoes: ["Transações", null],
+  analise: ["Análise", "Categorias, orçamentos e gastos fixos"],
+  investimentos: ["Investimentos", "Aplicações e compras parceladas"],
+  ajustes: ["Ajustes", "Regras de categoria e conexões com os bancos"],
+};
+function mostrarVista() {
+  const v = location.hash.slice(1) in VISTAS ? location.hash.slice(1) : "inicio";
+  document.querySelectorAll(".vista").forEach((el) => { el.hidden = el.dataset.vista !== v; });
+  document.querySelectorAll("nav.lateral a[href^='#']").forEach((a) => a.classList.toggle("ativo", a.getAttribute("href") === "#" + v));
+  const h = new Date().getHours(), [titulo, sub] = VISTAS[v];
+  $("titulo").textContent = titulo || (h < 12 ? "Bom dia!" : h < 18 ? "Boa tarde!" : "Boa noite!");
+  $("subtitulo").textContent = sub || (D ? nomeMesLongo(D.resumo.mes)[0].toUpperCase() + nomeMesLongo(D.resumo.mes).slice(1) : "");
+  document.title = (titulo ? titulo + " · " : "") + "Meu Pierre";
+  if (v === "inicio") graficos.ev?.resize();
+}
+function irPara(v) {
+  if (location.hash === "#" + v) mostrarVista(); else location.hash = v;
+  topo();
+}
+const topo = () => scrollTo({ top: 0, behavior: "instant" });
+window.addEventListener("hashchange", () => { mostrarVista(); topo(); });
+
 $("mes").addEventListener("change", (e) => carregar(e.target.value));
-$("txBusca").addEventListener("input", () => { txLimite = 50; renderTransacoes(); });
-$("txCat").addEventListener("change", () => { txLimite = 50; renderTransacoes(); });
-$("txTipo").addEventListener("change", () => { txLimite = 50; renderTransacoes(); });
+$("txBusca").addEventListener("input", () => { txLimite = 60; renderTransacoes(); });
+$("txCat").addEventListener("change", () => { txLimite = 60; renderTransacoes(); });
+$("txConta").addEventListener("change", () => { txLimite = 60; renderTransacoes(); });
+$("txTipo").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (b) { marcarTipo(b.dataset.tipo); txLimite = 60; renderTransacoes(); }
+});
 $("txMais").addEventListener("click", () => { txLimite += 100; renderTransacoes(); });
-$("verGastos").addEventListener("click", () => filtrar({ tipo: "saida" }));
-$("verEntradas").addEventListener("click", () => filtrar({ tipo: "entrada" }));
 
 $("btnSync").addEventListener("click", async () => {
   const b = $("btnSync");
@@ -760,7 +953,7 @@ $("formRegra").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
     await api("/api/regra", { texto: $("regraTexto").value, categoria: $("regraCat").value });
-    $("regraTexto").value = ""; $("regraCat").value = "";
+    $("regraTexto").value = ""; $("regraCat").value = ""; $("regraCat").placeholder = "Categoria (ex.: Aluguel)";
     carregar();
   } catch (err) { alert(err.message); }
 });
@@ -772,28 +965,19 @@ document.addEventListener("click", async (e) => {
     carregar();
   }
   const cat = e.target.closest("button.tag");
-  if (cat) {
+  if (cat) {  // corrigir categoria: abre Ajustes com a regra já preenchida
+    irPara("ajustes");
     $("regraTexto").value = cat.dataset.desc;
     $("regraCat").value = "";
     $("regraCat").placeholder = "Nova categoria (hoje: " + cat.dataset.cat + ")";
-    $("regraCat").scrollIntoView({ behavior: "smooth", block: "center" });
+    $("regraCat").scrollIntoView({ block: "center" });
     $("regraCat").focus({ preventScroll: true });
   }
   const fil = e.target.closest("[data-filtra]");
-  if (fil) {
-    filtrar({ cat: fil.dataset.filtra });
-    $("secTx").scrollIntoView({ behavior: "smooth" });
-  }
+  if (fil) { filtrar({ cat: fil.dataset.filtra }); irPara("transacoes"); }
+  const tipo = e.target.closest("a[data-tipo]");
+  if (tipo) { e.preventDefault(); filtrar({ tipo: tipo.dataset.tipo }); irPara("transacoes"); }
 });
-
-// Destaca na barra lateral a seção visível
-const links = [...document.querySelectorAll("nav.lateral a[href^='#']")];
-const marcar = (id) => links.forEach((a) => a.classList.toggle("ativo", a.getAttribute("href") === "#" + id));
-const obs = new IntersectionObserver((ents) => {
-  for (const en of ents) if (en.isIntersecting) marcar(scrollY < 120 ? "inicio" : en.target.id);
-}, { rootMargin: "-35% 0px -60% 0px" });
-["secCartoes", "secTx", "secAnalise", "secInv", "secAjustes"].forEach((id) => obs.observe($(id)));
-window.addEventListener("scroll", () => { if (scrollY < 120) marcar("inicio"); }, { passive: true });
 
 function aplicarTema(t) {
   document.documentElement.dataset.theme = t;
@@ -810,6 +994,7 @@ $("btnTema").addEventListener("click", () => {
 });
 aplicarTema(document.documentElement.dataset.theme || "dark");
 
+mostrarVista();
 carregar();
 </script>
 </body>

@@ -199,7 +199,7 @@
   .bola { width: 54px; height: 54px; border-radius: 50%; background: #f28c3b; color: #fff; display: grid; place-items: center; flex: none; }
   .pilha { position: relative; padding-top: 18px; }
   .pilha::before { content: ""; position: absolute; left: 14px; right: 6px; top: 2px; height: 60px; border-radius: 26px 26px 0 0;
-                   background: #f28c3b; transform: rotate(-2.5deg); transform-origin: right top; }
+                   background: var(--pilha, #f28c3b); transform: rotate(-2.5deg); transform-origin: right top; }
   .pilha.vazia::before { display: none; }
   .cc { position: relative; background: var(--menta); color: var(--menta-texto); border-radius: 26px; padding: 22px 24px; min-height: 196px;
         display: flex; flex-direction: column; }
@@ -212,6 +212,17 @@
   .cc .rodape { margin-top: auto; padding-top: 12px; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
   .cc .trilho { background: rgba(15,74,73,.15); height: 6px; margin-top: 8px; }
   .cc .trilho > div { background: #f28c3b; }
+  /* Cartão nas cores do banco */
+  .cc.marca { background: var(--cc-fundo); color: var(--cc-texto); overflow: hidden; }
+  .cc.marca::after { content: ""; position: absolute; right: -60px; bottom: -90px; width: 230px; height: 230px; border-radius: 50%;
+                     background: currentColor; opacity: .08; pointer-events: none; }
+  .cc.marca .rot { opacity: .8; }
+  .cc.marca .trilho { background: color-mix(in srgb, currentColor 22%, transparent); }
+  .cc.marca .trilho > div { background: currentColor; }
+  .cc .nome-banco { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .cc-logo { position: relative; width: 36px; height: 36px; border-radius: 11px; background: #fff; flex: none; display: grid; place-items: center;
+             color: var(--cc-cor, #0f4a49); font-weight: 800; font-size: 17px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+  .cc-logo img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 5px; object-fit: contain; background: #fff; }
   .botoes-cc { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
   .botoes-cc a { height: 56px; border-radius: 999px; background: #fff; color: #0f4a49; font-weight: 700;
                  display: inline-flex; justify-content: center; align-items: center; gap: 8px; text-decoration: none; font-size: 15px; }
@@ -580,8 +591,37 @@ function bolinha(texto, categoria, peq = false) {
   return `<span class="ic${peq ? " peq" : ""}" style="--c:${c}" title="${esc(m ? m.nome : categoria)}">${icone(ic)}${img}</span>`;
 }
 // Sem logotipo de verdade (erro ou o globo genérico de 16px), fica o ícone da categoria.
-document.addEventListener("error", (e) => { if (e.target.matches?.(".ic img")) e.target.remove(); }, true);
-document.addEventListener("load", (e) => { if (e.target.matches?.(".ic img") && e.target.naturalWidth <= 16) e.target.remove(); }, true);
+document.addEventListener("error", (e) => { if (e.target.matches?.(".ic img, .cc-logo img")) e.target.remove(); }, true);
+document.addEventListener("load", (e) => { if (e.target.matches?.(".ic img, .cc-logo img") && e.target.naturalWidth <= 16) e.target.remove(); }, true);
+
+// Cores dos bancos para os cartões: [padrão no nome, fundo, cor principal, cor do texto, site do logotipo]
+const BANCOS = [
+  [/nubank|nu/, "linear-gradient(135deg, #9b30e8, #6a0fb0)", "#820ad1", "#fff", "nubank.com.br"],
+  [/bradesco/, "linear-gradient(135deg, #e3173f, #a1001d)", "#cc092f", "#fff", "bradesco.com.br"],
+  [/itau/, "linear-gradient(135deg, #f58220, #d35400)", "#ec7000", "#fff", "itau.com.br"],
+  [/santander/, "linear-gradient(135deg, #ec0000, #a80000)", "#ec0000", "#fff", "santander.com.br"],
+  [/inter/, "linear-gradient(135deg, #ff8a3d, #e05a00)", "#ff7a00", "#fff", "bancointer.com.br"],
+  [/c6/, "linear-gradient(135deg, #3a3a3a, #121212)", "#242424", "#fff", "c6bank.com.br"],
+  [/banco do brasil|bb/, "linear-gradient(135deg, #fff35c, #f6d500)", "#0038a8", "#0b2a6b", "bb.com.br"],
+  [/caixa/, "linear-gradient(135deg, #2a7fd0, #005ca9)", "#005ca9", "#fff", "caixa.gov.br"],
+  [/picpay/, "linear-gradient(135deg, #27c86a, #0f9a46)", "#11c76f", "#fff", "picpay.com"],
+  [/mercado ?pago/, "linear-gradient(135deg, #12b8ef, #0080c0)", "#009ee3", "#fff", "mercadopago.com.br"],
+  [/xp/, "linear-gradient(135deg, #2e2e2e, #000)", "#111", "#fff", "xpi.com.br"],
+  [/btg/, "linear-gradient(135deg, #17407a, #061a36)", "#0d2b54", "#fff", "btgpactual.com"],
+  [/neon/, "linear-gradient(135deg, #1fd8ff, #0090c7)", "#00a5e0", "#fff", "neon.com.br"],
+  [/pagbank|pagseguro/, "linear-gradient(135deg, #2bd078, #14904d)", "#1bb35f", "#fff", "pagbank.com.br"],
+  [/sicoob/, "linear-gradient(135deg, #00b2a9, #00625e)", "#00a19a", "#fff", "sicoob.com.br"],
+  [/sicredi/, "linear-gradient(135deg, #4cb31a, #2b7a0b)", "#3fa110", "#fff", "sicredi.com.br"],
+  [/next/, "linear-gradient(135deg, #3cf08a, #00b85c)", "#00c85a", "#08321b", "next.me"],
+  [/will ?bank/, "linear-gradient(135deg, #ffe44d, #f5c400)", "#1a1a1a", "#1a1a1a", "willbank.com.br"],
+  [/original/, "linear-gradient(135deg, #22c26e, #00894a)", "#00a857", "#fff", "original.com.br"],
+  [/safra/, "linear-gradient(135deg, #1f3f78, #0b1f45)", "#0e2a5a", "#fff", "safra.com.br"],
+  [/porto/, "linear-gradient(135deg, #22b5ea, #0079b0)", "#00a3e0", "#fff", "portoseguro.com.br"],
+];
+function estiloBanco(nome) {
+  const t = semAcento(nome || ""), b = BANCOS.find(([re]) => re.test(t));
+  return b ? { fundo: b[1], cor: b[2], texto: b[3], dominio: b[4] } : null;
+}
 
 // Nome legível: marca conhecida, ou a descrição sem prefixos de maquininha e sem CAIXA ALTA.
 const PREFIXOS = /^(ifd|pag|pg|mp|ec|dl|htm|pp|paypal|ebanx|pagseguro|sumup|stone|cielo|rede)\s*\*\s*/i;
@@ -816,14 +856,21 @@ function renderLateral() {
   const cartoes = D.contas.filter((c) => c.cartao), contas = D.contas.filter((c) => !c.cartao);
   $("qtdCartoes").textContent = cartoes.length === 1 ? "1 cartão" : cartoes.length + " cartões";
   $("cartoes").className = "pilha" + (cartoes.length ? "" : " vazia");
-  $("cartoes").innerHTML = cartoes.length ? cartoes.map((c) => `<div class="cc">
-      <div class="banco"><span>${esc(c.banco)}</span>${icone("sinal")}</div>
+  $("cartoes").innerHTML = cartoes.length ? cartoes.map((c) => {
+    const b = estiloBanco(c.banco) || estiloBanco(c.nome);
+    const estilo = b ? ` marca" style="--cc-fundo:${b.fundo};--cc-texto:${b.texto};--cc-cor:${b.cor}` : "";
+    const logo = `<span class="cc-logo">${esc((c.banco || "?")[0].toUpperCase())}${b ? `<img src="https://www.google.com/s2/favicons?domain=${b.dominio}&sz=64" alt="" referrerpolicy="no-referrer">` : ""}</span>`;
+    return `<div class="cc${estilo}">
+      <div class="banco"><span class="nome-banco">${logo}<span>${esc(c.banco)}</span></span>${icone("sinal")}</div>
       <div class="rot">Fatura atual</div>
       <div class="valor">${brl(c.saldo)}</div>
       <div class="numero">**** **** ${esc(c.final || "····")}</div>
       <div class="rodape"><span>Limite ${brl(c.limite)}</span><span>Vence ${data(c.vencimento).slice(0, 5)}</span></div>
       ${c.uso_limite != null ? `<div class="trilho" title="${pct(c.uso_limite)} do limite usado"><div style="width:${Math.min(100, c.uso_limite * 100)}%"></div></div>` : ""}
-    </div>`).join("") : `<div class="tudo-ok">Nenhum cartão de crédito conectado.</div>`;
+    </div>`;
+  }).join("") : `<div class="tudo-ok">Nenhum cartão de crédito conectado.</div>`;
+  const primeiro = cartoes.length && (estiloBanco(cartoes[0].banco) || estiloBanco(cartoes[0].nome));
+  $("cartoes").style.setProperty("--pilha", primeiro ? primeiro.cor : "#f28c3b");
 
   $("qtdContas").textContent = contas.length === 1 ? "1 conta" : contas.length + " contas";
   $("contas").innerHTML = contas.length ? contas.map((c) =>

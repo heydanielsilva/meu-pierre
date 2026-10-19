@@ -292,76 +292,101 @@ class Store:
         agora = agora_br().isoformat()
 
         for item_id, banco_cfg in itens.items():
+            # Cada banco é gravado e confirmado separadamente: se um falhar (ou a Vercel
+            # interromper por tempo), o que já foi salvo dos outros não se perde.
             try:
-                it = cliente.item(item_id)
-                erro = (it.get("error") or {}).get("message") if it.get("error") else None
-                self.con.execute(
-                    "INSERT OR REPLACE INTO items VALUES (?,?,?,?,?,?)",
-                    (item_id, banco_cfg or None, it.get("status"), it.get("lastUpdatedAt"),
-                     it.get("consentExpiresAt"), erro),
-                )
-                resumo["status"][banco_cfg or item_id] = it.get("status")
+                self._sincronizar_item(cliente, item_id, banco_cfg, de, ate, agora, resumo)
+                self.con.commit()
             except Exception as e:  # noqa: BLE001
-                resumo["erros"].append(f"Item {item_id}: {e}")
+                self._desfazer()
+                resumo["erros"].append(f"{banco_cfg or item_id}: falha ao gravar no banco de dados: {e}")
 
-            try:
-                contas = cliente.accounts(item_id)
-            except Exception as e:  # noqa: BLE001
-                resumo["erros"].append(f"Contas do item {item_id}: {e}")
-                continue
-
-            for c in contas:
-                cd = c.get("creditData") or {}
-                banco = banco_cfg or c.get("marketingName") or c.get("name") or "Banco"
-                self.con.execute(
-                    "INSERT OR REPLACE INTO accounts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                    (c["id"], item_id, banco, c.get("marketingName") or c.get("name"),
-                     c.get("type"), c.get("subtype"), c.get("number"), c.get("balance"),
-                     cd.get("creditLimit"), cd.get("availableCreditLimit"),
-                     (cd.get("balanceDueDate") or "")[:10] or None,
-                     (cd.get("balanceCloseDate") or "")[:10] or None, agora),
-                )
-                resumo["contas"] += 1
-                try:
-                    txs = cliente.transactions(c["id"], de, ate)
-                except Exception as e:  # noqa: BLE001
-                    resumo["erros"].append(f"Transações de {banco}: {e}")
-                    txs = []
-                for t in txs:
-                    self._salvar_tx(c, t)
-                resumo["transacoes"] += len(txs)
-
-                if c.get("subtype") == "CREDIT_CARD":
-                    try:
-                        for b in cliente.bills(c["id"]):
-                            self.con.execute(
-                                "INSERT OR REPLACE INTO bills VALUES (?,?,?,?,?)",
-                                (b["id"], c["id"], (b.get("dueDate") or "")[:10],
-                                 b.get("totalAmount"), b.get("minimumPaymentAmount")),
-                            )
-                            resumo["faturas"] += 1
-                    except Exception:  # noqa: BLE001
-                        pass  # nem todo item MeuPluggy expõe /bills
-
-            try:
-                for inv in cliente.investments(item_id):
-                    self.con.execute(
-                        "INSERT OR REPLACE INTO investments VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                        (inv["id"], item_id, banco_cfg or None, inv.get("name"), inv.get("type"),
-                         inv.get("subtype"), inv.get("balance"), inv.get("amountOriginal"),
-                         inv.get("lastMonthRate"), inv.get("lastTwelveMonthsRate"),
-                         (inv.get("dueDate") or "")[:10] or None, agora),
-                    )
-                    resumo["investimentos"] += 1
-            except Exception as e:  # noqa: BLE001
-                resumo["erros"].append(f"Investimentos do item {item_id}: {e}")
-
-        self.con.commit()
         self.set_meta("ultima_sync", agora)
-        self.set_meta("ultimo_resultado", json.dumps({"em": agora, "dias": dias, **resumo}, ensure_ascii=False))
+        self.registrar_resultado({"em": agora, "dias": dias, **resumo})
         return resumo
 
-    def _salvar_tx(self, conta: dict, t: dict) -> None:
+    def registrar_resultado(self, resultado: dict) -> None:
+        self.set_meta("ultimo_resultado", json.dumps(resultado, ensure_ascii=False))
+
+    def _desfazer(self) -> None:
+        try:
+            if self.postgres:
+                self.con._c().rollback()
+            else:
+                self.con.rollback()
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _sincronizar_item(self, cliente, item_id: str, banco_cfg: str, de: str, ate: str,
+                          agora: str, resumo: dict) -> None:
+        try:
+            it = cliente.item(item_id)
+        except Exception as e:  # noqa: BLE001
+            resumo["erros"].append(f"Item {item_id}: {e}")
+        else:
+            erro = (it.get("error") or {}).get("message") if it.get("error") else None
+            self.con.execute(
+                "INSERT OR REPLACE INTO items VALUES (?,?,?,?,?,?)",
+                (item_id, banco_cfg or None, it.get("status"), it.get("lastUpdatedAt"),
+                 it.get("consentExpiresAt"), erro),
+            )
+            resumo["status"][banco_cfg or item_id] = it.get("status")
+
+        try:
+            contas = cliente.accounts(item_id)
+        except Exception as e:  # noqa: BLE001
+            resumo["erros"].append(f"Contas do item {item_id}: {e}")
+            return
+
+        for c in contas:
+            cd = c.get("creditData") or {}
+            banco = banco_cfg or c.get("marketingName") or c.get("name") or "Banco"
+            self.con.execute(
+                "INSERT OR REPLACE INTO accounts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (c["id"], item_id, banco, c.get("marketingName") or c.get("name"),
+                 c.get("type"), c.get("subtype"), c.get("number"), c.get("balance"),
+                 cd.get("creditLimit"), cd.get("availableCreditLimit"),
+                 (cd.get("balanceDueDate") or "")[:10] or None,
+                 (cd.get("balanceCloseDate") or "")[:10] or None, agora),
+            )
+            resumo["contas"] += 1
+            try:
+                txs = cliente.transactions(c["id"], de, ate)
+            except Exception as e:  # noqa: BLE001
+                resumo["erros"].append(f"Transações de {banco} · {c.get('name') or c['id']}: {e}")
+                txs = []
+            # Tudo de uma vez: gravar uma a uma no Postgres da nuvem estoura o tempo da Vercel.
+            linhas = [self._linha_tx(c, t) for t in txs if t.get("id")]
+            if linhas:
+                self.con.executemany("INSERT OR REPLACE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?)", linhas)
+            resumo["transacoes"] += len(linhas)
+
+            if c.get("subtype") == "CREDIT_CARD":
+                try:
+                    faturas = cliente.bills(c["id"])
+                except Exception:  # noqa: BLE001
+                    faturas = []  # nem todo item MeuPluggy expõe /bills
+                linhas = [(b["id"], c["id"], (b.get("dueDate") or "")[:10], b.get("totalAmount"),
+                           b.get("minimumPaymentAmount")) for b in faturas if b.get("id")]
+                if linhas:
+                    self.con.executemany("INSERT OR REPLACE INTO bills VALUES (?,?,?,?,?)", linhas)
+                resumo["faturas"] += len(linhas)
+
+        try:
+            invs = cliente.investments(item_id)
+        except Exception as e:  # noqa: BLE001
+            resumo["erros"].append(f"Investimentos do item {item_id}: {e}")
+            invs = []
+        linhas = [(inv["id"], item_id, banco_cfg or None, inv.get("name"), inv.get("type"),
+                   inv.get("subtype"), inv.get("balance"), inv.get("amountOriginal"),
+                   inv.get("lastMonthRate"), inv.get("lastTwelveMonthsRate"),
+                   (inv.get("dueDate") or "")[:10] or None, agora) for inv in invs if inv.get("id")]
+        if linhas:
+            self.con.executemany("INSERT OR REPLACE INTO investments VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", linhas)
+        resumo["investimentos"] += len(linhas)
+
+    @staticmethod
+    def _linha_tx(conta: dict, t: dict) -> tuple:
         valor = float(t.get("amount") or 0)
         tipo = (t.get("type") or "").upper()
         if tipo in ("DEBIT", "CREDIT"):
@@ -370,14 +395,21 @@ class Store:
             direcao = "saida" if valor < 0 else "entrada"
         cc = t.get("creditCardMetadata") or {}
         merchant = t.get("merchant") or {}
-        self.con.execute(
-            "INSERT OR REPLACE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (t["id"], conta["id"], (t.get("date") or "")[:10],
-             t.get("descriptionRaw") or t.get("description") or "",
-             abs(valor), direcao, t.get("category"),
-             merchant.get("businessName") or merchant.get("name"),
-             cc.get("installmentNumber"), cc.get("totalInstallments")),
-        )
+
+        def texto(v):  # o Postgres recusa o caractere nulo
+            return v.replace("\x00", "") if isinstance(v, str) else v
+
+        def inteiro(v):
+            try:
+                return int(v) if v not in (None, "") else None
+            except (TypeError, ValueError):
+                return None
+
+        return (t["id"], conta["id"], (t.get("date") or "")[:10],
+                texto(t.get("descriptionRaw") or t.get("description") or ""),
+                abs(valor), direcao, texto(t.get("category")),
+                texto(merchant.get("businessName") or merchant.get("name")),
+                inteiro(cc.get("installmentNumber")), inteiro(cc.get("totalInstallments")))
 
     # ------------------------------------------------------------- demo
     def popular_demo(self) -> None:

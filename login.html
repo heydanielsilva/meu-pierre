@@ -25,6 +25,8 @@
     --fundo: #071817; --cartao: #112c2b; --texto: #eaf3f2; --suave: #8fb0ac; --campo: #173836; --linha: #1f4240;
             --acento: #f59a4e; --erro: #ff7b73; color-scheme: dark;
   }
+  /* No computador, tudo em 75% do tamanho (como o zoom de 75% do navegador); no celular, tamanho normal */
+  @media (min-width: 761px) { html { zoom: .75; } }
   * { box-sizing: border-box; }
   body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--fundo); color: var(--texto);
          font: 16px/1.5 "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }

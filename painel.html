@@ -42,6 +42,12 @@
     --escuro: #071817; --escuro-2: #12302f; --acento: #f59a4e; --acento-claro: #3a2a1c; --acento-texto: #f7a865;
     --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c; --serie-rec: #36a597; --serie-gas: #d8691a;
   }
+  /* No computador, tudo em 75% do tamanho (como o zoom de 75% do navegador); no celular, tamanho normal */
+  @media (min-width: 761px) {
+    html { zoom: .75; }
+    .app { min-height: calc(100vh / .75); }
+    nav.lateral { height: calc(100vh / .75) !important; }
+  }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html { scroll-behavior: smooth; scroll-padding-top: 16px; }
@@ -864,8 +870,20 @@ function render() {
   $("listaCats").innerHTML = [...cats].sort().map((c) => `<option value="${esc(c)}">`).join("");
 }
 
+// Com o zoom de 75% da página, o Chart.js lê a posição do mouse em escala errada; corrige antes de tratar o evento.
+let zoomCorrigido = false;
+function corrigirZoom() {
+  if (zoomCorrigido) return;
+  zoomCorrigido = true;
+  Chart.register({ id: "zoomCss", beforeEvent(chart, args) {
+    const c = chart.canvas, z = c.currentCSSZoom ?? (c.getBoundingClientRect().width / c.offsetWidth || 1);
+    if (z !== 1 && args.event.x != null) { args.event.x /= z; args.event.y /= z; }
+  } });
+}
+
 function renderGraficos() {
   if (!window.Chart) return;
+  corrigirZoom();
   const R = D.resumo;
   Chart.defaults.color = cor("--suave");
   Chart.defaults.borderColor = cor("--linha");

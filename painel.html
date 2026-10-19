@@ -490,6 +490,9 @@
   .aba { display: grid; gap: 24px; min-width: 0; }
   .abas { margin-bottom: 0; max-width: 520px; }
   .tv { width: 100%; min-width: 0; }
+  /* Sem isto, no tema escuro o navegador pinta o fundo dos iframes do TradingView de branco
+     (o conteúdo deles usa o esquema de cores claro, diferente da página) */
+  .tv iframe { color-scheme: light; background: transparent !important; }
   .tv-faixa { height: 46px; }
   .faixa-mercado { padding: 8px 14px; }
   .tv-info { height: 180px; }
@@ -1884,7 +1887,9 @@ function widgetTV(alvo, tipo, config) {
   const sc = document.createElement("script");
   sc.src = `https://s3.tradingview.com/external-embedding/embed-widget-${tipo}.js`;
   sc.async = true;
-  sc.text = JSON.stringify({ locale: "br", colorTheme: temaTV(), theme: temaTV(), isTransparent: true, ...config });
+  // cores da plataforma no gráfico completo (os outros widgets ficam transparentes sobre o cartão)
+  const cores = tipo === "advanced-chart" ? { backgroundColor: cor("--cartao-2"), gridColor: cor("--linha") } : {};
+  sc.text = JSON.stringify({ locale: "br", colorTheme: temaTV(), theme: temaTV(), isTransparent: true, ...cores, ...config });
   caixa.append(w, sc);
   alvo.append(caixa);
 }

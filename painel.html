@@ -114,6 +114,11 @@
   .mini { position: relative; height: 96px; min-width: 0; }
   .grafico { position: relative; height: 250px; }
   .grafico.alto { height: 270px; }
+  /* No Início, o gráfico de receitas x gastos cresce até alinhar com o cartão ao lado */
+  .coluna.cheia { display: flex; flex-direction: column; }
+  .cartao.estica { flex: 1; display: flex; flex-direction: column; }
+  .cartao.estica .grafico { flex: 1; height: auto; min-height: 270px; }
+  .cartao.estica .grafico canvas { position: absolute; inset: 0; }
   .legenda { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--suave); font-weight: 500; margin: -6px 0 14px; }
   .legenda span { display: inline-flex; align-items: center; gap: 7px; }
   .legenda i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
@@ -410,7 +415,7 @@
           <section class="grade-3" id="kpis"></section>
 
           <section class="grade-2">
-            <div class="coluna">
+            <div class="coluna cheia">
               <div class="cartao">
                 <div class="cab"><h2>Receitas</h2><span class="extra" id="recMes"></span></div>
                 <div class="receita">
@@ -421,7 +426,7 @@
                   <div class="mini"><canvas id="gReceitas"></canvas></div>
                 </div>
               </div>
-              <div class="cartao">
+              <div class="cartao estica">
                 <div class="cab"><h2>Receitas x gastos</h2><span class="extra" id="evPeriodo">últimos 12 meses</span></div>
                 <div class="legenda"><span><i style="background:var(--serie-rec)"></i>Receitas</span><span><i style="background:var(--serie-gas)"></i>Gastos</span></div>
                 <div class="medias" id="evMedias"></div>
@@ -433,8 +438,8 @@
               <div class="cat-total"></div>
               <div class="cat-visual"></div>
               <div class="segmento largo cat-modo" role="group" aria-label="Agrupar por">
-                <button type="button" data-modo="categorias" aria-pressed="true">Categorias</button>
-                <button type="button" data-modo="grupos" aria-pressed="false">Grupos</button>
+                <button type="button" data-modo="grupos" aria-pressed="true">Grupos</button>
+                <button type="button" data-modo="categorias" aria-pressed="false">Categorias</button>
               </div>
               <div class="cat-lista"></div>
             </div>
@@ -494,8 +499,8 @@
             <div class="cat-total"></div>
             <div class="cat-visual"></div>
             <div class="segmento largo cat-modo" role="group" aria-label="Agrupar por">
-              <button type="button" data-modo="categorias" aria-pressed="true">Categorias</button>
-              <button type="button" data-modo="grupos" aria-pressed="false">Grupos</button>
+              <button type="button" data-modo="grupos" aria-pressed="true">Grupos</button>
+              <button type="button" data-modo="categorias" aria-pressed="false">Categorias</button>
             </div>
             <div class="cat-lista"></div>
           </div>
@@ -964,8 +969,8 @@ function barraCat(c, total, maior) {
       <div class="det">${pct(c.valor / total)} do total · ${v == null ? "novo neste mês" : pct(v, true) + " vs mês anterior"}</div></span></button>`;
 }
 
-let modoCat = "categorias";
-try { modoCat = localStorage.getItem("modoCat") || "categorias"; } catch (e) {}
+let modoCat = "grupos";  // padrão: grupos (anel)
+try { modoCat = localStorage.getItem("modoCategorias") || "grupos"; } catch (e) {}
 const brlCurto = (v) => oculto ? "R$ •••••" : v >= 1000 ? "R$ " + (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mil" : brl(v);
 const pctInt = (v) => (v >= 0.01 ? Math.round(v * 100) : "<1") + "%";
 
@@ -1208,7 +1213,7 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest(".cat-modo button");
   if (b) {
     modoCat = b.dataset.modo;
-    try { localStorage.setItem("modoCat", modoCat); } catch (err) {}
+    try { localStorage.setItem("modoCategorias", modoCat); } catch (err) {}
     renderCategorias();
   }
   const g = e.target.closest(".cat-visual [data-grupo]");  // clicar num arco abre o grupo na lista

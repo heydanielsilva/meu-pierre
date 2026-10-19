@@ -219,6 +219,66 @@
   .dica { color: var(--suave); font-size: 12.5px; margin-top: 8px; }
 
 
+  /* Transações: gráfico por dia, chips de categoria, cabeçalhos fixos e gaveta de detalhes */
+  .dias-graf { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3px; align-items: end; height: 140px; }
+  .dias-graf button { position: relative; height: 100%; border: 0; background: none; padding: 0; cursor: pointer; display: flex; flex-direction: column;
+                      justify-content: flex-end; align-items: center; gap: 4px; min-width: 0; }
+  .dias-graf button i { display: block; width: 100%; max-width: 22px; min-height: 3px; border-radius: 4px 4px 2px 2px; background: var(--serie-gas);
+                        opacity: .75; transition: opacity .15s, transform .15s; transform-origin: bottom; }
+  .dias-graf button.fds i { opacity: .45; }
+  .dias-graf button.hoje i { box-shadow: 0 0 0 2px var(--cartao), 0 0 0 4px var(--serie-gas); opacity: 1; }
+  .dias-graf button.sel i { opacity: 1; background: var(--acento); }
+  .dias-graf button.futuro i { background: var(--linha); opacity: 1; }
+  .dias-graf button:hover i { opacity: 1; transform: scaleY(1.04); }
+  .dias-graf small { font-size: 10.5px; color: var(--suave); height: 13px; }
+  .dias-graf button::after { content: attr(data-rotulo); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+                             background: #0f4a49; color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px;
+                             width: max-content; max-width: 150px; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 2; }
+  .dias-graf button:hover::after { opacity: 1; }
+  .dias-graf button:nth-child(-n+3)::after { left: 0; transform: none; }
+  .dias-graf button:nth-last-child(-n+3)::after { left: auto; right: 0; transform: none; }
+  .dias-media { position: relative; }
+  .dias-media .linha-media { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--suave); opacity: .5; pointer-events: none; }
+  .dias-media .linha-media span { position: absolute; right: 0; top: -18px; font-size: 11px; color: var(--suave); background: var(--cartao); padding: 0 4px; }
+  .chips-cat { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; margin-bottom: 6px; scrollbar-width: thin; }
+  .chips-cat button { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 12px 0 5px; border-radius: 999px;
+                      border: 1px solid var(--linha); background: var(--cartao-2); color: var(--texto); font-weight: 600; font-size: 13px; cursor: pointer;
+                      transition: border-color .15s, transform .15s; }
+  .chips-cat button .ic { width: 28px; height: 28px; }
+  .chips-cat button .ic svg.i { width: 15px; height: 15px; }
+  .chips-cat button small { color: var(--suave); font-weight: 500; }
+  .chips-cat button:hover { transform: translateY(-1px); }
+  .chips-cat button[aria-pressed="true"] { border-color: var(--acento); background: var(--cartao); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 22%, transparent); }
+  .chips-cat button.todas { padding-left: 12px; }
+  .filtros-ativos { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .filtros-ativos:empty { display: none; }
+  .filtros-ativos button { border: 0; border-radius: 999px; padding: 5px 10px; background: var(--acento-claro); color: var(--acento-texto); font-weight: 600;
+                           font-size: 12.5px; cursor: pointer; }
+  .dia-cab { position: sticky; top: 0; z-index: 1; background: var(--cartao); padding-top: 8px; }
+  .tx { cursor: pointer; transition: background .15s, transform .15s; }
+  .tx:active { transform: scale(.995); }
+  .gaveta-fundo { position: fixed; inset: 0; background: rgba(4, 16, 16, .55); backdrop-filter: blur(2px); z-index: 40; }
+  .gaveta { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); z-index: 41; background: var(--cartao); color: var(--texto);
+            box-shadow: -20px 0 50px rgba(0,0,0,.35); overflow-y: auto; padding: 26px 24px 32px; border-radius: 28px 0 0 28px; }
+  .gaveta-fechar { position: absolute; top: 18px; right: 18px; }
+  .gv-topo { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 10px 0 18px; }
+  .gv-topo .ic { width: 68px; height: 68px; }
+  .gv-topo .ic svg.i { width: 30px; height: 30px; }
+  .gv-topo .ic img { padding: 13px; }
+  .gv-topo h3 { margin: 4px 0 0; font-size: 21px; }
+  .gv-topo .gv-valor { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .gv-topo .gv-tipo { color: var(--suave); font-size: 14px; }
+  .gv-campos { display: grid; gap: 8px; }
+  .gv-campos div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 14px; background: var(--cartao-2); font-size: 14px; }
+  .gv-campos div span:first-child { color: var(--suave); }
+  .gv-campos div span:last-child { font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+  .gv-bloco { margin-top: 18px; }
+  .gv-bloco h4 { margin: 0 0 8px; font-size: 13px; color: var(--suave); text-transform: uppercase; letter-spacing: .05em; }
+  .gv-cat { display: flex; gap: 8px; }
+  .gv-cat .campo { flex: 1; }
+  .gv-similares .tx { padding: 8px 6px; }
+  .gv-original { font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--suave); background: var(--cartao-2); padding: 10px 12px; border-radius: 12px; overflow-wrap: anywhere; }
+
   /* Filtros da tela de transações */
   .filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
   .filtros .campo { flex: 1 1 170px; }
@@ -356,6 +416,10 @@
                    animation-delay: calc(var(--i, 0) * 50ms); }
     svg.anel circle { animation: desenhar 1.1s cubic-bezier(.3,.8,.3,1) both; animation-delay: calc(var(--i, 0) * 90ms); }
     .anel-centro { animation: surgir .6s .25s ease both; }
+    .dias-graf button i { animation: crescerY .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 18ms); }
+    .gaveta:not([hidden]) { animation: gavetaEntrar .35s cubic-bezier(.2,.8,.2,1) both; }
+    .gaveta-fundo:not([hidden]) { animation: surgir .25s ease both; }
+    #txLista .tx { animation: surgir .35s ease both; }
     .pontos i { animation: estourar .45s cubic-bezier(.3,1.4,.5,1) both; animation-delay: calc(var(--i, 0) * 25ms); }
     .faisca polyline { stroke-dasharray: 300; animation: tracar 1.2s ease both; }
     .faisca circle { animation: surgir .4s 1s ease both; }
@@ -396,6 +460,8 @@
   @keyframes brilharDeNovo { from { transform: translateX(-180%) skewX(-18deg); } to { transform: translateX(380%) skewX(-18deg); } }
   @keyframes sinal { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
   @keyframes faixa { from { transform: rotate(-2.5deg); } to { transform: rotate(-4.5deg) translateY(-3px); } }
+  @keyframes gavetaSubir { from { transform: translateY(60px); opacity: 0; } }
+  @keyframes gavetaEntrar { from { transform: translateX(40px); opacity: 0; } }
   @keyframes deslizar { from { opacity: 0; transform: translateX(-14px); } }
   @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(255,107,107,.6); } 70%, 100% { box-shadow: 0 0 0 8px rgba(255,107,107,0); } }
   @keyframes balancar { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); }
@@ -674,6 +740,10 @@
     .tx .sub .conta { display: none; }
     .parcela .sub { white-space: normal; }
     .barras-mes { gap: 4px; }
+    .dias-graf { gap: 1px; height: 120px; }
+    .dias-graf small { font-size: 9px; }
+    .gaveta:not([hidden]) { animation-name: gavetaSubir !important; }
+    .gaveta { top: auto; width: 100vw; max-height: 88vh; border-radius: 26px 26px 0 0; padding-bottom: 90px; }
     .evo-grade { grid-template-columns: 1fr; }
     .sim-res { grid-template-columns: 1fr; }
     .tv-grafico { height: 380px; }
@@ -862,8 +932,12 @@
 
       <!-- Transações -->
       <div class="vista" data-vista="transacoes" hidden>
+        <section class="grade-4" id="txResumo"></section>
         <section class="cartao">
-          <div class="totais" id="txTotais"></div>
+          <div class="cab"><h2>Gastos por dia</h2><span class="extra" id="txDiasExtra"></span></div>
+          <div id="txDias"></div>
+        </section>
+        <section class="cartao">
           <div class="filtros">
             <input class="campo busca" id="txBusca" type="search" placeholder="Buscar empresa, pessoa ou descrição">
             <div class="segmento" role="group" aria-label="Tipo" id="txTipo">
@@ -871,12 +945,16 @@
               <button type="button" data-tipo="saida" aria-pressed="false">Saídas</button>
               <button type="button" data-tipo="entrada" aria-pressed="false">Entradas</button>
             </div>
-            <select class="campo" id="txCat" aria-label="Categoria"><option value="">Todas as categorias</option></select>
             <select class="campo" id="txConta" aria-label="Conta"><option value="">Todas as contas</option></select>
+            <select class="campo" id="txOrdem" aria-label="Ordem">
+              <option value="data">Mais recentes</option><option value="maior">Maior valor</option><option value="menor">Menor valor</option>
+            </select>
           </div>
+          <div class="chips-cat" id="txChips" role="group" aria-label="Categorias"></div>
+          <div class="filtros-ativos" id="txAtivos"></div>
           <div id="txLista"></div>
           <div class="rodape-cartao"><button class="pilula" id="txMais" hidden>Mostrar mais</button></div>
-          <p class="dica">Clique na categoria de uma transação para corrigi-la. As transações em cinza (pagamento de fatura, transferências entre suas contas e aplicações) não contam como gasto nem receita.</p>
+          <p class="dica">Clique numa transação para ver os detalhes e corrigir a categoria. As transações em cinza (pagamento de fatura, transferências entre suas contas e aplicações) não contam como gasto nem receita.</p>
         </section>
       </div>
 
@@ -1028,6 +1106,11 @@
   </div>
 </div>
 <datalist id="listaCats"></datalist>
+<div class="gaveta-fundo" id="gavetaFundo" hidden></div>
+<aside class="gaveta" id="gaveta" hidden role="dialog" aria-modal="true" aria-labelledby="gvNome">
+  <button class="x gaveta-fechar" id="gavetaFechar" type="button" title="Fechar">✕</button>
+  <div id="gavetaCorpo"></div>
+</aside>
 
 <script>
 const $ = (id) => document.getElementById(id);
@@ -1453,7 +1536,7 @@ function linhaTx(t, editavel = false) {
   const cat = editavel
     ? `<button class="tag" data-desc="${esc(t.estabelecimento || t.descricao)}" data-cat="${esc(t.categoria)}" title="Corrigir categoria">${esc(t.categoria)}</button>`
     : `<span>${tipo ? "· " : ""}${esc(t.categoria)}</span>`;
-  return `<div class="tx${t.neutra ? " neutra" : ""}" title="${esc(t.descricao)}">${bolinha(t.estabelecimento + " " + t.descricao, t.categoria)}
+  return `<div class="tx${t.neutra ? " neutra" : ""}" data-tx="${esc(t.id)}" title="${esc(t.descricao)}">${bolinha(t.estabelecimento + " " + t.descricao, t.categoria)}
     <div class="meio"><div class="nome">${esc(nome)}</div>
       <div class="sub">${tipo ? `<span class="tipo">${esc(tipo)}</span>` : ""}${cat}<span class="conta">· ${esc(contaTx(t))}</span>${parc}</div></div>
     <div class="valor ${t.neutra ? "" : saida ? "neg" : "pos"}">${saida ? "−" : "+"}${brl(t.valor)}${t.neutra ? "<small>não conta</small>" : ""}</div></div>`;
@@ -2206,7 +2289,6 @@ function renderFiltros() {
     el.innerHTML = `<option value="">${todos}</option>` + [...new Set(valores)].sort()
       .map((v) => `<option ${v === atual ? "selected" : ""}>${esc(v)}</option>`).join("");
   };
-  opcoes($("txCat"), "Todas as categorias", T.map((t) => t.categoria));
   opcoes($("txConta"), "Todas as contas", T.map(contaTx));
 }
 
@@ -2220,18 +2302,60 @@ function nomeDia(s) {
   return longo[0].toUpperCase() + longo.slice(1);
 }
 
+let txCatSel = "", txDiaSel = "";
 function renderTransacoes() {
-  const q = semAcento($("txBusca").value), cat = $("txCat").value, conta = $("txConta").value;
-  const lst = D.resumo.transacoes.filter((t) =>
+  const R = D.resumo, q = semAcento($("txBusca").value), conta = $("txConta").value, ordem = $("txOrdem").value;
+  // base: busca + conta + tipo (os chips e o gráfico por dia usam essa base)
+  const base = R.transacoes.filter((t) =>
     (!q || semAcento(t.descricao + " " + (t.estabelecimento || "") + " " + nomeTx(t) + " " + t.categoria).includes(q)) &&
-    (!cat || t.categoria === cat) && (!conta || contaTx(t) === conta) && (!txTipo || t.direcao === txTipo));
-  const soma = (dir) => lst.filter((t) => t.direcao === dir && !t.neutra).reduce((s, t) => s + t.valor, 0);
-  const saidas = soma("saida"), entradas = soma("entrada");
-  $("txTotais").innerHTML =
-    `<div><small>Saídas</small><b>${brl(saidas)}</b></div>` +
-    `<div><small>Entradas</small><b class="pos">${brl(entradas)}</b></div>` +
-    `<div><small>Transações</small><b>${lst.length}</b></div>`;
+    (!conta || contaTx(t) === conta) && (!txTipo || t.direcao === txTipo));
+  const lst = base.filter((t) => (!txCatSel || t.categoria === txCatSel) && (!txDiaSel || t.data === txDiaSel));
+  const gastos = lst.filter((t) => t.direcao === "saida" && !t.neutra), entradasL = lst.filter((t) => t.direcao === "entrada" && !t.neutra);
+  const saidas = gastos.reduce((s, t) => s + t.valor, 0), entradas = entradasL.reduce((s, t) => s + t.valor, 0), saldo = entradas - saidas;
+  const maior = gastos.reduce((m, t) => (!m || t.valor > m.valor ? t : m), null);
+  const diasCorridos = R.atual ? R.dia : R.dias_mes;
 
+  // resumo
+  $("txResumo").innerHTML =
+    tile("gastos", ["#ff8f6b", "#d9452f"], "Saídas", brl(saidas), `${gastos.length} gasto${gastos.length === 1 ? "" : "s"}${!txDiaSel && diasCorridos ? " · " + brl(saidas / diasCorridos) + " por dia" : ""}`) +
+    tile("resultado", ["#4fdca0", "#11946a"], "Entradas", `<span class="pos">${brl(entradas)}</span>`, `${entradasL.length} entrada${entradasL.length === 1 ? "" : "s"}`) +
+    tile("patrimonio", saldo >= 0 ? ["#8d9bff", "#4c59d6"] : ["#ff8a80", "#c8372d"], "Saldo do período", `<span class="${saldo < 0 ? "neg" : ""}">${brl(saldo)}</span>`, saldo >= 0 ? "entrou mais do que saiu" : "saiu mais do que entrou") +
+    tile("alvo", ["#ffc35c", "#d9860f"], "Maior gasto", maior ? brl(maior.valor) : "—", maior ? esc(nomeTx(maior)) + " · " + data(maior.data).slice(0, 5) : "nenhum gasto");
+
+  // gastos por dia (clique num dia para filtrar)
+  const porDia = new Array(R.dias_mes).fill(0);
+  base.filter((t) => t.direcao === "saida" && !t.neutra && (!txCatSel || t.categoria === txCatSel)).forEach((t) => { porDia[+t.data.slice(8, 10) - 1] += t.valor; });
+  const maxD = Math.max(...porDia, 1), mediaD = diasCorridos ? porDia.slice(0, diasCorridos).reduce((a, b) => a + b, 0) / diasCorridos : 0;
+  const hojeIso = iso(new Date());
+  $("txDiasExtra").textContent = mediaD ? `média ${brl(mediaD)} por dia${txCatSel ? " em " + txCatSel : ""}` : "";
+  $("txDias").innerHTML = `<div class="dias-media"><div class="dias-graf" role="img" aria-label="Gastos por dia do mês">${porDia.map((v, i) => {
+    const dia = R.mes + "-" + String(i + 1).padStart(2, "0"), dw = new Date(+R.mes.slice(0, 4), +R.mes.slice(5, 7) - 1, i + 1).getDay();
+    const cls = [dw === 0 || dw === 6 ? "fds" : "", dia === hojeIso ? "hoje" : "", dia === txDiaSel ? "sel" : "", dia > hojeIso ? "futuro" : ""].join(" ");
+    return `<button type="button" class="${cls}" data-dia="${dia}" data-rotulo="${data(dia).slice(0, 5)}: ${brl(v)}" aria-label="${data(dia)}: ${brl(v)}">
+      <i style="--i:${i};height:${v ? Math.max(3, v / maxD * 100) : 2}%"></i><small>${(i + 1) % 5 === 1 || i === 0 ? i + 1 : ""}</small></button>`;
+  }).join("")}</div>${mediaD ? `<div class="linha-media" style="bottom:calc(17px + ${mediaD / maxD} * (100% - 17px))"><span>média</span></div>` : ""}</div>`;
+
+  // chips de categoria (com o total de gastos de cada uma)
+  const porCat = new Map();
+  base.filter((t) => !txDiaSel || t.data === txDiaSel).forEach((t) => porCat.set(t.categoria, (porCat.get(t.categoria) || 0) + (t.direcao === "saida" && !t.neutra ? t.valor : 0)));
+  const cats = [...porCat.entries()].sort((a, b) => b[1] - a[1]);
+  $("txChips").innerHTML = `<button type="button" class="todas" data-chip="" aria-pressed="${!txCatSel}">Todas</button>` + cats.map(([c, v]) => {
+    const [ic, k] = estiloCat(c);
+    return `<button type="button" data-chip="${esc(c)}" aria-pressed="${c === txCatSel}"><span class="ic" style="--c:${k}">${icone(ic)}</span>${esc(c)}${v ? ` <small>${brl(v)}</small>` : ""}</button>`;
+  }).join("");
+  const ativos = [];
+  if (txDiaSel) ativos.push(`<button type="button" data-limpa="dia">${nomeDia(txDiaSel)} ✕</button>`);
+  if (txCatSel) ativos.push(`<button type="button" data-limpa="cat">${esc(txCatSel)} ✕</button>`);
+  if (ativos.length > 1 || q || conta || txTipo) ativos.push(`<button type="button" data-limpa="tudo">Limpar filtros</button>`);
+  $("txAtivos").innerHTML = ativos.join("");
+
+  // lista: por dia (mais recentes) ou por valor
+  if (ordem !== "data") {
+    const ord = [...lst].sort((a, b) => ordem === "maior" ? b.valor - a.valor : a.valor - b.valor);
+    $("txLista").innerHTML = ord.length ? ord.slice(0, txLimite).map((t) => linhaTx(t, true)).join("") : `<div class="vazio">Nenhuma transação com esses filtros.</div>`;
+    $("txMais").hidden = ord.length <= txLimite;
+    return;
+  }
   const dias = [];
   for (const t of lst.slice(0, txLimite)) {
     if (dias.at(-1)?.data !== t.data) dias.push({ data: t.data, itens: [] });
@@ -2245,8 +2369,57 @@ function renderTransacoes() {
   $("txMais").hidden = lst.length <= txLimite;
 }
 
+// Gaveta com os detalhes de uma transação
+function abrirTransacao(id, focarCategoria = false) {
+  const t = D.resumo.transacoes.find((x) => String(x.id) === String(id));
+  if (!t) return;
+  const { nome, tipo } = detalharTx(t), saida = t.direcao === "saida";
+  const chave = t.estabelecimento || nome;
+  const parecidas = D.resumo.transacoes.filter((x) => x.id !== t.id && ((x.estabelecimento && x.estabelecimento === t.estabelecimento) || nomeTx(x) === nome));
+  const totalPar = parecidas.filter((x) => x.direcao === t.direcao).reduce((s, x) => s + x.valor, 0) + t.valor;
+  const campo = (rot, val) => val ? `<div><span>${rot}</span><span>${val}</span></div>` : "";
+  $("gavetaCorpo").innerHTML = `<div class="gv-topo">${bolinha(t.estabelecimento + " " + t.descricao, t.categoria)}
+      <h3 id="gvNome">${esc(nome)}</h3><div class="gv-tipo">${esc(tipo || (saida ? "Saída" : "Entrada"))}</div>
+      <div class="gv-valor ${t.neutra ? "suave" : saida ? "neg" : "pos"}">${saida ? "−" : "+"}${brl(t.valor)}</div>
+      ${t.neutra ? `<div class="gv-tipo">não conta como gasto nem receita</div>` : ""}</div>
+    <div class="gv-campos">
+      ${campo("Data", new Date(+t.data.slice(0, 4), +t.data.slice(5, 7) - 1, +t.data.slice(8, 10)).toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}
+      ${campo("Conta", esc(contaTx(t)))}
+      ${campo("Categoria", esc(t.categoria))}
+      ${t.parcelas_total ? campo("Parcela", `${t.parcela_atual} de ${t.parcelas_total} · total da compra ${brl(t.valor * t.parcelas_total)}`) : ""}
+      ${t.data_compra && t.data_compra !== t.data ? campo("Data da compra", data(t.data_compra)) : ""}
+    </div>
+    ${t.parcelas_total && t.parcelas_total <= 24 ? `<div class="gv-bloco"><h4>Parcelas</h4><div class="pontos">${Array.from({ length: t.parcelas_total }, (_, i) =>
+      `<i class="${i < t.parcela_atual ? "pago" : ""}${i === t.parcela_atual - 1 ? " atual" : ""}" style="--i:${i}"></i>`).join("")}</div></div>` : ""}
+    <div class="gv-bloco"><h4>Corrigir categoria</h4>
+      <form class="gv-cat" id="gvFormCat"><input class="campo" id="gvCat" list="listaCats" placeholder="Nova categoria (hoje: ${esc(t.categoria)})" required>
+        <button class="pilula roxa">Salvar</button></form>
+      <p class="dica">Vale para todas as transações com "${esc(chave)}" (cria uma regra em Ajustes).</p></div>
+    ${parecidas.length ? `<div class="gv-bloco gv-similares"><h4>${esc(nome)} neste mês · ${parecidas.length + 1} vezes · ${brl(totalPar)}</h4>
+      ${parecidas.slice(0, 6).map((x) => linhaTx(x)).join("")}</div>` : ""}
+    <div class="gv-bloco"><h4>Descrição original do banco</h4><div class="gv-original">${esc(t.descricao)}</div></div>`;
+  $("gvFormCat").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      await api("/api/regra", { texto: chave, categoria: $("gvCat").value });
+      fecharTransacao();
+      carregar();
+    } catch (err) { alert(err.message); }
+  });
+  $("gaveta").hidden = false; $("gavetaFundo").hidden = false;
+  document.body.style.overflow = "hidden";
+  (focarCategoria ? $("gvCat") : $("gavetaFechar")).focus({ preventScroll: true });
+}
+function fecharTransacao() {
+  $("gaveta").hidden = true; $("gavetaFundo").hidden = true;
+  document.body.style.overflow = "";
+}
+$("gavetaFechar").addEventListener("click", fecharTransacao);
+$("gavetaFundo").addEventListener("click", fecharTransacao);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("gaveta").hidden) fecharTransacao(); });
+
 function filtrar({ cat = "", tipo = "" }) {
-  $("txCat").value = cat;
+  txCatSel = cat; txDiaSel = "";
   $("txConta").value = "";
   $("txBusca").value = "";
   marcarTipo(tipo);
@@ -2290,7 +2463,22 @@ window.addEventListener("hashchange", () => { mostrarVista(); topo(); });
 
 $("mes").addEventListener("change", (e) => carregar(e.target.value));
 $("txBusca").addEventListener("input", () => { txLimite = 60; renderTransacoes(); });
-$("txCat").addEventListener("change", () => { txLimite = 60; renderTransacoes(); });
+$("txOrdem").addEventListener("change", () => { txLimite = 60; renderTransacoes(); });
+document.addEventListener("click", (e) => {
+  const chip = e.target.closest("[data-chip]");
+  if (chip) { txCatSel = chip.dataset.chip; txLimite = 60; renderTransacoes(); return; }
+  const dia = e.target.closest("[data-dia]");
+  if (dia) { txDiaSel = txDiaSel === dia.dataset.dia ? "" : dia.dataset.dia; txLimite = 60; renderTransacoes(); return; }
+  const limpa = e.target.closest("[data-limpa]");
+  if (limpa) {
+    if (limpa.dataset.limpa !== "cat") txDiaSel = "";
+    if (limpa.dataset.limpa !== "dia") txCatSel = "";
+    if (limpa.dataset.limpa === "tudo") { $("txBusca").value = ""; $("txConta").value = ""; marcarTipo(""); }
+    txLimite = 60; renderTransacoes(); return;
+  }
+  const tx = e.target.closest("[data-tx]");
+  if (tx && !e.target.closest("button.tag")) abrirTransacao(tx.dataset.tx);
+});
 $("txConta").addEventListener("change", () => { txLimite = 60; renderTransacoes(); });
 $("txTipo").addEventListener("click", (e) => {
   const b = e.target.closest("button");
@@ -2371,14 +2559,7 @@ document.addEventListener("click", async (e) => {
     carregar();
   }
   const cat = e.target.closest("button.tag");
-  if (cat) {  // corrigir categoria: abre Ajustes com a regra já preenchida
-    irPara("ajustes");
-    $("regraTexto").value = cat.dataset.desc;
-    $("regraCat").value = "";
-    $("regraCat").placeholder = "Nova categoria (hoje: " + cat.dataset.cat + ")";
-    $("regraCat").scrollIntoView({ block: "center" });
-    $("regraCat").focus({ preventScroll: true });
-  }
+  if (cat) abrirTransacao(cat.closest("[data-tx]")?.dataset.tx, true);  // corrigir categoria direto na gaveta
   const fil = e.target.closest("[data-filtra]");
   if (fil) { filtrar({ cat: fil.dataset.filtra }); irPara("transacoes"); }
   const tipo = e.target.closest("a[data-tipo]");

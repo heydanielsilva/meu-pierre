@@ -365,12 +365,28 @@ def faturas() -> list[dict]:
     return out
 
 
+CLASSES_INVEST = {"FIXED_INCOME": "Renda fixa", "MUTUAL_FUND": "Fundos", "EQUITY": "Ações", "ETF": "ETFs",
+                  "SECURITY": "Previdência", "COE": "COE", "OTHER": "Outros"}
+SUBTIPOS_INVEST = {"TREASURY": "Tesouro Direto", "REAL_ESTATE_FUND": "Fundos imobiliários", "CRYPTOCURRENCY": "Cripto"}
+
+
+def _taxa(v, limite: float):
+    """A Pluggy pode mandar a rentabilidade como fração (0,0095) ou em % (0,95); devolve sempre fração."""
+    if v is None:
+        return None
+    return v / 100 if abs(v) > limite else v
+
+
 def investimentos() -> list[dict]:
-    """Carteira: saldo por aplicação e rentabilidade no mês e em 12 meses."""
-    return [{"nome": r["nome"], "banco": r["banco"], "tipo": r["tipo"], "saldo": r["saldo"],
-             "aplicado": r["valor_aplicado"], "rent_mes": r["rent_mes"], "rent_12m": r["rent_12m"],
-             "vencimento": r["vencimento"]}
-            for r in store.con.execute("SELECT * FROM investments ORDER BY saldo DESC").fetchall()]
+    """Carteira: saldo por aplicação, classe (renda fixa, ações…) e rentabilidade no mês e em 12 meses."""
+    out = []
+    for r in store.con.execute("SELECT * FROM investments ORDER BY saldo DESC").fetchall():
+        classe = SUBTIPOS_INVEST.get(r["subtipo"] or "") or CLASSES_INVEST.get(r["tipo"] or "", "Outros")
+        out.append({"nome": r["nome"], "banco": r["banco"], "tipo": r["tipo"], "subtipo": r["subtipo"], "classe": classe,
+                    "saldo": r["saldo"], "aplicado": r["valor_aplicado"],
+                    "rent_mes": _taxa(r["rent_mes"], 0.3), "rent_12m": _taxa(r["rent_12m"], 2.5),
+                    "vencimento": r["vencimento"]})
+    return out
 
 
 def definir_orcamento(categoria: str, valor_mensal: float) -> None:

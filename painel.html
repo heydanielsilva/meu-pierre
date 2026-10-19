@@ -97,15 +97,41 @@
   .vazio { color: var(--suave); font-size: 14px; padding: 6px 0; }
 
   /* KPIs */
-  .kpi { position: relative; padding: 26px 26px 28px; }
-  .kpi .icone { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--cartao-2); margin-bottom: 26px; }
-  .kpi .icone svg { width: 26px; height: 26px; }
+  .kpi { position: relative; padding: 26px 26px 28px; overflow: hidden; isolation: isolate; }
+  /* brilho colorido no canto e ícone grande "marca d'água" ao fundo */
+  .deco { position: relative; overflow: hidden; isolation: isolate; }
+  .deco::before { content: ""; position: absolute; top: -80px; right: -80px; width: 200px; height: 200px; border-radius: 50%; z-index: -1;
+                  background: radial-gradient(closest-side, color-mix(in srgb, var(--k1) 24%, transparent), transparent); pointer-events: none; }
+  .deco .agua { position: absolute; right: -16px; bottom: -22px; width: 104px; height: 104px; color: var(--k2); opacity: .09;
+                transform: rotate(-12deg); z-index: -1; pointer-events: none; }
+  .bloco { position: relative; width: 50px; height: 50px; border-radius: 16px; display: grid; place-items: center; flex: none; color: #fff;
+           background: linear-gradient(140deg, var(--k1), var(--k2));
+           box-shadow: 0 10px 20px -8px color-mix(in srgb, var(--k2) 75%, transparent), inset 0 1px 0 rgba(255,255,255,.35);
+           transition: transform .3s cubic-bezier(.3,1.5,.5,1); }
+  .bloco::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+                  background: linear-gradient(165deg, rgba(255,255,255,.32), rgba(255,255,255,0) 50%); }
+  .bloco svg { width: 27px; height: 27px; }
+  .deco:hover .bloco { transform: rotate(-8deg) scale(1.07); }
+  .kpi::before { content: ""; position: absolute; top: -90px; right: -90px; width: 240px; height: 240px; border-radius: 50%; z-index: -1;
+                 background: radial-gradient(closest-side, color-mix(in srgb, var(--k1) 26%, transparent), transparent); pointer-events: none; }
+  .kpi .agua { position: absolute; right: -22px; bottom: -26px; width: 150px; height: 150px; color: var(--k2); opacity: .09;
+               transform: rotate(-12deg); z-index: -1; pointer-events: none; }
+  .kpi .icone { position: relative; width: 60px; height: 60px; border-radius: 19px; display: grid; place-items: center; margin-bottom: 24px;
+                background: linear-gradient(140deg, var(--k1), var(--k2)); color: #fff;
+                box-shadow: 0 12px 24px -8px color-mix(in srgb, var(--k2) 75%, transparent), inset 0 1px 0 rgba(255,255,255,.35);
+                transition: transform .3s cubic-bezier(.3,1.5,.5,1); }
+  .kpi .icone::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+                       background: linear-gradient(165deg, rgba(255,255,255,.32), rgba(255,255,255,0) 50%); }
+  .kpi .icone svg { width: 32px; height: 32px; }
+  .kpi:hover .icone { transform: rotate(-8deg) scale(1.07); }
+  .kpi .selo.sobe { background: color-mix(in srgb, var(--neg) 16%, var(--cartao)); color: var(--neg); }
+  .kpi .selo.desce { background: color-mix(in srgb, var(--pos) 16%, var(--cartao)); color: var(--pos); }
   .kpi .rot { color: var(--suave); font-size: 16px; font-weight: 500; }
   .kpi .val { font-size: 29px; font-weight: 700; letter-spacing: -0.01em; margin-top: 4px; font-variant-numeric: tabular-nums; }
   .kpi .det { font-size: 13px; color: var(--suave); margin-top: 6px; }
   .kpi .selo { position: absolute; top: 26px; right: 24px; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--cartao-2); }
   .kpi.destaque { background: var(--escuro); color: var(--escuro-texto); }
-  .kpi.destaque .icone { background: var(--acento); color: #fff; }
+  .kpi.destaque .agua { color: #fff; opacity: .06; }
   .kpi.destaque .rot { color: #fff; }
   .kpi.destaque .det { color: var(--escuro-suave); }
   :root[data-theme="dark"] .kpi.destaque { box-shadow: inset 0 0 0 1px #1f4240; }
@@ -233,7 +259,7 @@
   /* Análise: resumo, assinaturas e parcelas */
   .grade-4 { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
   .resumo-item { display: flex; gap: 14px; align-items: flex-start; padding: 20px; }
-  .resumo-item .ic { width: 46px; height: 46px; }
+  .resumo-item { align-items: center; }
   .resumo-item .rot { color: var(--suave); font-size: 14px; font-weight: 500; }
   .resumo-item .val { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .resumo-item .det { color: var(--suave); font-size: 12.5px; margin-top: 2px; }
@@ -314,6 +340,7 @@
     .vista:not([hidden]) > :nth-child(2), .vista:not([hidden]) > .principal > :nth-child(2) { animation-delay: .07s; }
     .vista:not([hidden]) > :nth-child(3), .vista:not([hidden]) > .principal > :nth-child(3) { animation-delay: .14s; }
     .vista:not([hidden]) > :nth-child(4) { animation-delay: .21s; }
+    .ranking .eixo i { animation: crescerX 1s .2s cubic-bezier(.2,.8,.2,1) both; }
     .trilho > div, .empilhada i { animation: crescerX 1s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
     .barras-mes .bm i, .mini-barras i { animation: crescerY .8s cubic-bezier(.2,.8,.2,1) both; transform-origin: bottom;
                                         animation-delay: calc(var(--i, 0) * 45ms); }
@@ -326,6 +353,15 @@
     .faisca circle { animation: surgir .4s 1s ease both; }
     #kpis > .kpi { animation: subir .55s cubic-bezier(.2,.8,.2,1) both; }
     #kpis > .kpi:nth-child(2) { animation-delay: .08s; } #kpis > .kpi:nth-child(3) { animation-delay: .16s; }
+    #kpis .icone { animation: estourar .6s .15s cubic-bezier(.3,1.5,.5,1) both; }
+    #kpis > .kpi:nth-child(2) .icone { animation-delay: .23s; } #kpis > .kpi:nth-child(3) .icone { animation-delay: .31s; }
+    #kpis .agua, .deco .agua { animation: girarEntrar 1s .2s cubic-bezier(.2,.8,.2,1) both; }
+    .grade-4 .bloco { animation: estourar .6s .15s cubic-bezier(.3,1.5,.5,1) both; }
+    .grade-4 > :nth-child(2) .bloco { animation-delay: .22s; } .grade-4 > :nth-child(3) .bloco { animation-delay: .29s; }
+    .grade-4 > :nth-child(4) .bloco { animation-delay: .36s; }
+    .grade-4 > .cartao { animation: subir .55s cubic-bezier(.2,.8,.2,1) both; }
+    .grade-4 > :nth-child(2) { animation-delay: .06s; } .grade-4 > :nth-child(3) { animation-delay: .12s; } .grade-4 > :nth-child(4) { animation-delay: .18s; }
+    .inv { animation: subir .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 70ms); }
     .composicao i, .ritmo i { animation: crescerX 1.1s .2s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
     .ritmo .marca { animation: surgir .4s 1s ease both; }
     .kpi-anel circle + circle { animation: desenhar 1.2s .2s cubic-bezier(.3,.8,.3,1) both; }
@@ -338,6 +374,7 @@
     .alerta .ponto.alto { animation: pulsar 1.8s ease-out infinite; }
     .bola.tocar svg { animation: balancar 1.2s .6s ease-in-out 2; }
   }
+  @keyframes girarEntrar { from { opacity: 0; transform: rotate(-40deg) scale(.6); } }
   @keyframes deslizar { from { opacity: 0; transform: translateX(-14px); } }
   @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(255,107,107,.6); } 70%, 100% { box-shadow: 0 0 0 8px rgba(255,107,107,0); } }
   @keyframes balancar { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); }
@@ -349,6 +386,41 @@
   @keyframes desenhar { from { stroke-dasharray: 0 1000; } }
   @keyframes surgir { from { opacity: 0; } }
   @keyframes tracar { from { stroke-dashoffset: 300; } }
+
+  /* Investimentos */
+  .classe-linha { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--linha); }
+  .classe-linha:first-child { border-top: 0; }
+  .classe-linha .ponto-cor { width: 12px; height: 12px; border-radius: 4px; flex: none; }
+  .classe-linha .meio { flex: 1; min-width: 0; font-weight: 600; }
+  .classe-linha .meio small { display: block; color: var(--suave); font-weight: 500; font-size: 12.5px; }
+  .classe-linha .num { font-weight: 700; }
+  .banco-linha + .banco-linha { margin-top: 16px; }
+  .banco-linha .topo-b { display: flex; align-items: center; gap: 10px; }
+  .banco-linha .topo-b .meio { flex: 1; font-weight: 600; }
+  .banco-linha .topo-b .meio small { display: block; color: var(--suave); font-weight: 500; font-size: 12.5px; }
+  .banco-linha .trilho { height: 10px; margin-top: 8px; }
+  #investimentos { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+  .inv { background: var(--cartao-2); border-radius: 20px; padding: 16px 18px; }
+  .ranking { display: grid; grid-template-columns: minmax(0, 1fr) 2fr auto; gap: 8px 12px; align-items: center; font-size: 13.5px; }
+  .ranking .nome-r { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ranking .eixo { position: relative; height: 12px; border-radius: 999px; background: var(--cartao-2); }
+  .ranking .eixo i { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
+  .ranking .eixo .zero { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--suave); opacity: .5; }
+  .ranking b { font-variant-numeric: tabular-nums; text-align: right; }
+  .inv-topo { display: flex; align-items: center; gap: 12px; }
+  .inv-topo .meio { flex: 1; min-width: 0; }
+  .inv-topo .nome { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .inv-topo .direita { text-align: right; }
+  .inv-topo .direita b { display: block; font-size: 19px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .inv-topo .direita small { color: var(--suave); font-size: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+  .chip { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--cartao); color: var(--suave); }
+  .chip.cor { background: color-mix(in srgb, var(--c) 18%, var(--cartao)); color: var(--c); }
+  .inv .trilho { height: 6px; margin-top: 12px; background: var(--cartao); }
+  .inv-numeros { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin-top: 12px; }
+  .inv-numeros > div { background: var(--cartao); border-radius: 12px; padding: 8px 10px; min-width: 0; }
+  .inv-numeros small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
+  .inv-numeros b { font-size: 14.5px; font-variant-numeric: tabular-nums; }
 
   /* Telas */
   .vista { display: grid; gap: 24px; min-width: 0; }
@@ -431,7 +503,8 @@
     .sync { text-align: left; }
     .cartao { padding: 20px 16px; border-radius: 22px; }
     .kpi { padding: 20px; }
-    .kpi .icone { width: 52px; height: 52px; margin-bottom: 18px; }
+    .kpi .icone { width: 52px; height: 52px; border-radius: 16px; margin-bottom: 18px; }
+    .kpi .icone svg { width: 28px; height: 28px; }
     .kpi .val { font-size: 25px; }
     aside.escuro { border-radius: 26px; padding: 22px 18px; }
     .receita { grid-template-columns: 1fr; }
@@ -446,6 +519,11 @@
     .tx .sub .conta { display: none; }
     .parcela .sub { white-space: normal; }
     .barras-mes { gap: 4px; }
+    .inv-topo { flex-wrap: wrap; }
+    .inv-topo .meio { flex: 1 1 calc(100% - 60px); }
+    .inv-topo .direita { flex: 1 1 100%; display: flex; align-items: baseline; justify-content: space-between; text-align: left; }
+    .chip { white-space: nowrap; }
+    .ranking { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; }
   }
 </style>
 </head>
@@ -501,6 +579,29 @@
   <symbol id="i-olho" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-olho-off" viewBox="0 0 24 24"><path d="M10.6 5.6A9 9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.7 3.4M6.6 6.6C4 8.3 2.5 12 2.5 12S6 18.5 12 18.5c1.9 0 3.5-.6 4.9-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2M3.5 3.5l17 17"/></symbol>
   <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="k-patrimonio" viewBox="0 0 32 32"><path d="M8 9.5 20.2 5.2a2 2 0 0 1 2.6 1.3l1 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="4" y="9.5" width="24" height="17" rx="4.5" fill="currentColor" fill-opacity=".3"/><rect x="4" y="9.5" width="24" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M28 14.5h-5.2a3.5 3.5 0 0 0 0 7H28" fill="currentColor"/><circle cx="22.8" cy="18" r="1.3" fill="currentColor" style="fill:var(--k2,#0f4a49)"/></symbol>
+  <symbol id="k-gastos" viewBox="0 0 32 32"><path d="M6.5 11h19l-1.5 14.3a3 3 0 0 1-3 2.7h-10a3 3 0 0 1-3-2.7z" fill="currentColor" fill-opacity=".3"/>
+    <path d="M6.5 11h19l-1.5 14.3a3 3 0 0 1-3 2.7h-10a3 3 0 0 1-3-2.7zM11.5 14V9a4.5 4.5 0 0 1 9 0v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M16 24v-7M13 20l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="k-sobra" viewBox="0 0 32 32"><circle cx="16" cy="5.2" r="2.8" fill="currentColor"/>
+    <path d="M5.5 17c0-4.7 4.5-8.2 10.3-8.2 1.4 0 2.7.2 3.9.6l3.6-2.5v4.5c1.1 1 2 2.1 2.5 3.4h2.2v5.2h-2.2c-.7 1.6-2 3-3.6 3.9V27h-4.1v-1.7c-.8.1-1.6.2-2.4.2s-1.6-.1-2.4-.2V27H9.2v-3.4C7 22 5.5 19.7 5.5 17z" fill="currentColor" fill-opacity=".3"/>
+    <path d="M5.5 17c0-4.7 4.5-8.2 10.3-8.2 1.4 0 2.7.2 3.9.6l3.6-2.5v4.5c1.1 1 2 2.1 2.5 3.4h2.2v5.2h-2.2c-.7 1.6-2 3-3.6 3.9V27h-4.1v-1.7c-.8.1-1.6.2-2.4.2s-1.6-.1-2.4-.2V27H9.2v-3.4C7 22 5.5 19.7 5.5 17z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M12.5 12.3h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="21.3" cy="15.2" r="1.3" fill="currentColor"/></symbol>
+  <symbol id="k-assinatura" viewBox="0 0 32 32"><rect x="4" y="6.5" width="24" height="21" rx="4.5" fill="currentColor" fill-opacity=".3"/><rect x="4" y="6.5" width="24" height="21" rx="4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M4 12.5h24M10.5 4v5M21.5 4v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.2 20a4.2 4.2 0 1 1-1.2-3.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.6 14.4v2.6H17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="k-parcela" viewBox="0 0 32 32"><rect x="3.5" y="7" width="25" height="18" rx="4" fill="currentColor" fill-opacity=".3"/><rect x="3.5" y="7" width="25" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M3.5 12.5h25" fill="none" stroke="currentColor" stroke-width="3"/><path d="M8 19.5h3M14.5 19.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/><path d="M21 19.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" opacity=".45"/></symbol>
+  <symbol id="k-falta" viewBox="0 0 32 32"><path d="M10 4.5c0 5 6 7 6 11.5s-6 6.5-6 11.5h12c0-5-6-7-6-11.5s6-6.5 6-11.5z" fill="currentColor" fill-opacity=".3"/>
+    <path d="M10 4.5c0 5 6 7 6 11.5s-6 6.5-6 11.5h12c0-5-6-7-6-11.5s6-6.5 6-11.5zM8 4.5h16M8 27.5h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.6 25h6.8L16 21.6z" fill="currentColor"/></symbol>
+  <symbol id="k-invest" viewBox="0 0 32 32"><rect x="6" y="17" width="5" height="10" rx="1.5" fill="currentColor" fill-opacity=".3"/><rect x="13.5" y="12.5" width="5" height="14.5" rx="1.5" fill="currentColor" fill-opacity=".3"/><rect x="21" y="8" width="5" height="19" rx="1.5" fill="currentColor" fill-opacity=".3"/>
+    <path d="M4 27.5h24M5.5 14.5 12 9l5 3.5 8.5-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21.5 5.5h4v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="k-resultado" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="currentColor" fill-opacity=".3"/><circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 22.5v-13M10.8 14.5 16 9.5l5.2 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"/></symbol>
+  <symbol id="k-mes" viewBox="0 0 32 32"><rect x="4" y="6.5" width="24" height="21" rx="4.5" fill="currentColor" fill-opacity=".3"/><rect x="4" y="6.5" width="24" height="21" rx="4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M4 12.5h24M10.5 4v5M21.5 4v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 23l4-4 2.5 2.5L22 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="k-alvo" viewBox="0 0 32 32"><circle cx="15" cy="17" r="11" fill="currentColor" fill-opacity=".3"/><circle cx="15" cy="17" r="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="17" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="17" r="1.6" fill="currentColor"/>
+    <path d="M15 17 25 7M21.5 6.5H25.5V10.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
 </svg>
 
@@ -661,8 +762,23 @@
 
       <!-- Investimentos e parcelas -->
       <div class="vista" data-vista="investimentos" hidden>
-        <section class="grade-2">
-          <div class="cartao"><div class="cab"><h2>Investimentos</h2><span class="extra" id="invTotal"></span></div><ul class="lista" id="investimentos"></ul></div>
+        <section class="grade-4" id="invResumo"></section>
+        <section class="grade-2" id="invGraficos">
+          <div class="cartao">
+            <div class="cab"><h2>Onde está seu dinheiro</h2><span class="extra">por tipo de aplicação</span></div>
+            <div class="cat-visual" id="invAnel"></div>
+            <div id="invClasses"></div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><h2>Por banco</h2><span class="extra" id="invBancosQtd"></span></div>
+            <div id="invBancos"></div>
+            <div class="cab" style="margin-top:30px"><h2>Quem rendeu mais</h2><span class="extra">últimos 12 meses</span></div>
+            <div id="invRanking"></div>
+          </div>
+        </section>
+        <section class="cartao">
+          <div class="cab"><h2>Suas aplicações</h2><span class="extra" id="invTotal"></span></div>
+          <div id="investimentos"></div>
         </section>
       </div>
 
@@ -914,9 +1030,10 @@ function faixas(lista) {
   $("faixas").innerHTML = lista.map((f) => `<div class="faixa ${f.classe}">${esc(f.texto)}</div>`).join("");
 }
 
-function kpi({ rot, val, det = "", ic, destaque = false, selo = "", classe = "", vis = "" }) {
-  return `<div class="cartao kpi ${destaque ? "destaque" : ""}">
-    <div class="icone">${icone(ic)}</div>${selo ? `<span class="selo">${selo}</span>` : ""}${vis.canto || ""}
+function kpi({ rot, val, det = "", ic, cores, destaque = false, selo = "", classeSelo = "", classe = "", vis = "" }) {
+  const k = (id, c) => `<svg class="${c}" aria-hidden="true"><use href="#k-${id}"/></svg>`;
+  return `<div class="cartao kpi ${destaque ? "destaque" : ""}" style="--k1:${cores[0]};--k2:${cores[1]}">${k(ic, "agua")}
+    <div class="icone">${k(ic, "k")}</div>${selo ? `<span class="selo ${classeSelo}">${selo}</span>` : ""}${vis.canto || ""}
     <div class="rot">${rot}</div><div class="val ${classe}">${val}</div>${vis.baixo || ""}${det ? `<div class="det">${det}</div>` : ""}</div>`;
 }
 
@@ -963,10 +1080,12 @@ function render() {
         stroke-dasharray="${tx * Ck} ${Ck}" transform="rotate(-90 28 28)"/>
       <text x="28" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="var(--texto)">${R.poupanca == null ? "—" : Math.round(R.poupanca * 100) + "%"}</text></svg>`;
   $("kpis").innerHTML =
-    kpi({ rot: "Patrimônio líquido", val: contar(P.liquido), ic: "bolsa", destaque: true, vis: { baixo: composicao } }) +
-    kpi({ rot: "Gastos do mês", val: contar(R.gastos), ic: "gasto", selo: varG != null ? pct(varG, true) : "", vis: { baixo: ritmo },
+    kpi({ rot: "Patrimônio líquido", val: contar(P.liquido), ic: "patrimonio", cores: ["#f7a65e", "#e2691f"], destaque: true, vis: { baixo: composicao } }) +
+    kpi({ rot: "Gastos do mês", val: contar(R.gastos), ic: "gastos", cores: ["#ff8f6b", "#d9452f"], vis: { baixo: ritmo },
+          selo: varG != null ? (varG > 0 ? "▲ " : "▼ ") + pct(Math.abs(varG)) : "", classeSelo: varG > 0 ? "sobe" : "desce",
           det: R.atual ? `projeção ${brl(R.projecao)} até dia ${R.dias_mes}` : `mês anterior ${brl(R.gastos_anterior)}` }) +
-    kpi({ rot: "Sobra do mês", val: contar(R.sobra), ic: "carteira", classe: R.sobra < 0 ? "neg" : "", vis: { canto: anelPoup },
+    kpi({ rot: "Sobra do mês", val: contar(R.sobra), ic: "sobra", cores: R.sobra < 0 ? ["#ff8a80", "#c8372d"] : ["#4fdca0", "#11946a"],
+          classe: R.sobra < 0 ? "neg" : "", vis: { canto: anelPoup },
           det: `receitas ${brl(R.receitas)} · poupança ${pct(R.poupanca)}` });
 
   // Receitas
@@ -990,12 +1109,7 @@ function render() {
 
   renderFixasEParcelas();
 
-  const totInv = D.investimentos.reduce((s, i) => s + (i.saldo || 0), 0);
-  $("invTotal").textContent = D.investimentos.length ? brl(totInv) : "";
-  $("investimentos").innerHTML = D.investimentos.length ? D.investimentos.map((i) => {
-    const ganho = i.aplicado ? i.saldo - i.aplicado : null;
-    return `<li><span class="conta-ic">${bolinha(i.banco || "", "Investimentos", true)}<span>${esc(i.nome)}<br><small>${esc(i.banco || "")} · mês ${pct(i.rent_mes, true)} · 12m ${pct(i.rent_12m, true)}${ganho != null ? " · resultado " + brl(ganho) : ""}</small></span></span><span class="num">${brl(i.saldo)}</span></li>`;
-  }).join("") : `<li class="vazio">Nenhum investimento compartilhado pelos bancos.</li>`;
+  renderInvestimentos();
 
   $("regras").innerHTML = D.regras.length ? D.regras.map((r) =>
     `<li><span class="conta-ic">${bolinha(r.texto, r.categoria, true)}<span>"${esc(r.texto)}" → <b>${esc(r.categoria)}</b></span></span><button class="x" title="Remover" data-regra="${esc(r.texto)}">✕</button></li>`).join("")
@@ -1249,6 +1363,13 @@ function anel(lista, total) {
   return `<svg class="anel" viewBox="0 0 240 240" role="img" aria-label="Gastos por grupo: ${esc(lista.map(({ g, valor }) => g[0] + " " + pctInt(valor / total)).join(", "))}">${arcos.join("")}</svg>`;
 }
 
+// Cartão de resumo com ícone em bloco colorido, brilho e marca d'água (Análise e Investimentos)
+function tile(ic, [k1, k2], rot, val, det, vis = "") {
+  const k = (c) => `<svg class="${c}" aria-hidden="true"><use href="#k-${ic}"/></svg>`;
+  return `<div class="cartao resumo-item deco" style="--k1:${k1};--k2:${k2}">${k("agua")}<span class="bloco">${k("k")}</span>
+    <div style="min-width:0"><div class="rot">${rot}</div><div class="val">${val}</div><div class="det">${det}</div></div>${vis ? `<div class="vis">${vis}</div>` : ""}</div>`;
+}
+
 // Análise: resumo no topo, assinaturas/contas fixas e compras parceladas
 function renderFixasEParcelas() {
   const R = D.resumo, rec = D.recorrentes, P = D.parcelas;
@@ -1259,8 +1380,7 @@ function renderFixasEParcelas() {
   const fim = P.reduce((m, p) => (p.termina > m ? p.termina : m), "");
   const varG = R.gastos_anterior ? (R.gastos - R.gastos_anterior) / R.gastos_anterior : null;
   const mesCurto = (m) => NOMES_MES[+m.slice(5, 7) - 1] + "/" + m.slice(2, 4);
-  const resumo = (ic, cor, rot, val, det, vis = "") => `<div class="cartao resumo-item"><span class="ic" style="--c:${cor}">${icone(ic)}</span>
-    <div style="min-width:0"><div class="rot">${rot}</div><div class="val">${val}</div><div class="det">${det}</div></div>${vis ? `<div class="vis">${vis}</div>` : ""}</div>`;
+  const resumo = (ic, cores, rot, val, det, vis = "") => tile(ic, cores, rot, val, det, vis);
   // gastos dos últimos meses (linha), logos das assinaturas, parcelas dos próximos meses e quanto já foi pago
   const ev = D.evolucao.filter((e) => e.gastos).slice(-6), gs = ev.map((e) => e.gastos);
   const minG = Math.min(...gs) * 0.9, faixa = Math.max(...gs) - minG || 1;  // escala da variação, não a partir do zero
@@ -1279,11 +1399,11 @@ function renderFixasEParcelas() {
       <circle cx="23" cy="23" r="18" fill="none" stroke="${G.banco}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${fracPago * Cm} ${Cm}" transform="rotate(-90 23 23)"/>
       <text x="23" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="var(--texto)">${Math.round(fracPago * 100)}%</text></svg>` : "";
   $("anResumo").innerHTML =
-    resumo("gasto", G.comida, "Gastos do mês", contar(R.gastos), varG == null ? "sem mês anterior" : pct(varG, true) + " vs mês anterior", faisca) +
-    resumo("play", G.assinatura, "Assinaturas e fixas", contar(totRec) + "<small class='suave' style='font-size:13px;font-weight:500'>/mês</small>",
+    resumo("gastos", ["#ff8f6b", "#d9452f"], "Gastos do mês", contar(R.gastos), varG == null ? "sem mês anterior" : pct(varG, true) + " vs mês anterior", faisca) +
+    resumo("assinatura", ["#f57fc0", "#c2368a"], "Assinaturas e fixas", contar(totRec) + "<small class='suave' style='font-size:13px;font-weight:500'>/mês</small>",
       `${assin.length} assinatura${assin.length === 1 ? "" : "s"} · ${fixas.length} conta${fixas.length === 1 ? "" : "s"} fixa${fixas.length === 1 ? "" : "s"}`, logos) +
-    resumo("cartao", G.compras, "Parcelas neste mês", contar(totParcMes), parcMes.length ? `${parcMes.length} compra${parcMes.length === 1 ? "" : "s"} parcelada${parcMes.length === 1 ? "" : "s"}` : "nenhuma parcela no mês", miniBarras) +
-    resumo("recibo", G.banco, "Falta pagar em parcelas", contar(falta), fim ? "última parcela em " + mesCurto(fim) : "nenhuma compra parcelada", anelMini);
+    resumo("parcela", ["#a98bff", "#6d46e0"], "Parcelas neste mês", contar(totParcMes), parcMes.length ? `${parcMes.length} compra${parcMes.length === 1 ? "" : "s"} parcelada${parcMes.length === 1 ? "" : "s"}` : "nenhuma parcela no mês", miniBarras) +
+    resumo("falta", ["#f2be6b", "#c47a1c"], "Falta pagar em parcelas", contar(falta), fim ? "última parcela em " + mesCurto(fim) : "nenhuma compra parcelada", anelMini);
 
   // Assinaturas e contas fixas
   $("recTotal").textContent = rec.length ? brl(totRec) + "/mês · " + brl(totRec * 12) + "/ano" : "";
@@ -1314,6 +1434,80 @@ function renderFixasEParcelas() {
       <div class="progresso"><span>${p.parcela} de ${p.total_parcelas} pagas</span><span>faltam ${p.restantes} · ${brl(p.falta)}</span></div></div>
       <div class="direita">${brl(p.valor)}<small>por mês</small></div></div>`;
   }).join("") : `<div class="vazio">Nenhuma compra parcelada em andamento.</div>`;
+}
+
+// Investimentos: resumo, divisão por tipo e por banco, e um cartão por aplicação
+const CLASSES = { "Renda fixa": ["#36a597", "banco"], "Tesouro Direto": ["#3b82c4", "escudo"], "Fundos": ["#8b5cf6", "grafico"],
+                  "Ações": ["#f28c3b", "invest"], "Fundos imobiliários": ["#d14d9b", "casa"], "ETFs": ["#e0b03a", "grafico"],
+                  "Previdência": ["#5b6ee1", "escudo"], "COE": ["#64808a", "recibo"], "Cripto": ["#f7931a", "dinheiro"], "Outros": ["#9c8f7a", "etiqueta"] };
+const estiloClasse = (c) => CLASSES[c] || CLASSES.Outros;
+const pctSinal = (v) => v == null ? "—" : (v > 0 ? "+" : "") + (v * 100).toFixed(2).replace(".", ",") + "%";
+const classeSinal = (v) => v == null || v === 0 ? "" : v > 0 ? "pos" : "neg";
+
+function renderInvestimentos() {
+  const I = D.investimentos, total = I.reduce((s, i) => s + (i.saldo || 0), 0);
+  $("invGraficos").hidden = !I.length;
+  $("invTotal").textContent = I.length ? `${I.length} aplicaç${I.length === 1 ? "ão" : "ões"} · ${brl(total)}` : "";
+  const comAplicado = I.filter((i) => i.aplicado), aplicado = comAplicado.reduce((s, i) => s + i.aplicado, 0);
+  const resultado = comAplicado.reduce((s, i) => s + i.saldo - i.aplicado, 0), resPct = aplicado ? resultado / aplicado : null;
+  const media = (k) => { const l = I.filter((i) => i[k] != null && i.saldo); const b = l.reduce((s, i) => s + i.saldo, 0); return b ? l.reduce((s, i) => s + i[k] * i.saldo, 0) / b : null; };
+  const rMes = media("rent_mes"), r12 = media("rent_12m");
+  const ganhoMes = I.filter((i) => i.rent_mes != null).reduce((s, i) => s + i.saldo - i.saldo / (1 + i.rent_mes), 0);
+  const ok = resultado >= 0;
+  $("invResumo").innerHTML = I.length ?
+    tile("invest", ["#8d9bff", "#4c59d6"], "Total investido", contar(total), `${I.length} aplicaç${I.length === 1 ? "ão" : "ões"} em ${new Set(I.map((i) => i.banco)).size} banco(s)`) +
+    tile("resultado", ok ? ["#4fdca0", "#11946a"] : ["#ff8a80", "#c8372d"], "Resultado", `<span class="${ok ? "pos" : "neg"}">${ok ? "+" : ""}${contar(resultado)}</span>`,
+      resPct == null ? "sem valor aplicado informado" : `${pctSinal(resPct)} sobre ${brl(aplicado)} aplicados`) +
+    tile("mes", ["#5fe0d6", "#0f8f8a"], "Rendeu no último mês", `<span class="${classeSinal(ganhoMes)}">${ganhoMes >= 0 ? "+" : ""}${contar(ganhoMes)}</span>`, "média de " + pctSinal(rMes) + " na carteira") +
+    tile("alvo", ["#ffc35c", "#d9860f"], "Rentabilidade em 12 meses", `<span class="${classeSinal(r12)}">${pctSinal(r12)}</span>`, "média ponderada pelo saldo")
+    : `<div class="cartao vazio" style="grid-column:1/-1">Nenhum investimento compartilhado pelos bancos ainda. Quando a Pluggy trouxer suas aplicações, elas aparecem aqui.</div>`;
+
+  // por tipo: anel + lista
+  const porClasse = new Map();
+  for (const i of I) porClasse.set(i.classe, (porClasse.get(i.classe) || 0) + (i.saldo || 0));
+  const classes = [...porClasse.entries()].sort((a, b) => b[1] - a[1]);
+  $("invAnel").innerHTML = classes.length ? anel(classes.map(([c, v]) => ({ g: [c, estiloClasse(c)[1], estiloClasse(c)[0]], valor: v })), total || 1) +
+    `<div class="anel-centro"><b>${contar(total, true)}</b><small>investidos</small></div>` : "";
+  $("invClasses").innerHTML = classes.map(([c, v]) => `<div class="classe-linha"><span class="ponto-cor" style="background:${estiloClasse(c)[0]}"></span>
+      <span class="meio">${esc(c)}<small>${pctInt(v / total)} da carteira</small></span><span class="num">${brl(v)}</span></div>`).join("");
+
+  // por banco
+  const porBanco = new Map();
+  for (const i of I) porBanco.set(i.banco || "Outros", (porBanco.get(i.banco || "Outros") || 0) + (i.saldo || 0));
+  const bancos = [...porBanco.entries()].sort((a, b) => b[1] - a[1]);
+  $("invBancosQtd").textContent = bancos.length === 1 ? "1 banco" : bancos.length + " bancos";
+  $("invBancos").innerHTML = bancos.map(([b, v]) => {
+    const corB = estiloBanco(b)?.cor || "#36a597";
+    return `<div class="banco-linha"><div class="topo-b">${bolinha(b, "Investimentos", true)}<span class="meio">${esc(b)}<small>${pctInt(v / total)} do total</small></span><b class="num">${brl(v)}</b></div>
+      <div class="trilho"><div style="width:${v / total * 100}%;background:${corB}"></div></div></div>`;
+  }).join("");
+
+  // quem rendeu mais em 12 meses (barras a partir do zero; negativas para a esquerda)
+  const comTaxa = I.filter((i) => i.rent_12m != null).sort((a, b) => b.rent_12m - a.rent_12m);
+  const maxPos = Math.max(0, ...comTaxa.map((i) => i.rent_12m)), maxNeg = Math.max(0, ...comTaxa.map((i) => -i.rent_12m));
+  const escala = maxPos + maxNeg || 1, zero = maxNeg / escala * 100;
+  $("invRanking").innerHTML = comTaxa.length ? `<div class="ranking">${comTaxa.map((i, n) => {
+    const w = Math.abs(i.rent_12m) / escala * 100, cor = i.rent_12m < 0 ? "var(--neg)" : estiloClasse(i.classe)[0];
+    return `<span class="nome-r" title="${esc(i.nome)}">${esc(i.nome)}</span>
+      <span class="eixo"><span class="zero" style="left:${zero}%"></span><i style="${i.rent_12m < 0 ? `right:${100 - zero}%` : `left:${zero}%`};width:${w}%;background:${cor};animation-delay:${n * 80}ms;transform-origin:${i.rent_12m < 0 ? "right" : "left"}"></i></span>
+      <b class="${classeSinal(i.rent_12m)}">${pctSinal(i.rent_12m)}</b>`;
+  }).join("")}</div>` : `<div class="vazio">Os bancos não informaram a rentabilidade.</div>`;
+
+  // um cartão por aplicação
+  $("investimentos").innerHTML = I.length ? I.map((i, n) => {
+    const [cor] = estiloClasse(i.classe), ganho = i.aplicado ? i.saldo - i.aplicado : null;
+    const venc = i.vencimento ? `<span class="chip">vence ${data(i.vencimento).slice(3)}</span>` : "";
+    const sub = i.subtipo && !["TREASURY", "REAL_ESTATE_FUND", "CRYPTOCURRENCY"].includes(i.subtipo) ? `<span class="chip">${esc(i.subtipo.replace(/_/g, " "))}</span>` : "";
+    return `<div class="inv" style="--i:${n}"><div class="inv-topo">${bolinha(i.banco || "", "Investimentos")}
+        <div class="meio"><div class="nome">${esc(i.nome)}</div><div class="chips"><span class="chip cor" style="--c:${cor}">${esc(i.classe)}</span>${sub}<span class="chip">${esc(i.banco || "")}</span>${venc}</div></div>
+        <div class="direita"><b>${brl(i.saldo)}</b><small>${pctInt((i.saldo || 0) / total)} da carteira</small></div></div>
+      <div class="trilho"><div style="width:${(i.saldo || 0) / total * 100}%;background:${cor}"></div></div>
+      <div class="inv-numeros">
+        <div><small>Aplicado</small><b>${i.aplicado ? brl(i.aplicado) : "—"}</b></div>
+        <div><small>Resultado</small><b class="${classeSinal(ganho)}">${ganho == null ? "—" : (ganho > 0 ? "+" : "") + brl(ganho) + (i.aplicado ? ` (${pctSinal(ganho / i.aplicado)})` : "")}</b></div>
+        <div><small>No último mês</small><b class="${classeSinal(i.rent_mes)}">${pctSinal(i.rent_mes)}</b></div>
+        <div><small>Em 12 meses</small><b class="${classeSinal(i.rent_12m)}">${pctSinal(i.rent_12m)}</b></div></div></div>`;
+  }).join("") : `<div class="vazio">Nenhum investimento compartilhado pelos bancos.</div>`;
 }
 
 function renderOrcamentos() {
@@ -1465,7 +1659,7 @@ document.addEventListener("click", (e) => {
   }
   const g = e.target.closest(".cat-visual [data-grupo]");  // clicar num arco abre o grupo na lista
   if (g) {
-    const d = [...g.closest(".cat-card").querySelectorAll("details.grupo")].find((x) => x.dataset.nomeGrupo === g.dataset.grupo);
+    const d = [...(g.closest(".cat-card")?.querySelectorAll("details.grupo") || [])].find((x) => x.dataset.nomeGrupo === g.dataset.grupo);
     if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
   }
 });

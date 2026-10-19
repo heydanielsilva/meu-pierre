@@ -289,6 +289,24 @@
                            white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 2; }
   .barras-mes .bm:hover::after { opacity: 1; }
 
+  /* Início: mini visuais nos cartões do topo */
+  .composicao { display: flex; gap: 3px; height: 10px; margin: 14px 0 10px; }
+  .composicao i { border-radius: 4px; min-width: 4px; }
+  .legenda-mini { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--escuro-suave); }
+  .legenda-mini span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .legenda-mini b { width: 8px; height: 8px; border-radius: 50%; }
+  .ritmo { position: relative; height: 10px; border-radius: 999px; background: var(--cartao-2); margin: 14px 0 8px; }
+  .ritmo i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; }
+  .ritmo .proj { background: color-mix(in srgb, var(--serie-gas) 30%, transparent); }
+  .ritmo .feito { background: var(--serie-gas); }
+  .ritmo .feito.acima { background: var(--neg); }
+  .ritmo .marca { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--texto); opacity: .7; }
+  .kpi-anel { position: absolute; top: 22px; right: 22px; width: 64px; height: 64px; }
+  .kpi { transition: transform .2s ease, box-shadow .2s ease; }
+  .kpi:hover, .cc:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(0,0,0,.2); }
+  .cc { transition: transform .25s ease, box-shadow .25s ease; }
+  .bola svg { transform-origin: 50% 10%; }
+
   /* Animações (desligadas para quem pede menos movimento no sistema) */
   @media (prefers-reduced-motion: no-preference) {
     .vista:not([hidden]) > section, .vista:not([hidden]) > .principal > section, .vista:not([hidden]) > aside {
@@ -306,7 +324,24 @@
     .pontos i { animation: estourar .45s cubic-bezier(.3,1.4,.5,1) both; animation-delay: calc(var(--i, 0) * 25ms); }
     .faisca polyline { stroke-dasharray: 300; animation: tracar 1.2s ease both; }
     .faisca circle { animation: surgir .4s 1s ease both; }
+    #kpis > .kpi { animation: subir .55s cubic-bezier(.2,.8,.2,1) both; }
+    #kpis > .kpi:nth-child(2) { animation-delay: .08s; } #kpis > .kpi:nth-child(3) { animation-delay: .16s; }
+    .composicao i, .ritmo i { animation: crescerX 1.1s .2s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
+    .ritmo .marca { animation: surgir .4s 1s ease both; }
+    .kpi-anel circle + circle { animation: desenhar 1.2s .2s cubic-bezier(.3,.8,.3,1) both; }
+    #recentes .tx, aside.escuro .cc, aside.escuro li, .alerta { animation: deslizar .5s cubic-bezier(.2,.8,.2,1) both; }
+    #recentes .tx:nth-child(2), aside.escuro .cc:nth-child(2), aside.escuro li:nth-child(2), .alerta:nth-child(2) { animation-delay: .06s; }
+    #recentes .tx:nth-child(3), aside.escuro .cc:nth-child(3), aside.escuro li:nth-child(3), .alerta:nth-child(3) { animation-delay: .12s; }
+    #recentes .tx:nth-child(4), aside.escuro li:nth-child(4), .alerta:nth-child(4) { animation-delay: .18s; }
+    #recentes .tx:nth-child(5), aside.escuro li:nth-child(5), .alerta:nth-child(5) { animation-delay: .24s; }
+    #recentes .tx:nth-child(6), .alerta:nth-child(6) { animation-delay: .3s; }
+    .alerta .ponto.alto { animation: pulsar 1.8s ease-out infinite; }
+    .bola.tocar svg { animation: balancar 1.2s .6s ease-in-out 2; }
   }
+  @keyframes deslizar { from { opacity: 0; transform: translateX(-14px); } }
+  @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(255,107,107,.6); } 70%, 100% { box-shadow: 0 0 0 8px rgba(255,107,107,0); } }
+  @keyframes balancar { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); }
+                        60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
   @keyframes subir { from { opacity: 0; transform: translateY(16px); } }
   @keyframes crescerX { from { transform: scaleX(0); } }
   @keyframes crescerY { from { transform: scaleY(0); } }
@@ -879,10 +914,10 @@ function faixas(lista) {
   $("faixas").innerHTML = lista.map((f) => `<div class="faixa ${f.classe}">${esc(f.texto)}</div>`).join("");
 }
 
-function kpi({ rot, val, det = "", ic, destaque = false, selo = "", classe = "" }) {
+function kpi({ rot, val, det = "", ic, destaque = false, selo = "", classe = "", vis = "" }) {
   return `<div class="cartao kpi ${destaque ? "destaque" : ""}">
-    <div class="icone">${icone(ic)}</div>${selo ? `<span class="selo">${selo}</span>` : ""}
-    <div class="rot">${rot}</div><div class="val ${classe}">${val}</div>${det ? `<div class="det">${det}</div>` : ""}</div>`;
+    <div class="icone">${icone(ic)}</div>${selo ? `<span class="selo">${selo}</span>` : ""}${vis.canto || ""}
+    <div class="rot">${rot}</div><div class="val ${classe}">${val}</div>${vis.baixo || ""}${det ? `<div class="det">${det}</div>` : ""}</div>`;
 }
 
 function render() {
@@ -907,12 +942,31 @@ function render() {
 
   // KPIs
   const varG = R.gastos_anterior ? (R.gastos - R.gastos_anterior) / R.gastos_anterior : null;
+  // Patrimônio: de onde vem (contas e investimentos) e quanto as faturas tiram
+  const ativos = Math.max(0, P.saldo) + Math.max(0, P.investimentos), base = ativos + Math.max(0, P.faturas) || 1;
+  const composicao = `<div class="composicao" role="img" aria-label="Contas ${brl(P.saldo)}, investimentos ${brl(P.investimentos)}, faturas ${brl(P.faturas)}">
+      <i style="flex:${Math.max(0, P.saldo) / base} 1 0;background:#9ec7c2" title="Contas: ${brl(P.saldo)}"></i>
+      <i style="flex:${Math.max(0, P.investimentos) / base} 1 0;background:#f28c3b;animation-delay:.12s" title="Investimentos: ${brl(P.investimentos)}"></i>
+      <i style="flex:${Math.max(0, P.faturas) / base} 1 0;background:#ff7b73;animation-delay:.24s" title="Faturas: ${brl(P.faturas)}"></i></div>
+    <div class="legenda-mini"><span><b style="background:#9ec7c2"></b>contas ${brl(P.saldo)}</span><span><b style="background:#f28c3b"></b>investimentos ${brl(P.investimentos)}</span><span><b style="background:#ff7b73"></b>faturas ${brl(P.faturas)}</span></div>`;
+  // Gastos: quanto do mês já foi (projeção ou mês anterior como referência), com marca do mês anterior
+  const refG = Math.max(R.atual ? R.projecao || 0 : 0, R.gastos_anterior || 0, R.gastos, 1);
+  const ritmo = `<div class="ritmo" title="${R.atual ? "Gasto até agora, projeção do mês e" : "Gasto do mês e"} gasto do mês anterior">
+      ${R.atual && R.projecao ? `<i class="proj" style="width:${R.projecao / refG * 100}%"></i>` : ""}
+      <i class="feito ${R.gastos > (R.gastos_anterior || Infinity) ? "acima" : ""}" style="width:${R.gastos / refG * 100}%"></i>
+      ${R.gastos_anterior ? `<span class="marca" style="left:${R.gastos_anterior / refG * 100}%" title="Mês anterior: ${brl(R.gastos_anterior)}"></span>` : ""}</div>`;
+  // Sobra: anel com a taxa de poupança
+  const tx = Math.max(0, Math.min(1, R.poupanca || 0)), Ck = 2 * Math.PI * 22;
+  const anelPoup = `<svg class="kpi-anel" viewBox="0 0 56 56" role="img" aria-label="Taxa de poupança ${pct(R.poupanca)}">
+      <circle cx="28" cy="28" r="22" fill="none" stroke="var(--linha)" stroke-width="7"/>
+      <circle cx="28" cy="28" r="22" fill="none" stroke="${R.sobra < 0 ? "var(--neg)" : "var(--pos)"}" stroke-width="7" stroke-linecap="round"
+        stroke-dasharray="${tx * Ck} ${Ck}" transform="rotate(-90 28 28)"/>
+      <text x="28" y="32" text-anchor="middle" font-size="12" font-weight="700" fill="var(--texto)">${R.poupanca == null ? "—" : Math.round(R.poupanca * 100) + "%"}</text></svg>`;
   $("kpis").innerHTML =
-    kpi({ rot: "Patrimônio líquido", val: contar(P.liquido), ic: "bolsa", destaque: true,
-          det: `contas ${brl(P.saldo)} · investimentos ${brl(P.investimentos)} · faturas ${brl(P.faturas)}` }) +
-    kpi({ rot: "Gastos do mês", val: contar(R.gastos), ic: "gasto", selo: varG != null ? pct(varG, true) : "",
+    kpi({ rot: "Patrimônio líquido", val: contar(P.liquido), ic: "bolsa", destaque: true, vis: { baixo: composicao } }) +
+    kpi({ rot: "Gastos do mês", val: contar(R.gastos), ic: "gasto", selo: varG != null ? pct(varG, true) : "", vis: { baixo: ritmo },
           det: R.atual ? `projeção ${brl(R.projecao)} até dia ${R.dias_mes}` : `mês anterior ${brl(R.gastos_anterior)}` }) +
-    kpi({ rot: "Sobra do mês", val: contar(R.sobra), ic: "carteira", classe: R.sobra < 0 ? "neg" : "",
+    kpi({ rot: "Sobra do mês", val: contar(R.sobra), ic: "carteira", classe: R.sobra < 0 ? "neg" : "", vis: { canto: anelPoup },
           det: `receitas ${brl(R.receitas)} · poupança ${pct(R.poupanca)}` });
 
   // Receitas
@@ -956,6 +1010,7 @@ function render() {
   $("listaCats").innerHTML = [...cats].sort().map((c) => `<option value="${esc(c)}">`).join("");
 }
 
+const menosMovimento = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Com o zoom de 75% da página, o Chart.js lê a posição do mouse em escala errada; corrige antes de tratar o evento.
 let zoomCorrigido = false;
 function corrigirZoom() {
@@ -1007,6 +1062,8 @@ function renderGraficos() {
     options: {
       maintainAspectRatio: false,
       interaction: { mode: "index", intersect: false },
+      animation: menosMovimento() ? false : { duration: 900, easing: "easeOutQuart",
+        delay: (c) => c.type === "data" && c.mode === "default" ? c.dataIndex * 55 + c.datasetIndex * 25 : 0 },
       plugins: { legend: { display: false }, tooltip: { ...tooltip, displayColors: true, boxPadding: 4, callbacks: {
         title: (it) => nomeMesLongo(ev[it[0].dataIndex].mes) + (ev[it[0].dataIndex].mes === hoje() ? " (parcial)" : ""),
         label: (c) => ` ${c.dataset.label}: ${brl(c.raw)}`,
@@ -1040,6 +1097,7 @@ function renderGraficos() {
                          pointBorderColor: cor("--texto"), pointBorderWidth: 3, pointHoverRadius: 6 }] },
     options: {
       maintainAspectRatio: false, layout: { padding: 8 },
+      animation: menosMovimento() ? false : { duration: 1200, easing: "easeOutCubic" },
       plugins: { legend: { display: false }, tooltip: { ...tooltip, callbacks: { label: (c) => brl(c.raw) } } },
       scales: { x: { display: false }, y: { display: false } },
     },
@@ -1294,6 +1352,7 @@ function renderLateral() {
     `<li><span class="conta-ic">${bolinha(c.banco, "Tarifas bancárias", true)}<span>${esc(c.banco)}<br><small>${esc(c.nome)}</small></span></span><span class="num">${brl(c.saldo)}</span></li>`).join("")
     : `<li class="tudo-ok">Nenhuma conta ainda.</li>`;
 
+  document.querySelector("aside.escuro .bola").classList.toggle("tocar", D.alertas.length > 0);
   $("qtdAlertas").textContent = D.alertas.length ? (D.alertas.length === 1 ? "1 aviso" : D.alertas.length + " avisos") : "tudo em ordem";
   $("alertas").innerHTML = D.alertas.length
     ? D.alertas.map((a) => `<div class="alerta"><span class="ponto ${a.nivel}"></span><span>${esc(oculto ? a.texto.replace(/R\$\s?-?[\d.]+(,\d+)?/g, "R$ •••••") : a.texto)}</span></div>`).join("")

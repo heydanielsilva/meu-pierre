@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Meu Pierre</title>
+<style>
+  :root { --fundo: #f4f5f7; --cartao: #fff; --texto: #1d2330; --suave: #6b7280; --borda: #e3e6eb; --marca: #2563eb; --erro: #c62828; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fundo: #0f1218; --cartao: #181c25; --texto: #e7e9ee; --suave: #9aa1ad; --borda: #2a303c; --marca: #5b8cff; --erro: #ff6b6b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
+         background: var(--fundo); color: var(--texto); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  form { width: 100%; max-width: 360px; background: var(--cartao); border: 1px solid var(--borda);
+         border-radius: 14px; padding: 28px 24px; }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  p { margin: 0 0 20px; color: var(--suave); font-size: 14px; }
+  label { display: block; font-size: 14px; margin-bottom: 6px; }
+  input { width: 100%; padding: 11px 12px; border: 1px solid var(--borda); border-radius: 8px;
+          background: transparent; color: inherit; font-size: 16px; }
+  button { width: 100%; margin-top: 16px; padding: 11px; border: 0; border-radius: 8px;
+           background: var(--marca); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+  .erro { color: var(--erro); font-size: 14px; margin-top: 12px; min-height: 1em; }
+</style>
+</head>
+<body>
+<form method="post" action="/entrar">
+  <h1>Meu Pierre</h1>
+  <p>Suas finanças, num painel só.</p>
+  <label for="senha">Senha</label>
+  <input id="senha" name="senha" type="password" autocomplete="current-password" required autofocus>
+  <button type="submit">Entrar</button>
+  <div class="erro">{{erro}}</div>
+</form>
+</body>
+</html>

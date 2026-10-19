@@ -199,7 +199,7 @@ def contas() -> list[dict]:
     out = []
     for c in store.con.execute("SELECT * FROM accounts ORDER BY banco, tipo").fetchall():
         cartao = c["subtipo"] == "CREDIT_CARD"
-        out.append({"banco": c["banco"], "nome": c["nome"], "cartao": cartao, "tipo": c["tipo"],
+        out.append({"id": c["id"], "banco": c["banco"], "nome": c["nome"], "cartao": cartao, "tipo": c["tipo"],
                     "final": str(c["numero"] or "")[-4:], "saldo": c["saldo"], "limite": c["limite"],
                     "limite_disponivel": c["limite_disponivel"], "vencimento": c["vencimento_fatura"],
                     "fechamento": c["fechamento_fatura"],
@@ -334,7 +334,7 @@ def parcelas_futuras() -> list[dict]:
         rest = r["parcelas_total"] - r["parcela_atual"]
         if rest > 0:
             d = date.fromisoformat(r["data"][:10])
-            out.append({"descricao": r["descricao"], "estabelecimento": r["estabelecimento"], "banco": r["banco"],
+            out.append({"conta_id": r["account_id"], "descricao": r["descricao"], "estabelecimento": r["estabelecimento"], "banco": r["banco"],
                         "cartao": r["subtipo"] == "CREDIT_CARD", "parcela": r["parcela_atual"],
                         "total_parcelas": r["parcelas_total"], "valor": r["valor"], "restantes": rest,
                         "falta": rest * r["valor"], "total_compra": r["parcelas_total"] * r["valor"],
@@ -359,8 +359,8 @@ def faturas() -> list[dict]:
     """Faturas anteriores de cada cartão."""
     out = []
     for c in store.con.execute("SELECT * FROM accounts WHERE subtipo='CREDIT_CARD'").fetchall():
-        for b in store.con.execute("SELECT * FROM bills WHERE account_id=? ORDER BY vencimento DESC LIMIT 6", (c["id"],)):
-            out.append({"cartao": f"{c['banco']} · {c['nome']}", "vencimento": b["vencimento"],
+        for b in store.con.execute("SELECT * FROM bills WHERE account_id=? ORDER BY vencimento DESC LIMIT 12", (c["id"],)):
+            out.append({"conta_id": c["id"], "cartao": f"{c['banco']} · {c['nome']}", "vencimento": b["vencimento"],
                         "valor": b["valor"], "minimo": b["pagamento_minimo"]})
     return out
 

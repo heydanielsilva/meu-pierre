@@ -314,6 +314,8 @@
                            background: #0f4a49; color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px;
                            white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 2; }
   .barras-mes .bm:hover::after { opacity: 1; }
+  .barras-mes .bm:nth-child(-n+2)::after { left: 0; transform: none; }
+  .barras-mes .bm:nth-last-child(-n+2)::after { left: auto; right: 0; transform: none; }
 
   /* Início: mini visuais nos cartões do topo */
   .composicao { display: flex; gap: 3px; height: 10px; margin: 14px 0 10px; }
@@ -365,9 +367,17 @@
     .composicao i, .ritmo i { animation: crescerX 1.1s .2s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
     .ritmo .marca { animation: surgir .4s 1s ease both; }
     .kpi-anel circle + circle { animation: desenhar 1.2s .2s cubic-bezier(.3,.8,.3,1) both; }
-    #recentes .tx, aside.escuro .cc, aside.escuro li, .alerta { animation: deslizar .5s cubic-bezier(.2,.8,.2,1) both; }
-    #recentes .tx:nth-child(2), aside.escuro .cc:nth-child(2), aside.escuro li:nth-child(2), .alerta:nth-child(2) { animation-delay: .06s; }
-    #recentes .tx:nth-child(3), aside.escuro .cc:nth-child(3), aside.escuro li:nth-child(3), .alerta:nth-child(3) { animation-delay: .12s; }
+    #recentes .tx, aside.escuro li, .alerta { animation: deslizar .5s cubic-bezier(.2,.8,.2,1) both; }
+    .cc { animation: cartaoEntrar .9s cubic-bezier(.2,.9,.3,1.15) backwards; }
+    .cc:nth-child(2) { animation-delay: .12s; } .cc:nth-child(3) { animation-delay: .24s; } .cc:nth-child(4) { animation-delay: .36s; }
+    .cc::before { animation: brilhar 1.3s .75s ease-in-out both; }
+    .cc:hover::before { animation: brilharDeNovo .9s ease-in-out; }
+    .cc .banco > svg.i { animation: sinal 2.4s ease-in-out infinite; }
+    .pilha::before { animation: faixa 5s ease-in-out infinite alternate; }
+    .mini-cc { transition: transform .3s cubic-bezier(.3,1.5,.5,1); }
+    .seletor-cc button:hover .mini-cc, .seletor-cc button[aria-pressed="true"] .mini-cc { transform: rotate(-10deg) scale(1.1); }
+    #recentes .tx:nth-child(2), aside.escuro li:nth-child(2), .alerta:nth-child(2) { animation-delay: .06s; }
+    #recentes .tx:nth-child(3), aside.escuro li:nth-child(3), .alerta:nth-child(3) { animation-delay: .12s; }
     #recentes .tx:nth-child(4), aside.escuro li:nth-child(4), .alerta:nth-child(4) { animation-delay: .18s; }
     #recentes .tx:nth-child(5), aside.escuro li:nth-child(5), .alerta:nth-child(5) { animation-delay: .24s; }
     #recentes .tx:nth-child(6), .alerta:nth-child(6) { animation-delay: .3s; }
@@ -375,6 +385,11 @@
     .bola.tocar svg { animation: balancar 1.2s .6s ease-in-out 2; }
   }
   @keyframes girarEntrar { from { opacity: 0; transform: rotate(-40deg) scale(.6); } }
+  @keyframes cartaoEntrar { from { opacity: 0; transform: perspective(900px) translateY(-28px) rotateX(32deg) scale(.9); } }
+  @keyframes brilhar { from { transform: translateX(-180%) skewX(-18deg); } to { transform: translateX(380%) skewX(-18deg); } }
+  @keyframes brilharDeNovo { from { transform: translateX(-180%) skewX(-18deg); } to { transform: translateX(380%) skewX(-18deg); } }
+  @keyframes sinal { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+  @keyframes faixa { from { transform: rotate(-2.5deg); } to { transform: rotate(-4.5deg) translateY(-3px); } }
   @keyframes deslizar { from { opacity: 0; transform: translateX(-14px); } }
   @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(255,107,107,.6); } 70%, 100% { box-shadow: 0 0 0 8px rgba(255,107,107,0); } }
   @keyframes balancar { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); }
@@ -386,6 +401,41 @@
   @keyframes desenhar { from { stroke-dasharray: 0 1000; } }
   @keyframes surgir { from { opacity: 0; } }
   @keyframes tracar { from { stroke-dashoffset: 300; } }
+
+  /* Análise: seletor de cartão, faturas e parcelas por cartão */
+  .seletor-cc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .seletor-cc button { display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 14px 0 8px; border-radius: 14px;
+                       border: 1px solid var(--linha); background: var(--cartao-2); cursor: pointer; font-weight: 600; color: var(--suave);
+                       transition: background .2s, color .2s, transform .2s; }
+  .seletor-cc button:hover { transform: translateY(-2px); color: var(--texto); }
+  .seletor-cc button[aria-pressed="true"] { background: var(--cartao); color: var(--texto); border-color: var(--acento);
+                                             box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 22%, transparent); }
+  .seletor-cc small { font-weight: 500; opacity: .75; }
+  .mini-cc { width: 34px; height: 22px; border-radius: 5px; flex: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); position: relative; }
+  .mini-cc::after { content: ""; position: absolute; left: 5px; top: 7px; width: 8px; height: 6px; border-radius: 2px; background: rgba(255,230,160,.85); }
+  .mini-cc.todos { background: conic-gradient(from 200deg, #f28c3b, #820ad1, #cc092f, #36a597, #f28c3b); }
+  .cc-grade { display: grid; gap: 30px; grid-template-columns: minmax(0, .95fr) minmax(0, 1fr) minmax(0, 1.15fr); align-items: start; }
+  .cc-grade .cc { min-height: 200px; }
+  .cc-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .cc-stats div { background: var(--cartao-2); border-radius: 14px; padding: 10px 12px; min-width: 0; }
+  .cc-stats small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
+  .cc-stats b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-lista .item { cursor: pointer; }
+  .cc-lista .item:hover .nome { color: var(--acento-texto); }
+  .fatura-linha { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--linha); font-size: 14px; }
+  .fatura-linha:first-child { border-top: 0; }
+  .fatura-linha .meio { flex: 1; min-width: 0; }
+  .fatura-linha .meio small { display: block; color: var(--suave); font-size: 12px; }
+  .fatura-linha b { font-variant-numeric: tabular-nums; }
+  .selo-atual { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--acento-claro); color: var(--acento-texto); margin-left: 6px; }
+  .barras-mes.cor-cc .bm i { background: var(--cor-cc, var(--acento)); }
+  .barras-mes.cor-cc .bm.prox i { background: var(--cor-cc, var(--acento)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-cc, var(--acento)) 30%, transparent); }
+  .rec-colunas { display: grid; gap: 0 36px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); }
+
+  /* Cartões de crédito: brilho que atravessa o cartão e inclinação 3D com o mouse */
+  .cc { overflow: hidden; will-change: transform; }
+  .cc::before { content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 40%; z-index: 2; pointer-events: none;
+                background: linear-gradient(100deg, transparent, rgba(255,255,255,.38), transparent); transform: translateX(-180%) skewX(-18deg); }
 
   /* Investimentos */
   .classe-linha { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--linha); }
@@ -484,6 +534,8 @@
 
   /* Responsivo */
   @media (max-width: 1180px) {
+    .cc-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cc-grade > :last-child { grid-column: 1 / -1; }
     .layout { grid-template-columns: 1fr; }
     aside.escuro { position: static; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); align-items: start; }
   }
@@ -519,6 +571,7 @@
     .tx .sub .conta { display: none; }
     .parcela .sub { white-space: normal; }
     .barras-mes { gap: 4px; }
+    .cc-grade { grid-template-columns: 1fr; }
     .inv-topo { flex-wrap: wrap; }
     .inv-topo .meio { flex: 1 1 calc(100% - 60px); }
     .inv-topo .direita { flex: 1 1 100%; display: flex; align-items: baseline; justify-content: space-between; text-align: left; }
@@ -747,16 +800,18 @@
             <ul class="lista" id="estab"></ul>
           </div>
         </section>
-        <section class="grade-2">
-          <div class="cartao">
-            <div class="cab"><h2>Assinaturas e contas fixas</h2><span class="extra" id="recTotal"></span></div>
-            <div id="recorrentes"></div>
+        <section class="cartao" id="secCartoesAn">
+          <div class="cab"><h2>Cartões de crédito</h2><span class="extra" id="ccExtra"></span></div>
+          <div class="seletor-cc" id="seletorCC" role="group" aria-label="Escolher cartão"></div>
+          <div class="cc-grade">
+            <div id="ccDetalhe"></div>
+            <div><div class="subtitulo"><span>Faturas</span><span id="fatTotal"></span></div><div id="ccFaturas"></div></div>
+            <div><div class="subtitulo"><span>Parcelas</span><span id="parcTotal"></span></div><div id="parcMeses"></div><div id="parcelas"></div></div>
           </div>
-          <div class="cartao">
-            <div class="cab"><h2>Parcelas dos cartões</h2><span class="extra" id="parcTotal"></span></div>
-            <div id="parcMeses"></div>
-            <div id="parcelas"></div>
-          </div>
+        </section>
+        <section class="cartao">
+          <div class="cab"><h2>Assinaturas e contas fixas</h2><span class="extra" id="recTotal"></span></div>
+          <div id="recorrentes"></div>
         </section>
       </div>
 
@@ -1410,30 +1465,103 @@ function renderFixasEParcelas() {
   const linhaRec = (r) => `<div class="item">${bolinha(r.nome, r.categoria, true)}<div class="meio">
       <div class="nome">${esc(nomeTx({ descricao: r.nome }))}</div><div class="sub">${esc(r.categoria)} · próxima ~${data(r.proxima).slice(0, 5)}</div></div>
       <div class="direita">${brl(r.media)}<small>por mês</small></div></div>`;
-  const bloco = (titulo, lst) => lst.length ? `<div class="subtitulo"><span>${titulo}</span><span>${brl(lst.reduce((s, r) => s + r.media, 0))}/mês</span></div>` + lst.map(linhaRec).join("") : "";
+  const bloco = (titulo, lst) => lst.length ? `<div><div class="subtitulo"><span>${titulo}</span><span>${brl(lst.reduce((s, r) => s + r.media, 0))}/mês</span></div>` + lst.map(linhaRec).join("") + "</div>" : "";
   const empilhada = `<div class="empilhada" role="img" aria-label="Divisão das cobranças fixas">${rec.map((r, i) =>
     `<i style="flex:${r.media} 1 0;background:${estiloCat(r.categoria)[1]};animation-delay:${i * 60}ms" title="${esc(nomeTx({ descricao: r.nome }))}: ${brl(r.media)}/mês (${pctInt(r.media / totRec)})"></i>`).join("")}</div>`;
-  $("recorrentes").innerHTML = rec.length ? empilhada + bloco("Assinaturas", assin) + bloco("Contas fixas", fixas)
+  $("recorrentes").innerHTML = rec.length ? empilhada + `<div class="rec-colunas">${bloco("Assinaturas", assin)}${bloco("Contas fixas", fixas)}</div>`
     : `<div class="vazio">Nenhuma cobrança recorrente clara nos últimos 6 meses.</div>`;
 
-  // Compras parceladas e quanto cai em cada mês
+  renderCartoesAnalise();
+}
+
+// Análise > Cartões de crédito: escolha um cartão (ou todos) para ver fatura, histórico de faturas e parcelas
+let ccSel = "";
+try { ccSel = localStorage.getItem("cartaoSel") || ""; } catch (e) {}
+const somarMeses = (m, n) => { const t = +m.slice(0, 4) * 12 + +m.slice(5, 7) - 1 + n; return Math.floor(t / 12) + "-" + String(t % 12 + 1).padStart(2, "0"); };
+const mesCurtoAno = (m) => NOMES_MES[+m.slice(5, 7) - 1] + "/" + m.slice(2, 4);
+const fundoCartao = (c) => (estiloBanco(c.banco) || estiloBanco(c.nome))?.fundo || "linear-gradient(135deg,#cfe3e0,#9ec7c2)";
+
+function barrasMeses(lista, { cor = "", destaque = -1 } = {}) {
+  const maior = Math.max(...lista.map((m) => m.valor), 1);
+  return `<div class="barras-mes${cor ? " cor-cc" : ""}" style="grid-template-columns:repeat(${lista.length},minmax(0,1fr));${cor ? `--cor-cc:${cor}` : ""}" role="img" aria-label="${esc(lista.map((m) => nomeMesLongo(m.mes) + " " + brl(m.valor)).join(", "))}">` +
+    lista.map((m, i) => `<div class="bm${m.valor ? "" : " zero"}${i === destaque && m.valor ? " prox" : ""}" data-rotulo="${mesCurtoAno(m.mes)}: ${brl(m.valor)}">
+      <i style="--i:${i};height:${m.valor ? Math.max(4, m.valor / maior * 100) : 3}%"></i><small>${NOMES_MES[+m.mes.slice(5, 7) - 1]}</small></div>`).join("") + `</div>`;
+}
+
+function renderCartoesAnalise() {
+  const R = D.resumo, cards = D.contas.filter((c) => c.cartao);
+  if (ccSel && !cards.some((c) => c.id === ccSel)) ccSel = "";
+  $("secCartoesAn").hidden = !cards.length && !D.parcelas.length;
+  const sel = cards.find((c) => c.id === ccSel) || (cards.length === 1 ? cards[0] : null), ids = sel ? [sel.id] : cards.map((c) => c.id);
+  const corSel = sel ? (estiloBanco(sel.banco) || estiloBanco(sel.nome))?.cor || "" : "";
+  $("ccExtra").textContent = cards.length === 1 ? "1 cartão" : cards.length + " cartões";
+
+  // seletor: Todos + um botão por cartão, com miniatura nas cores do banco
+  $("seletorCC").innerHTML = (cards.length > 1 ? `<button type="button" data-cc="" aria-pressed="${!sel}"><span class="mini-cc todos"></span>Todos</button>` : "") +
+    cards.map((c) => `<button type="button" data-cc="${esc(c.id)}" aria-pressed="${sel?.id === c.id}">
+      <span class="mini-cc" style="background:${fundoCartao(c)}"></span>${esc(c.banco)} <small>•${esc(c.final || "")}</small></button>`).join("");
+
+  // detalhe: o cartão escolhido ou o resumo de todos
+  const gastoCartao = (id) => R.transacoes.filter((t) => t.account_id === id && t.direcao === "saida" && !t.neutra).reduce((s, t) => s + t.valor, 0);
+  const stat = (rot, val) => `<div><small>${rot}</small><b>${val}</b></div>`;
+  if (sel) {
+    $("ccDetalhe").innerHTML = htmlCartao(sel) + `<div class="cc-stats">
+      ${stat("Gasto no mês", brl(gastoCartao(sel.id)))}${stat("Limite disponível", brl(sel.limite_disponivel))}
+      ${stat("Fecha em", sel.fechamento ? data(sel.fechamento).slice(0, 5) : "—")}${stat("Vence em", sel.vencimento ? data(sel.vencimento).slice(0, 5) : "—")}</div>`;
+  } else {
+    const tot = (k) => cards.reduce((s, c) => s + (c[k] || 0), 0);
+    $("ccDetalhe").innerHTML = `<div class="cc-stats" style="margin-top:0">
+      ${stat("Faturas atuais", brl(tot("saldo")))}${stat("Gasto no mês", brl(cards.reduce((s, c) => s + gastoCartao(c.id), 0)))}
+      ${stat("Limite total", brl(tot("limite")))}${stat("Limite disponível", brl(tot("limite_disponivel")))}</div>
+      <div class="cc-lista" style="margin-top:12px">${cards.map((c) => `<div class="item" data-cc="${esc(c.id)}" title="Ver só este cartão">
+        <span class="mini-cc" style="background:${fundoCartao(c)}"></span>
+        <div class="meio"><div class="nome">${esc(c.banco)} •${esc(c.final || "")}</div><div class="sub">vence ${data(c.vencimento).slice(0, 5)}${c.uso_limite != null ? " · " + pctInt(c.uso_limite) + " do limite usado" : ""}</div></div>
+        <div class="direita">${brl(c.saldo)}<small>fatura atual</small></div></div>`).join("")}</div>`;
+  }
+
+  // faturas: fechadas por mês de vencimento + a fatura em aberto em destaque
+  const porMes = new Map(), abertas = new Map();
+  for (const f of D.faturas.filter((f) => ids.includes(f.conta_id))) {
+    const m = (f.vencimento || "").slice(0, 7);
+    if (m) porMes.set(m, (porMes.get(m) || 0) + f.valor);
+  }
+  for (const c of cards.filter((c) => ids.includes(c.id))) {
+    const m = (c.vencimento || "").slice(0, 7) || somarMeses(hoje(), 1);
+    abertas.set(m, (abertas.get(m) || 0) + (c.saldo || 0));
+  }
+  for (const [m, v] of abertas) porMes.set(m, v);  // a fatura em aberto substitui a do mesmo mês
+  const lista = [...porMes.keys()].sort().slice(-7).map((m) => ({ mes: m, valor: porMes.get(m) }));
+  const fechadas = lista.filter((m) => !abertas.has(m.mes));
+  $("fatTotal").textContent = fechadas.length ? "média " + brl(fechadas.reduce((s, m) => s + m.valor, 0) / fechadas.length) : "";
+  $("ccFaturas").innerHTML = lista.length ? barrasMeses(lista, { cor: corSel, destaque: lista.findIndex((m) => abertas.has(m.mes)) }) +
+    [...lista].reverse().slice(0, 5).map((m) => {
+      const f = sel && D.faturas.find((x) => x.conta_id === sel.id && (x.vencimento || "").startsWith(m.mes));
+      return `<div class="fatura-linha"><div class="meio">${nomeMesLongo(m.mes)}${abertas.has(m.mes) ? `<span class="selo-atual">em aberto</span>` : ""}
+        <small>${abertas.has(m.mes) ? "fatura atual" : f?.minimo ? "mínimo " + brl(f.minimo) : "fatura fechada"}</small></div><b>${brl(m.valor)}</b></div>`;
+    }).join("") : `<div class="vazio">O banco ainda não informou faturas deste cartão.</div>`;
+
+  // parcelas do cartão escolhido e quanto cai em cada um dos próximos 12 meses
+  const P = D.parcelas.filter((p) => !sel || p.conta_id === sel.id), falta = P.reduce((s, p) => s + p.falta, 0);
   $("parcTotal").textContent = P.length ? "faltam " + brl(falta) : "";
-  const PM = D.parcelas_meses || [], maior = Math.max(...PM.map((m) => m.valor), 1);
-  $("parcMeses").innerHTML = P.length && PM.length ? `<div class="parc-resumo"><span>Parcelas nos próximos 12 meses</span><span>próximo mês: <b>${brl(PM[0].valor)}</b></span></div>
-    <div class="barras-mes" role="img" aria-label="${esc(PM.map((m) => nomeMesLongo(m.mes) + " " + brl(m.valor)).join(", "))}">${PM.map((m, i) =>
-      `<div class="bm${m.valor ? "" : " zero"}${i === 0 && m.valor ? " prox" : ""}" data-rotulo="${NOMES_MES[+m.mes.slice(5, 7) - 1]}: ${brl(m.valor)}"><i style="--i:${i};height:${m.valor ? Math.max(4, m.valor / maior * 100) : 3}%"></i><small>${NOMES_MES[+m.mes.slice(5, 7) - 1]}</small></div>`).join("")}</div>` : "";
+  const prox = Array.from({ length: 12 }, (_, i) => ({ mes: somarMeses(hoje(), i + 1), valor: 0 }));
+  for (const p of P) for (let i = 1; i <= p.restantes; i++) {
+    const alvo = prox.find((x) => x.mes === somarMeses(p.ultima.slice(0, 7), i));
+    if (alvo) alvo.valor += p.valor;
+  }
+  $("parcMeses").innerHTML = P.length ? `<div class="parc-resumo"><span>Próximos 12 meses</span><span>próximo mês: <b>${brl(prox[0].valor)}</b></span></div>` +
+    barrasMeses(prox, { cor: corSel, destaque: 0 }) : "";
   $("parcelas").innerHTML = P.length ? `<div class="subtitulo"><span>Compras em andamento</span><span>${P.length}</span></div>` + P.map((p) => {
     const nome = nomeTx({ descricao: p.descricao, estabelecimento: p.estabelecimento });
-    const onde = p.banco ? (p.cartao ? "Cartão " : "Conta ") + p.banco : "";
+    const onde = !sel && p.banco ? (p.cartao ? "Cartão " : "Conta ") + p.banco + " · " : "";
     return `<div class="item parcela">${bolinha((p.estabelecimento || "") + " " + p.descricao, "Compras", true)}<div class="meio">
-      <div class="nome">${esc(nome)}</div><div class="sub">${esc(onde)}${onde ? " · " : ""}compra de ${brl(p.total_compra)} · termina em ${mesCurto(p.termina)}</div>
+      <div class="nome">${esc(nome)}</div><div class="sub">${esc(onde)}compra de ${brl(p.total_compra)} · termina em ${mesCurtoAno(p.termina)}</div>
       ${p.total_parcelas <= 24
         ? `<div class="pontos" aria-label="${p.parcela} de ${p.total_parcelas} parcelas pagas">${Array.from({ length: p.total_parcelas }, (_, i) =>
             `<i class="${i < p.parcela ? "pago" : ""}${i === p.parcela - 1 ? " atual" : ""}" style="--i:${i}"></i>`).join("")}</div>`
         : `<div class="trilho"><div style="width:${p.parcela / p.total_parcelas * 100}%"></div></div>`}
       <div class="progresso"><span>${p.parcela} de ${p.total_parcelas} pagas</span><span>faltam ${p.restantes} · ${brl(p.falta)}</span></div></div>
       <div class="direita">${brl(p.valor)}<small>por mês</small></div></div>`;
-  }).join("") : `<div class="vazio">Nenhuma compra parcelada em andamento.</div>`;
+  }).join("") : `<div class="vazio">${sel ? "Nenhuma compra parcelada neste cartão." : "Nenhuma compra parcelada em andamento."}</div>`;
 }
 
 // Investimentos: resumo, divisão por tipo e por banco, e um cartão por aplicação
@@ -1521,15 +1649,12 @@ function renderOrcamentos() {
   }).join("") : `<div class="vazio">Nenhum orçamento. Defina um limite mensal por categoria abaixo.</div>`;
 }
 
-function renderLateral() {
-  const cartoes = D.contas.filter((c) => c.cartao), contas = D.contas.filter((c) => !c.cartao);
-  $("qtdCartoes").textContent = cartoes.length === 1 ? "1 cartão" : cartoes.length + " cartões";
-  $("cartoes").className = "pilha" + (cartoes.length ? "" : " vazia");
-  $("cartoes").innerHTML = cartoes.length ? cartoes.map((c) => {
-    const b = estiloBanco(c.banco) || estiloBanco(c.nome);
-    const estilo = b ? ` marca" style="--cc-fundo:${b.fundo};--cc-texto:${b.texto};--cc-cor:${b.cor}` : "";
-    const logo = `<span class="cc-logo">${esc((c.banco || "?")[0].toUpperCase())}${b ? `<img src="https://www.google.com/s2/favicons?domain=${b.dominio}&sz=64" alt="" referrerpolicy="no-referrer">` : ""}</span>`;
-    return `<div class="cc${estilo}">
+// Cartão de crédito desenhado nas cores do banco (Início e Análise)
+function htmlCartao(c) {
+  const b = estiloBanco(c.banco) || estiloBanco(c.nome);
+  const estilo = b ? ` marca" style="--cc-fundo:${b.fundo};--cc-texto:${b.texto};--cc-cor:${b.cor}` : "";
+  const logo = `<span class="cc-logo">${esc((c.banco || "?")[0].toUpperCase())}${b ? `<img src="https://www.google.com/s2/favicons?domain=${b.dominio}&sz=64" alt="" referrerpolicy="no-referrer">` : ""}</span>`;
+  return `<div class="cc${estilo}">
       <div class="banco"><span class="nome-banco">${logo}<span>${esc(c.banco)}</span></span>${icone("sinal")}</div>
       <div class="rot">Fatura atual</div>
       <div class="valor">${brl(c.saldo)}</div>
@@ -1537,7 +1662,13 @@ function renderLateral() {
       <div class="rodape"><span>Limite ${brl(c.limite)}</span><span>Vence ${data(c.vencimento).slice(0, 5)}</span></div>
       ${c.uso_limite != null ? `<div class="trilho" title="${pct(c.uso_limite)} do limite usado"><div style="width:${Math.min(100, c.uso_limite * 100)}%"></div></div>` : ""}
     </div>`;
-  }).join("") : `<div class="tudo-ok">Nenhum cartão de crédito conectado.</div>`;
+}
+
+function renderLateral() {
+  const cartoes = D.contas.filter((c) => c.cartao), contas = D.contas.filter((c) => !c.cartao);
+  $("qtdCartoes").textContent = cartoes.length === 1 ? "1 cartão" : cartoes.length + " cartões";
+  $("cartoes").className = "pilha" + (cartoes.length ? "" : " vazia");
+  $("cartoes").innerHTML = cartoes.length ? cartoes.map(htmlCartao).join("") : `<div class="tudo-ok">Nenhum cartão de crédito conectado.</div>`;
   const primeiro = cartoes.length && (estiloBanco(cartoes[0].banco) || estiloBanco(cartoes[0].nome));
   $("cartoes").style.setProperty("--pilha", primeiro ? primeiro.cor : "#f28c3b");
 
@@ -1649,6 +1780,25 @@ $("txTipo").addEventListener("click", (e) => {
   if (b) { marcarTipo(b.dataset.tipo); txLimite = 60; renderTransacoes(); }
 });
 $("txMais").addEventListener("click", () => { txLimite += 100; renderTransacoes(); });
+document.addEventListener("click", (e) => {  // escolher cartão na Análise
+  const b = e.target.closest("[data-cc]");
+  if (!b || !D) return;
+  ccSel = b.dataset.cc;
+  try { localStorage.setItem("cartaoSel", ccSel); } catch (err) {}
+  renderCartoesAnalise();
+});
+// Cartões de crédito inclinam em 3D acompanhando o mouse
+let ccInclinado = null;
+document.addEventListener("pointermove", (e) => {
+  if (e.pointerType !== "mouse" || menosMovimento()) return;
+  const c = e.target.closest?.(".cc");
+  if (ccInclinado && ccInclinado !== c) { ccInclinado.style.transform = ""; ccInclinado = null; }
+  if (!c) return;
+  ccInclinado = c;
+  const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+  c.style.transform = `perspective(900px) rotateX(${(-y * 12).toFixed(2)}deg) rotateY(${(x * 14).toFixed(2)}deg) translateY(-4px)`;
+});
+document.documentElement.addEventListener("pointerleave", () => { if (ccInclinado) { ccInclinado.style.transform = ""; ccInclinado = null; } });
 document.addEventListener("click", (e) => {
   const b = e.target.closest(".cat-modo button");
   if (b) {

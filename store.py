@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 CREATE TABLE IF NOT EXISTS transactions (
     id TEXT PRIMARY KEY, account_id TEXT, data TEXT, descricao TEXT,
     valor REAL, direcao TEXT, categoria_origem TEXT, estabelecimento TEXT,
-    parcela_atual INTEGER, parcelas_total INTEGER
+    parcela_atual INTEGER, parcelas_total INTEGER, fatura_id TEXT, data_compra TEXT
 );
 CREATE INDEX IF NOT EXISTS ix_tx_data ON transactions(data);
 CREATE TABLE IF NOT EXISTS investments (
@@ -121,7 +121,7 @@ NEUTRAS = {
 
 # Sobe quando muda a forma de interpretar as transações da Pluggy: a próxima
 # atualização busca 12 meses e regrava tudo com a regra nova.
-VERSAO_TRANSACOES = "2"
+VERSAO_TRANSACOES = "3"  # 3: guarda a fatura de cada compra do cartão (billId) e a data da compra
 
 PADROES_FATURA = re.compile(r"(PAG(AMEN)?T?O?\.?\s*(DE\s*)?FATURA|PGTO\.?\s*FATURA|FATURA\s+PAGA)", re.I)
 
@@ -223,7 +223,20 @@ class Store:
             self.con = sqlite3.connect(destino, check_same_thread=False)
             self.con.row_factory = sqlite3.Row
         self.con.executescript(SCHEMA)
+        self._migrar()
         self._regras_cache: list[tuple[str, str]] | None = None
+
+    def _migrar(self) -> None:
+        """Colunas criadas depois da primeira versão (bancos já existentes não as têm)."""
+        for tabela, coluna in (("transactions", "fatura_id"), ("transactions", "data_compra")):
+            try:
+                if self.postgres:
+                    self.con.execute(f"ALTER TABLE {tabela} ADD COLUMN IF NOT EXISTS {coluna} TEXT")
+                else:
+                    self.con.execute(f"ALTER TABLE {tabela} ADD COLUMN {coluna} TEXT")
+                self.con.commit()
+            except Exception:  # noqa: BLE001  (a coluna já existe)
+                pass
 
     # -------------------------------------------------------------- meta
     def get_meta(self, chave: str) -> str | None:
@@ -370,7 +383,7 @@ class Store:
             # Tudo de uma vez: gravar uma a uma no Postgres da nuvem estoura o tempo da Vercel.
             linhas = [self._linha_tx(c, t) for t in txs if t.get("id")]
             if linhas:
-                self.con.executemany("INSERT OR REPLACE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?)", linhas)
+                self.con.executemany("INSERT OR REPLACE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", linhas)
             resumo["transacoes"] += len(linhas)
 
             if c.get("subtype") == "CREDIT_CARD":
@@ -429,7 +442,8 @@ class Store:
                 texto(t.get("descriptionRaw") or t.get("description") or ""),
                 abs(valor), direcao, texto(t.get("category")),
                 texto(merchant.get("businessName") or merchant.get("name")),
-                inteiro(cc.get("installmentNumber")), inteiro(cc.get("totalInstallments")))
+                inteiro(cc.get("installmentNumber")), inteiro(cc.get("totalInstallments")),
+                cc.get("billId"), (cc.get("purchaseDate") or "")[:10] or None)
 
     # ------------------------------------------------------------- demo
     def popular_demo(self) -> None:
@@ -481,7 +495,7 @@ class Store:
             nonlocal n
             n += 1
             if d <= hoje:
-                txs.append((f"demo{n}", conta, d.isoformat(), desc, round(valor, 2), direcao, cat, merch, p, pt))
+                txs.append((f"demo{n}", conta, d.isoformat(), desc, round(valor, 2), direcao, cat, merch, p, pt, None, None))
 
         inicio = (hoje.replace(day=1) - timedelta(days=150)).replace(day=1)
         mes = inicio
@@ -530,7 +544,7 @@ class Store:
         for d in (3, 9, 16, 22):
             add("card-itau", hoje.replace(day=min(d, hoje.day)), "PAG*PADARIA DO BAIRRO", 23.5 + d, "saida", "Eating out")
         txs = [t for t in txs if t[4] > 0]
-        self.con.executemany("INSERT OR REPLACE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?)", txs)
+        self.con.executemany("INSERT OR REPLACE INTO transactions VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", txs)
         self.con.executemany("INSERT OR REPLACE INTO orcamentos VALUES (?,?)", [
             ("Delivery", 600), ("Restaurantes", 400), ("Supermercado", 1200), ("Transporte por app", 200),
         ])

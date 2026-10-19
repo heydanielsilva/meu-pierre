@@ -313,7 +313,8 @@
   .barras-mes.sim .bm i { opacity: 1 !important; }
   .barras-mes .bm::after { content: attr(data-rotulo); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
                            background: #0f4a49; color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 8px;
-                           white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 2; }
+                           width: max-content; max-width: 140px; white-space: normal; text-align: center;
+                           opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 2; }
   .barras-mes .bm:hover::after { opacity: 1; }
   .barras-mes .bm:nth-child(-n+2)::after { left: 0; transform: none; }
   .barras-mes .bm:nth-last-child(-n+2)::after { left: auto; right: 0; transform: none; }
@@ -434,6 +435,14 @@
   .fatura-linha b { font-variant-numeric: tabular-nums; }
   .selo-atual { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--acento-claro); color: var(--acento-texto); margin-left: 6px; }
   .barras-mes.cor-cc .bm i { background: var(--cor-cc, var(--acento)); }
+  .barras-mes .bm.futura i { background: repeating-linear-gradient(45deg, var(--cor-cc, var(--acento)) 0 4px, transparent 4px 8px) !important;
+                             box-shadow: inset 0 0 0 1.5px var(--cor-cc, var(--acento)); opacity: .9 !important; }
+  .barras-mes .bm.futura small { font-style: italic; }
+  .legenda-fat { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--suave); margin: -2px 0 8px; }
+  .legenda-fat i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .cc .devido { font-size: 12.5px; font-weight: 600; opacity: .8; margin-top: 4px; }
+  .selo-atual.fechada { background: color-mix(in srgb, var(--neg) 18%, var(--cartao)); color: var(--neg); }
+  .selo-atual.prevista { background: var(--cartao); color: var(--suave); }
   .barras-mes.cor-cc .bm.prox i { background: var(--cor-cc, var(--acento)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-cc, var(--acento)) 30%, transparent); }
   .rec-colunas { display: grid; gap: 0 36px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); }
 
@@ -1280,11 +1289,11 @@ function render() {
   const varG = R.gastos_anterior ? (R.gastos - R.gastos_anterior) / R.gastos_anterior : null;
   // Patrimônio: de onde vem (contas e investimentos) e quanto as faturas tiram
   const ativos = Math.max(0, P.saldo) + Math.max(0, P.investimentos), base = ativos + Math.max(0, P.faturas) || 1;
-  const composicao = `<div class="composicao" role="img" aria-label="Contas ${brl(P.saldo)}, investimentos ${brl(P.investimentos)}, faturas ${brl(P.faturas)}">
+  const composicao = `<div class="composicao" role="img" aria-label="Contas ${brl(P.saldo)}, investimentos ${brl(P.investimentos)}, dívida nos cartões ${brl(P.faturas)}">
       <i style="flex:${Math.max(0, P.saldo) / base} 1 0;background:#9ec7c2" title="Contas: ${brl(P.saldo)}"></i>
       <i style="flex:${Math.max(0, P.investimentos) / base} 1 0;background:#f28c3b;animation-delay:.12s" title="Investimentos: ${brl(P.investimentos)}"></i>
-      <i style="flex:${Math.max(0, P.faturas) / base} 1 0;background:#ff7b73;animation-delay:.24s" title="Faturas: ${brl(P.faturas)}"></i></div>
-    <div class="legenda-mini"><span><b style="background:#9ec7c2"></b>contas ${brl(P.saldo)}</span><span><b style="background:#f28c3b"></b>investimentos ${brl(P.investimentos)}</span><span><b style="background:#ff7b73"></b>faturas ${brl(P.faturas)}</span></div>`;
+      <i style="flex:${Math.max(0, P.faturas) / base} 1 0;background:#ff7b73;animation-delay:.24s" title="Dívida nos cartões (inclui parcelas futuras): ${brl(P.faturas)}"></i></div>
+    <div class="legenda-mini"><span><b style="background:#9ec7c2"></b>contas ${brl(P.saldo)}</span><span><b style="background:#f28c3b"></b>investimentos ${brl(P.investimentos)}</span><span><b style="background:#ff7b73"></b>cartões ${brl(P.faturas)}</span></div>`;
   // Gastos: quanto do mês já foi (projeção ou mês anterior como referência), com marca do mês anterior
   const refG = Math.max(R.atual ? R.projecao || 0 : 0, R.gastos_anterior || 0, R.gastos, 1);
   const ritmo = `<div class="ritmo" title="${R.atual ? "Gasto até agora, projeção do mês e" : "Gasto do mês e"} gasto do mês anterior">
@@ -1648,7 +1657,7 @@ const fundoCartao = (c) => (estiloBanco(c.banco) || estiloBanco(c.nome))?.fundo 
 function barrasMeses(lista, { cor = "", destaque = -1 } = {}) {
   const maior = Math.max(...lista.map((m) => m.valor), 1);
   return `<div class="barras-mes${cor ? " cor-cc" : ""}" style="grid-template-columns:repeat(${lista.length},minmax(0,1fr));${cor ? `--cor-cc:${cor}` : ""}" role="img" aria-label="${esc(lista.map((m) => nomeMesLongo(m.mes) + " " + brl(m.valor)).join(", "))}">` +
-    lista.map((m, i) => `<div class="bm${m.valor ? "" : " zero"}${i === destaque && m.valor ? " prox" : ""}" data-rotulo="${mesCurtoAno(m.mes)}: ${brl(m.valor)}">
+    lista.map((m, i) => `<div class="bm${m.valor ? "" : " zero"}${i === destaque && m.valor ? " prox" : ""}${m.classe ? " " + m.classe : ""}" data-rotulo="${mesCurtoAno(m.mes)}: ${brl(m.valor)}${m.classe === "futura" ? " (parcelas já lançadas)" : ""}">
       <i style="--i:${i};height:${m.valor ? Math.max(4, m.valor / maior * 100) : 3}%"></i><small>${NOMES_MES[+m.mes.slice(5, 7) - 1]}</small></div>`).join("") + `</div>`;
 }
 
@@ -1670,38 +1679,56 @@ function renderCartoesAnalise() {
   const stat = (rot, val) => `<div><small>${rot}</small><b>${val}</b></div>`;
   if (sel) {
     $("ccDetalhe").innerHTML = htmlCartao(sel) + `<div class="cc-stats">
-      ${stat("Gasto no mês", brl(gastoCartao(sel.id)))}${stat("Limite disponível", brl(sel.limite_disponivel))}
-      ${stat("Fecha em", sel.fechamento ? data(sel.fechamento).slice(0, 5) : "—")}${stat("Vence em", sel.vencimento ? data(sel.vencimento).slice(0, 5) : "—")}</div>`;
+      ${stat("Fatura aberta", brl(sel.fatura_aberta ?? sel.saldo))}${stat("Total no cartão", brl(sel.saldo))}
+      ${stat("Fecha em", data(sel.fecha_em || sel.fechamento).slice(0, 5))}${stat("Vence em", data(sel.vence_em || sel.vencimento).slice(0, 5))}
+      ${stat("Gasto no mês", brl(gastoCartao(sel.id)))}${stat("Limite disponível", brl(sel.limite_disponivel))}</div>`;
   } else {
     const tot = (k) => cards.reduce((s, c) => s + (c[k] || 0), 0);
     $("ccDetalhe").innerHTML = `<div class="cc-stats" style="margin-top:0">
-      ${stat("Faturas atuais", brl(tot("saldo")))}${stat("Gasto no mês", brl(cards.reduce((s, c) => s + gastoCartao(c.id), 0)))}
+      ${stat("Faturas abertas", brl(cards.reduce((s, c) => s + (c.fatura_aberta ?? c.saldo ?? 0), 0)))}${stat("Total nos cartões", brl(tot("saldo")))}
+      ${stat("Gasto no mês", brl(cards.reduce((s, c) => s + gastoCartao(c.id), 0)))}${stat("Limite usado", brl(tot("limite") - tot("limite_disponivel")))}
       ${stat("Limite total", brl(tot("limite")))}${stat("Limite disponível", brl(tot("limite_disponivel")))}</div>
       <div class="cc-lista" style="margin-top:12px">${cards.map((c) => `<div class="item" data-cc="${esc(c.id)}" title="Ver só este cartão">
         <span class="mini-cc" style="background:${fundoCartao(c)}"></span>
         <div class="meio"><div class="nome">${esc(c.banco)} •${esc(c.final || "")}</div><div class="sub">vence ${data(c.vencimento).slice(0, 5)}${c.uso_limite != null ? " · " + pctInt(c.uso_limite) + " do limite usado" : ""}</div></div>
-        <div class="direita">${brl(c.saldo)}<small>fatura atual</small></div></div>`).join("")}</div>`;
+        <div class="direita">${brl(c.fatura_aberta ?? c.saldo)}<small>fatura aberta</small></div></div>`).join("")}</div>`;
   }
 
-  // faturas: fechadas por mês de vencimento + a fatura em aberto em destaque
-  const porMes = new Map(), abertas = new Map();
-  for (const f of D.faturas.filter((f) => ids.includes(f.conta_id))) {
-    const m = (f.vencimento || "").slice(0, 7);
-    if (m) porMes.set(m, (porMes.get(m) || 0) + f.valor);
+  // faturas por mês de vencimento: anteriores (do banco), fechada a pagar, aberta (calculada) e próximas (parcelas já lançadas)
+  const porMes = new Map();
+  const somar = (m, v, tipo, extra = {}) => {
+    if (!m) return;
+    const x = porMes.get(m) || { mes: m, valor: 0, tipo, minimo: 0 };
+    const ordem = { paga: 0, fechada: 1, aberta: 2, futura: 3 };
+    x.valor += v || 0; if (ordem[tipo] > ordem[x.tipo]) x.tipo = tipo;
+    if (extra.minimo) x.minimo += extra.minimo;
+    if (extra.fecha) x.fecha = extra.fecha;
+    porMes.set(m, x);
+  };
+  const doCartao = cards.filter((c) => ids.includes(c.id)), hojeIso = iso(new Date());
+  const chavesFechadas = new Set(doCartao.map((c) => c.fatura_fechada && c.id + (c.fatura_fechada.vence || "").slice(0, 7)));
+  for (const f of D.faturas.filter((f) => ids.includes(f.conta_id)))
+    if (!chavesFechadas.has(f.conta_id + (f.vencimento || "").slice(0, 7))) somar((f.vencimento || "").slice(0, 7), f.valor, f.vencimento >= hojeIso ? "fechada" : "paga", { minimo: f.minimo });
+  for (const c of doCartao) {
+    if (c.fatura_fechada) somar(c.fatura_fechada.vence.slice(0, 7), c.fatura_fechada.valor, "fechada", { minimo: c.fatura_fechada.minimo });
+    if (c.fatura_aberta != null) somar((c.vence_em || "").slice(0, 7), c.fatura_aberta, "aberta", { fecha: c.fecha_em });
+    else somar((c.vencimento || "").slice(0, 7) || somarMeses(hoje(), 1), c.saldo, "aberta");
+    (c.proximas_faturas || []).slice(0, 4).forEach((p) => somar(p.vence.slice(0, 7), p.valor, "futura"));
   }
-  for (const c of cards.filter((c) => ids.includes(c.id))) {
-    const m = (c.vencimento || "").slice(0, 7) || somarMeses(hoje(), 1);
-    abertas.set(m, (abertas.get(m) || 0) + (c.saldo || 0));
-  }
-  for (const [m, v] of abertas) porMes.set(m, v);  // a fatura em aberto substitui a do mesmo mês
-  const lista = [...porMes.keys()].sort().slice(-7).map((m) => ({ mes: m, valor: porMes.get(m) }));
-  const fechadas = lista.filter((m) => !abertas.has(m.mes));
-  $("fatTotal").textContent = fechadas.length ? "média " + brl(fechadas.reduce((s, m) => s + m.valor, 0) / fechadas.length) : "";
-  $("ccFaturas").innerHTML = lista.length ? barrasMeses(lista, { cor: corSel, destaque: lista.findIndex((m) => abertas.has(m.mes)) }) +
-    [...lista].reverse().slice(0, 5).map((m) => {
-      const f = sel && D.faturas.find((x) => x.conta_id === sel.id && (x.vencimento || "").startsWith(m.mes));
-      return `<div class="fatura-linha"><div class="meio">${nomeMesLongo(m.mes)}${abertas.has(m.mes) ? `<span class="selo-atual">em aberto</span>` : ""}
-        <small>${abertas.has(m.mes) ? "fatura atual" : f?.minimo ? "mínimo " + brl(f.minimo) : "fatura fechada"}</small></div><b>${brl(m.valor)}</b></div>`;
+  const todos = [...porMes.values()].sort((a, b) => a.mes.localeCompare(b.mes));
+  const iAberta = todos.findIndex((m) => m.tipo === "aberta");
+  const lista = (iAberta < 0 ? todos.slice(-8) : todos.slice(Math.max(0, iAberta - 4), iAberta + 5)).map((m) => ({ ...m, classe: m.tipo === "futura" ? "futura" : "" }));
+  const pagas = lista.filter((m) => m.tipo === "paga");
+  $("fatTotal").textContent = pagas.length ? "média " + brl(pagas.reduce((s, m) => s + m.valor, 0) / pagas.length) : "";
+  const rotulo = { paga: ["", "fatura paga"], fechada: ["fechada", "fechada · a pagar"], aberta: ["", "em aberto"], futura: ["prevista", "prevista: só parcelas já lançadas"] };
+  $("ccFaturas").innerHTML = lista.length ? `<div class="legenda-fat"><span><i style="background:var(--cor-cc, var(--acento))"></i>faturas</span>
+      <span><i style="background:repeating-linear-gradient(45deg, var(--acento) 0 3px, transparent 3px 6px);box-shadow:inset 0 0 0 1px var(--acento)"></i>próximas (parcelas já lançadas)</span></div>` +
+    barrasMeses(lista, { cor: corSel, destaque: lista.findIndex((m) => m.tipo === "aberta") }) +
+    [...lista].filter((m) => m.tipo !== "paga").concat([...pagas].reverse().slice(0, 2)).map((m) => {
+      const [cls, txt] = rotulo[m.tipo];
+      const det = m.tipo === "aberta" ? `${m.fecha ? "fecha " + data(m.fecha).slice(0, 5) + " · " : ""}vence em ${nomeMesLongo(m.mes)}` : m.minimo ? txt + " · mínimo " + brl(m.minimo) : txt;
+      return `<div class="fatura-linha"><div class="meio">${nomeMesLongo(m.mes)}${m.tipo !== "paga" ? `<span class="selo-atual ${cls}">${m.tipo === "aberta" ? "em aberto" : m.tipo === "fechada" ? "a pagar" : "prevista"}</span>` : ""}
+        <small>${det}</small></div><b>${m.tipo === "futura" ? "≥ " : ""}${brl(m.valor)}</b></div>`;
     }).join("") : `<div class="vazio">O banco ainda não informou faturas deste cartão.</div>`;
 
   // parcelas do cartão escolhido e quanto cai em cada um dos próximos 12 meses
@@ -2143,10 +2170,11 @@ function htmlCartao(c) {
   const logo = `<span class="cc-logo">${esc((c.banco || "?")[0].toUpperCase())}${b ? `<img src="https://www.google.com/s2/favicons?domain=${b.dominio}&sz=64" alt="" referrerpolicy="no-referrer">` : ""}</span>`;
   return `<div class="cc${estilo}">
       <div class="banco"><span class="nome-banco">${logo}<span>${esc(c.banco)}</span></span>${icone("sinal")}</div>
-      <div class="rot">Fatura atual</div>
-      <div class="valor">${brl(c.saldo)}</div>
+      <div class="rot">Fatura aberta${c.fecha_em ? " · fecha " + data(c.fecha_em).slice(0, 5) : ""}</div>
+      <div class="valor">${brl(c.fatura_aberta ?? c.saldo)}</div>
+      ${c.fatura_aberta != null ? `<div class="devido">Total no cartão (com parcelas): ${brl(c.saldo)}</div>` : ""}
       <div class="numero">**** **** ${esc(c.final || "····")}</div>
-      <div class="rodape"><span>Limite ${brl(c.limite)}</span><span>Vence ${data(c.vencimento).slice(0, 5)}</span></div>
+      <div class="rodape"><span>Limite ${brl(c.limite)}</span><span>Vence ${data(c.vence_em || c.vencimento).slice(0, 5)}</span></div>
       ${c.uso_limite != null ? `<div class="trilho" title="${pct(c.uso_limite)} do limite usado"><div style="width:${Math.min(100, c.uso_limite * 100)}%"></div></div>` : ""}
     </div>`;
 }

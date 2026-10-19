@@ -105,6 +105,14 @@
   :root[data-theme="dark"] .kpi.destaque { box-shadow: inset 0 0 0 1px #1f4240; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .kpi.destaque { box-shadow: inset 0 0 0 1px #1f4240; } }
 
+  .receita { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
+  .receita .val { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .variacao { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-weight: 600; }
+  .seta { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--menta); color: var(--menta-texto); }
+  .seta.baixo { background: #ffd9d9; color: #b42318; }
+  .seta svg { width: 14px; height: 14px; stroke-width: 2.4; }
+  .mini { position: relative; height: 96px; min-width: 0; }
+  .grafico { position: relative; height: 250px; }
   .grafico.alto { height: 270px; }
   .legenda { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--suave); font-weight: 500; margin: -6px 0 14px; }
   .legenda span { display: inline-flex; align-items: center; gap: 7px; }
@@ -204,7 +212,7 @@
   .grupo summary { display: flex; align-items: center; gap: 12px; cursor: pointer; list-style: none; }
   .grupo summary::-webkit-details-marker { display: none; }
   .grupo summary .meio { flex: 1; min-width: 0; font-weight: 600; }
-  .grupo summary .meio small { display: block; color: var(--suave); font-weight: 500; font-size: 13px; }
+  .grupo summary .meio small { display: block; color: var(--suave); font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .grupo summary .num { font-weight: 700; }
   .grupo .seta-grupo { width: 18px; height: 18px; color: var(--suave); transition: transform .2s; }
   .grupo[open] .seta-grupo { transform: rotate(180deg); }
@@ -295,6 +303,7 @@
     .kpi .icone { width: 52px; height: 52px; margin-bottom: 18px; }
     .kpi .val { font-size: 25px; }
     aside.escuro { border-radius: 26px; padding: 22px 18px; }
+    .receita { grid-template-columns: 1fr; }
     .medias, .totais { gap: 8px; }
     .medias div, .totais div { padding: 9px 10px; }
     .medias b { font-size: 13px; white-space: normal; overflow: visible; }
@@ -401,15 +410,33 @@
           <section class="grade-3" id="kpis"></section>
 
           <section class="grade-2">
-            <div class="cartao">
-              <div class="cab"><h2>Receitas x gastos</h2><span class="extra" id="evPeriodo">últimos 12 meses</span></div>
-              <div class="legenda"><span><i style="background:var(--serie-rec)"></i>Receitas</span><span><i style="background:var(--serie-gas)"></i>Gastos</span></div>
-              <div class="medias" id="evMedias"></div>
-              <div class="grafico alto" role="img" id="evGrafico"><canvas id="gEvolucao"></canvas></div>
+            <div class="coluna">
+              <div class="cartao">
+                <div class="cab"><h2>Receitas</h2><span class="extra" id="recMes"></span></div>
+                <div class="receita">
+                  <div>
+                    <div class="val" id="recValor"></div>
+                    <div class="variacao" id="recVar"></div>
+                  </div>
+                  <div class="mini"><canvas id="gReceitas"></canvas></div>
+                </div>
+              </div>
+              <div class="cartao">
+                <div class="cab"><h2>Receitas x gastos</h2><span class="extra" id="evPeriodo">últimos 12 meses</span></div>
+                <div class="legenda"><span><i style="background:var(--serie-rec)"></i>Receitas</span><span><i style="background:var(--serie-gas)"></i>Gastos</span></div>
+                <div class="medias" id="evMedias"></div>
+                <div class="grafico alto" role="img" id="evGrafico"><canvas id="gEvolucao"></canvas></div>
+              </div>
             </div>
-            <div class="cartao">
+            <div class="cartao cat-card" data-limite="5">
               <div class="cab"><h2>Para onde foi o dinheiro</h2><a class="link" href="#analise">Ver análise</a></div>
-              <div id="topCats"></div>
+              <div class="cat-total"></div>
+              <div class="cat-visual"></div>
+              <div class="segmento largo cat-modo" role="group" aria-label="Agrupar por">
+                <button type="button" data-modo="categorias" aria-pressed="true">Categorias</button>
+                <button type="button" data-modo="grupos" aria-pressed="false">Grupos</button>
+              </div>
+              <div class="cat-lista"></div>
             </div>
           </section>
 
@@ -462,15 +489,15 @@
       <!-- Análise -->
       <div class="vista" data-vista="analise" hidden>
         <section class="grade-2">
-          <div class="cartao">
-            <div class="cab"><h2>Gastos por categoria</h2><span class="extra" id="catMes"></span></div>
-            <div class="cat-total" id="catTotal"></div>
-            <div class="cat-visual" id="catVisual"></div>
-            <div class="segmento largo" role="group" aria-label="Agrupar por" id="catModo">
+          <div class="cartao cat-card">
+            <div class="cab"><h2>Gastos por categoria</h2><span class="extra cat-mes"></span></div>
+            <div class="cat-total"></div>
+            <div class="cat-visual"></div>
+            <div class="segmento largo cat-modo" role="group" aria-label="Agrupar por">
               <button type="button" data-modo="categorias" aria-pressed="true">Categorias</button>
               <button type="button" data-modo="grupos" aria-pressed="false">Grupos</button>
             </div>
-            <div id="categorias"></div>
+            <div class="cat-lista"></div>
           </div>
           <div class="cartao">
             <div class="cab"><h2>Orçamentos</h2><span class="extra" id="orcMes"></span></div>
@@ -781,6 +808,13 @@ function render() {
     kpi({ rot: "Sobra do mês", val: brl(R.sobra), ic: "carteira", classe: R.sobra < 0 ? "neg" : "",
           det: `receitas ${brl(R.receitas)} · poupança ${pct(R.poupanca)}` });
 
+  // Receitas
+  const varR = R.receitas_anterior ? (R.receitas - R.receitas_anterior) / R.receitas_anterior : null;
+  $("recMes").textContent = nomeMesLongo(R.mes);
+  $("recValor").textContent = brl(R.receitas);
+  $("recVar").innerHTML = varR == null ? `<span class="suave">sem mês anterior para comparar</span>`
+    : `<span class="seta ${varR < 0 ? "baixo" : ""}">${icone(varR < 0 ? "baixo" : "cima")}</span>${pct(varR, true)} <span class="suave" style="font-weight:500">vs mês anterior</span>`;
+
   renderGraficos();
   renderRecentes();
   renderCategorias();
@@ -881,6 +915,26 @@ function renderGraficos() {
       onHover: (e, el) => { e.native.target.style.cursor = el.length ? "pointer" : "default"; },
     },
   });
+
+  // Receitas: linha suave dos últimos 6 meses
+  const ult = ev.slice(-6);
+  const ctx = $("gReceitas").getContext("2d");
+  const grad = ctx.createLinearGradient(0, 0, ctx.canvas.clientWidth || 300, 0);
+  grad.addColorStop(0, cor("--barra") + "33");
+  grad.addColorStop(1, cor("--acento"));
+  graficos.rec?.destroy();
+  graficos.rec = new Chart(ctx, {
+    type: "line",
+    data: { labels: ult.map((e) => nomeMesLongo(e.mes)),
+            datasets: [{ data: ult.map((e) => e.receitas), borderColor: grad, borderWidth: 3, tension: 0.45, fill: false,
+                         pointRadius: ult.map((e) => e.mes === R.mes ? 6 : 0), pointBackgroundColor: cor("--cartao"),
+                         pointBorderColor: cor("--texto"), pointBorderWidth: 3, pointHoverRadius: 6 }] },
+    options: {
+      maintainAspectRatio: false, layout: { padding: 8 },
+      plugins: { legend: { display: false }, tooltip: { ...tooltip, callbacks: { label: (c) => brl(c.raw) } } },
+      scales: { x: { display: false }, y: { display: false } },
+    },
+  });
 }
 
 // Uma linha de transação (Início e tela de Transações)
@@ -916,15 +970,22 @@ const brlCurto = (v) => oculto ? "R$ •••••" : v >= 1000 ? "R$ " + (v /
 const pctInt = (v) => (v >= 0.01 ? Math.round(v * 100) : "<1") + "%";
 
 function renderCategorias() {
+  document.querySelectorAll(".cat-card").forEach(pintarCategorias);
+}
+
+// Cartão de gastos por categoria (Início lista só os 5 maiores; Análise lista todos)
+function pintarCategorias(card) {
+  const q = (c) => card.querySelector(c), limite = +card.dataset.limite || Infinity;
   const cats = D.resumo.categorias.filter((c) => c.valor > 0);
   const total = cats.reduce((s, c) => s + c.valor, 0), maior = cats[0]?.valor || 1;
-  const vazio = `<div class="vazio">Sem gastos neste mês.</div>`;
-  $("topCats").innerHTML = cats.length ? cats.slice(0, 5).map((c) => barraCat(c, total, maior)).join("") : vazio;
-
-  $("catMes").textContent = nomeMesLongo(D.resumo.mes);
-  $("catModo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === modoCat)));
-  $("catModo").hidden = !cats.length;
-  if (!cats.length) { $("catTotal").innerHTML = ""; $("catVisual").innerHTML = ""; $("categorias").innerHTML = vazio; return; }
+  if (q(".cat-mes")) q(".cat-mes").textContent = nomeMesLongo(D.resumo.mes);
+  q(".cat-modo").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.modo === modoCat)));
+  q(".cat-modo").hidden = !cats.length;
+  if (!cats.length) {
+    q(".cat-total").innerHTML = ""; q(".cat-visual").innerHTML = "";
+    q(".cat-lista").innerHTML = `<div class="vazio">Sem gastos neste mês.</div>`;
+    return;
+  }
 
   if (modoCat === "grupos") {
     const grupos = new Map();
@@ -935,18 +996,18 @@ function renderCategorias() {
       grupos.get(g).cats.push(c);
     }
     const lista = [...grupos.values()].sort((a, b) => b.valor - a.valor);
-    $("catTotal").innerHTML = "";
-    $("catVisual").innerHTML = anel(lista, total) +
+    q(".cat-total").innerHTML = "";
+    q(".cat-visual").innerHTML = anel(lista, total) +
       `<div class="anel-centro"><b>${brlCurto(total)}</b><small>gastos no mês</small></div>`;
-    $("categorias").innerHTML = lista.map(({ g: [nome, ic, cor], valor, cats: cs }) =>
+    q(".cat-lista").innerHTML = lista.slice(0, limite).map(({ g: [nome, ic, cor], valor, cats: cs }) =>
       `<details class="grupo" data-nome-grupo="${esc(nome)}"><summary><span class="ic cheio" style="--c:${cor}">${icone(ic)}</span>
         <span class="meio">${esc(nome)}<small>${pctInt(valor / total)} · ${cs.length === 1 ? "1 categoria" : cs.length + " categorias"}</small></span>
         <span class="num">${brl(valor)}</span><svg class="i seta-grupo"><use href="#i-chevron"/></svg></summary>
         <div class="itens">${cs.map((c) => barraCat(c, valor, cs[0].valor)).join("")}</div></details>`).join("");
   } else {
-    $("catTotal").innerHTML = `<small>Gastos em ${MESES_LONGOS[+D.resumo.mes.slice(5, 7) - 1]}</small><b>${brl(total)}</b>`;
-    $("catVisual").innerHTML = bolhas(cats.slice(0, 12), total);
-    $("categorias").innerHTML = cats.map((c) => barraCat(c, total, maior)).join("");
+    q(".cat-total").innerHTML = `<small>Gastos em ${MESES_LONGOS[+D.resumo.mes.slice(5, 7) - 1]}</small><b>${brl(total)}</b>`;
+    q(".cat-visual").innerHTML = bolhas(cats.slice(0, 12), total);
+    q(".cat-lista").innerHTML = cats.slice(0, limite).map((c) => barraCat(c, total, maior)).join("");
   }
 }
 
@@ -1143,18 +1204,18 @@ $("txTipo").addEventListener("click", (e) => {
   if (b) { marcarTipo(b.dataset.tipo); txLimite = 60; renderTransacoes(); }
 });
 $("txMais").addEventListener("click", () => { txLimite += 100; renderTransacoes(); });
-$("catModo").addEventListener("click", (e) => {
-  const b = e.target.closest("button");
-  if (!b) return;
-  modoCat = b.dataset.modo;
-  try { localStorage.setItem("modoCat", modoCat); } catch (err) {}
-  renderCategorias();
-});
-$("catVisual").addEventListener("click", (e) => {  // clicar num arco abre o grupo na lista
-  const g = e.target.closest("[data-grupo]");
-  if (!g) return;
-  const d = [...document.querySelectorAll("details.grupo")].find((x) => x.dataset.nomeGrupo === g.dataset.grupo);
-  if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".cat-modo button");
+  if (b) {
+    modoCat = b.dataset.modo;
+    try { localStorage.setItem("modoCat", modoCat); } catch (err) {}
+    renderCategorias();
+  }
+  const g = e.target.closest(".cat-visual [data-grupo]");  // clicar num arco abre o grupo na lista
+  if (g) {
+    const d = [...g.closest(".cat-card").querySelectorAll("details.grupo")].find((x) => x.dataset.nomeGrupo === g.dataset.grupo);
+    if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  }
 });
 
 $("btnSync").addEventListener("click", async () => {

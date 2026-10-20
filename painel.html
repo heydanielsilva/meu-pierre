@@ -1048,43 +1048,12 @@
 
       <!-- Análise -->
       <div class="vista" data-vista="analise" hidden>
+        <div class="segmento largo abas" role="group" aria-label="Seções da análise" id="anAbas">
+          <button type="button" data-aba-an="geral" aria-pressed="true">Visão geral</button>
+          <button type="button" data-aba-an="previsao" aria-pressed="false">Previsão</button>
+        </div>
+        <div class="aba" data-aba-an="geral">
         <section class="grade-4" id="anResumo"></section>
-        <section class="cartao" id="secPrevisao">
-          <div class="cab"><h2>Previsão dos próximos meses</h2><span class="extra" id="prevExtra"></span></div>
-          <div class="prev-topo" id="prevTopo"></div>
-          <div class="legenda" id="prevLegenda">
-            <span><i style="background:var(--pv-fixo)"></i>Contas fixas e assinaturas</span>
-            <span><i style="background:var(--pv-parc)"></i>Parcelas</span>
-            <span><i style="background:var(--pv-var)"></i>Gasto típico do dia a dia</span>
-            <span><i style="background:var(--pv-man)"></i>Adicionados por você</span>
-            <span><i style="background:var(--barra)"></i>Este mês: já gasto</span>
-            <span><i class="hach"></i>Ainda deve gastar</span>
-            <span><i class="linha-rec"></i>Receita prevista</span>
-          </div>
-          <div class="prev-graf" id="prevGrafico"></div>
-          <div class="prev-grade">
-            <div><div class="subtitulo"><span>Mês a mês</span><span>sobra prevista</span></div><div id="prevMeses"></div></div>
-            <div>
-              <div class="subtitulo"><span>Gastos e entradas que você sabe que vêm</span><span id="prevLancTotal"></span></div>
-              <div id="prevLanc"></div>
-              <form class="form-prev" id="formPrev">
-                <input class="campo largo" id="pvDesc" placeholder="O que é (ex.: IPVA, viagem, 13º salário)" maxlength="80" required>
-                <input class="campo" id="pvValor" type="number" min="0.01" step="0.01" placeholder="Valor R$" required>
-                <select class="campo" id="pvTipo" aria-label="Tipo"><option value="saida">Gasto</option><option value="entrada">Entrada</option></select>
-                <input class="campo" id="pvMes" type="month" aria-label="Mês" required>
-                <select class="campo" id="pvRepetir" aria-label="Repetição">
-                  <option value="unica">Só uma vez</option><option value="mensal">Todo mês</option><option value="parcelado">Parcelado</option>
-                </select>
-                <input class="campo" id="pvVezes" type="number" min="1" max="120" step="1" placeholder="Por quantos meses" hidden>
-                <button class="pilula roxa">Adicionar</button>
-              </form>
-              <div class="dica" id="pvDica">Para o que o banco ainda não mostra: uma compra planejada, um imposto, uma viagem, um bônus.</div>
-              <div class="subtitulo" style="margin-top:22px"><span>Como a previsão é feita</span></div>
-              <div class="dica" id="prevComo" style="margin-top:0"></div>
-              <div class="base-prev" id="prevBase"></div>
-            </div>
-          </div>
-        </section>
         <section class="grade-2">
           <div class="cartao cat-card">
             <div class="cab"><h2>Gastos por categoria</h2><span class="extra cat-mes"></span></div>
@@ -1122,6 +1091,45 @@
           <div class="cab"><h2>Assinaturas e contas fixas</h2><span class="extra" id="recTotal"></span></div>
           <div id="recorrentes"></div>
         </section>
+        </div>
+        <div class="aba" data-aba-an="previsao" hidden>
+        <section class="cartao" id="secPrevisao">
+          <div class="cab"><h2>Previsão dos próximos meses</h2><span class="extra" id="prevExtra"></span></div>
+          <div class="prev-topo" id="prevTopo"></div>
+          <div class="legenda" id="prevLegenda">
+            <span><i style="background:var(--pv-fixo)"></i>Contas fixas e assinaturas</span>
+            <span><i style="background:var(--pv-parc)"></i>Parcelas</span>
+            <span><i style="background:var(--pv-var)"></i>Gasto típico do dia a dia</span>
+            <span><i style="background:var(--pv-man)"></i>Adicionados por você</span>
+            <span><i style="background:var(--barra)"></i>Este mês: já gasto</span>
+            <span><i class="hach"></i>Ainda deve gastar</span>
+            <span><i class="linha-rec"></i>Receita prevista</span>
+          </div>
+          <div class="prev-graf" id="prevGrafico"></div>
+          <div class="prev-grade">
+            <div><div class="subtitulo"><span>Mês a mês</span><span>sobra prevista</span></div><div id="prevMeses"></div></div>
+            <div>
+              <div class="subtitulo"><span>Gastos e entradas que você sabe que vêm</span><span id="prevLancTotal"></span></div>
+              <div id="prevLanc"></div>
+              <form class="form-prev" id="formPrev">
+                <input class="campo largo" id="pvDesc" placeholder="O que é (ex.: IPVA, viagem, 13º salário)" maxlength="80" required>
+                <input class="campo" id="pvValor" type="number" min="0.01" step="0.01" placeholder="Valor R$" required>
+                <select class="campo" id="pvTipo" aria-label="Tipo"><option value="saida">Gasto</option><option value="entrada">Entrada</option></select>
+                <input class="campo" id="pvMes" type="month" aria-label="Mês" required>
+                <select class="campo" id="pvRepetir" aria-label="Repetição">
+                  <option value="unica">Só uma vez</option><option value="mensal">Todo mês</option><option value="parcelado">Parcelado</option>
+                </select>
+                <input class="campo" id="pvVezes" type="number" min="1" max="120" step="1" placeholder="Por quantos meses" hidden>
+                <button class="pilula roxa">Adicionar</button>
+              </form>
+              <div class="dica" id="pvDica">Para o que o banco ainda não mostra: uma compra planejada, um imposto, uma viagem, um bônus.</div>
+              <div class="subtitulo" style="margin-top:22px"><span>Como a previsão é feita</span></div>
+              <div class="dica" id="prevComo" style="margin-top:0"></div>
+              <div class="base-prev" id="prevBase"></div>
+            </div>
+          </div>
+        </section>
+        </div>
       </div>
 
       <!-- Investimentos e parcelas -->
@@ -2255,11 +2263,27 @@ let abaInv = "carteira";
 try { abaInv = localStorage.getItem("abaInvest") || "carteira"; } catch (e) {}
 function mostrarAba() {
   document.querySelectorAll("#invAbas button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.aba === abaInv)));
-  document.querySelectorAll(".aba[data-aba]").forEach((a) => { a.hidden = a.dataset.aba !== abaInv; });
+  document.querySelectorAll("[data-vista=investimentos] .aba[data-aba]").forEach((a) => { a.hidden = a.dataset.aba !== abaInv; });
   if (abaInv === "carteira") graficos.inv?.resize();
   if (abaInv === "mercado" && D && !$("mercIndicadores").childElementCount) renderMercado();
   requestAnimationFrame(animarContadores);
 }
+let abaAn = "geral";
+try { abaAn = localStorage.getItem("abaAnalise") || "geral"; } catch (e) {}
+function mostrarAbaAn() {
+  document.querySelectorAll("#anAbas button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.abaAn === abaAn)));
+  document.querySelectorAll(".aba[data-aba-an]").forEach((a) => { a.hidden = a.dataset.abaAn !== abaAn; });
+  requestAnimationFrame(animarContadores);
+}
+function irAbaAn(aba) {
+  abaAn = aba;
+  try { localStorage.setItem("abaAnalise", abaAn); } catch (err) {}
+  mostrarAbaAn();
+}
+$("anAbas").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-aba-an]");
+  if (b) irAbaAn(b.dataset.abaAn);
+});
 $("invAbas").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-aba]");
   if (!b) return;
@@ -2701,6 +2725,7 @@ function mostrarVista() {
   document.title = (titulo ? titulo + " · " : "") + "Meu Pierre";
   if (v === "inicio") graficos.ev?.resize();
   if (v === "investimentos") mostrarAba();
+  if (v === "analise") mostrarAbaAn();
   requestAnimationFrame(animarContadores);
 }
 function irPara(v) {
@@ -2820,8 +2845,8 @@ $("formPrev").addEventListener("submit", async (e) => {
 });
 $("verPrevisao").addEventListener("click", (e) => {
   e.preventDefault();
+  irAbaAn("previsao");
   irPara("analise");
-  requestAnimationFrame(() => $("secPrevisao").scrollIntoView({ behavior: menosMovimento() ? "auto" : "smooth" }));
 });
 { // mês padrão do formulário: o próximo
   const d = new Date(), t = d.getFullYear() * 12 + d.getMonth() + 1;

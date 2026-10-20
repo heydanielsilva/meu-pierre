@@ -13,6 +13,7 @@ import json
 import os
 import re
 import statistics
+import uuid
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -522,6 +523,104 @@ def parcelas_por_mes(parcelas: list[dict], meses: int = 12) -> list[dict]:
     return [{"mes": m, "valor": v} for m, v in soma.items()]
 
 
+# ================================================================ PREVISÃO
+def adicionar_previsto(descricao: str, valor: float, tipo: str, mes: str, repetir: str, vezes: int | None) -> None:
+    """Gasto ou entrada que você sabe que vai acontecer e o banco ainda não mostra."""
+    if not descricao.strip() or valor <= 0 or not re.fullmatch(r"\d{4}-\d{2}", mes or ""):
+        raise ValueError("Informe descrição, valor e mês.")
+    tipo = "entrada" if tipo == "entrada" else "saida"
+    repetir = repetir if repetir in ("unica", "mensal", "parcelado") else "unica"
+    vezes = max(1, min(int(vezes), 120)) if vezes else None
+    if repetir == "parcelado" and not vezes:
+        raise ValueError("Informe em quantas parcelas.")
+    store.con.execute("INSERT OR REPLACE INTO previstos VALUES (?,?,?,?,?,?,?,?)",
+                      (uuid.uuid4().hex[:12], descricao.strip()[:80], round(valor, 2), tipo, mes, repetir,
+                       vezes if repetir != "unica" else None, agora_br().isoformat()))
+    store.con.commit()
+
+
+def remover_previsto(id_: str) -> int:
+    n = store.con.execute("DELETE FROM previstos WHERE id=?", (id_,)).rowcount
+    store.con.commit()
+    return n
+
+
+def _valor_previsto_no_mes(p: dict, mes: str) -> float:
+    """Quanto um lançamento manual pesa no mês (parcelado: valor total dividido nas parcelas)."""
+    if mes < p["mes"]:
+        return 0.0
+    k = (int(mes[:4]) * 12 + int(mes[5:])) - (int(p["mes"][:4]) * 12 + int(p["mes"][5:]))
+    if p["repetir"] == "unica":
+        return p["valor"] if k == 0 else 0.0
+    if p["repetir"] == "parcelado":
+        return p["valor"] / p["vezes"] if k < p["vezes"] else 0.0
+    return p["valor"] if not p["vezes"] or k < p["vezes"] else 0.0
+
+
+def previsao(meses: int = 6) -> dict:
+    """Este mês (projetado) e os próximos: contas fixas e assinaturas, parcelas já assumidas, gasto típico
+    das outras categorias (mediana dos últimos 3 meses) e o que você adicionou à mão."""
+    hoje = hoje_br()
+    rec = _recorrentes()
+    chaves = {r["chave"] for r in rec}
+    fixos = sum(r["media"] for r in rec)
+
+    # base: últimos 3 meses completos que têm transações
+    por_cat: dict[str, list[float]] = defaultdict(list)
+    receitas_base, base = [], []
+    for k in (3, 2, 1):
+        m = _somar_meses(hoje, -k)
+        _, de, ate = _mes(m)
+        txs = store.transacoes(de, ate)
+        if not txs:
+            continue
+        base.append(m)
+        receitas_base.append(_fluxo(txs)[0])
+        cat: dict[str, float] = defaultdict(float)
+        for t in txs:
+            if t["neutra"] or t["direcao"] != "saida" or (t.get("parcelas_total") or 0) > 1 or _chave_recorrente(t) in chaves:
+                continue
+            cat[t["categoria"]] += t["valor"]
+        for c, v in cat.items():
+            por_cat[c].append(v)
+    n = len(base)
+    tipico = {c: statistics.median(vs + [0.0] * (n - len(vs))) for c, vs in por_cat.items()}
+    tipico = {c: v for c, v in sorted(tipico.items(), key=lambda kv: -kv[1]) if v >= 1}
+    variavel = sum(tipico.values())
+    receita_tipica = statistics.median(receitas_base) if receitas_base else 0.0
+
+    previstos = [dict(p) for p in store.con.execute("SELECT * FROM previstos ORDER BY mes, criado_em").fetchall()]
+    parc = {m["mes"]: m["valor"] for m in parcelas_por_mes(parcelas_futuras(), meses)}
+
+    out, acumulado = [], 0.0
+    rotulo, de, ate = _mes("")
+    txs_mes = store.transacoes(de, ate)
+    for k in range(0, meses + 1):
+        m = _somar_meses(hoje, k)
+        manual_s = sum(_valor_previsto_no_mes(p, m) for p in previstos if p["tipo"] == "saida")
+        manual_e = sum(_valor_previsto_no_mes(p, m) for p in previstos if p["tipo"] == "entrada")
+        if k == 0:   # este mês: o que já foi gasto + o que ainda deve cair até o fim
+            rec_ja, gasto_ja = _fluxo(txs_mes)
+            proj = _projecao_mes(txs_mes)
+            item = {"mes": m, "atual": True, "ja_gasto": round(gasto_ja, 2), "restante": round(max(0.0, proj - gasto_ja), 2),
+                    "fixos": 0.0, "parcelas": 0.0, "variavel": 0.0,
+                    "receitas": round(max(rec_ja, receita_tipica) + manual_e, 2), "receitas_ja": round(rec_ja, 2)}
+            gastos = proj + manual_s
+        else:
+            p_m = parc.get(m, 0.0)
+            item = {"mes": m, "atual": False, "ja_gasto": 0.0, "restante": 0.0, "fixos": round(fixos, 2),
+                    "parcelas": round(p_m, 2), "variavel": round(variavel, 2), "receitas": round(receita_tipica + manual_e, 2)}
+            gastos = fixos + p_m + variavel + manual_s
+        item.update({"manuais": round(manual_s, 2), "manuais_entrada": round(manual_e, 2), "gastos": round(gastos, 2),
+                     "sobra": round(item["receitas"] - gastos, 2)})
+        acumulado += item["sobra"]
+        item["acumulado"] = round(acumulado, 2)
+        out.append(item)
+    return {"meses": out, "base_meses": base, "fixos": round(fixos, 2), "receita_tipica": round(receita_tipica, 2),
+            "variavel": round(variavel, 2), "variavel_categorias": [{"categoria": c, "valor": round(v, 2)} for c, v in tipico.items()],
+            "lancamentos": [{k: p[k] for k in ("id", "descricao", "valor", "tipo", "mes", "repetir", "vezes")} for p in previstos]}
+
+
 def faturas() -> list[dict]:
     """Faturas anteriores de cada cartão."""
     out = []
@@ -690,7 +789,7 @@ def regras() -> list[dict]:
             for r in store.con.execute("SELECT padrao, categoria FROM regras ORDER BY categoria").fetchall()]
 
 
-def alertas() -> list[dict]:
+def alertas(prev: dict | None = None) -> list[dict]:
     """Orçamentos estourando, saldo baixo, fatura vencendo, gastos fora do padrão e autorização expirando."""
     al: list[dict] = []
 
@@ -730,6 +829,12 @@ def alertas() -> list[dict]:
             if t["valor"] > 3 * med and t["valor"] > 100:
                 add("medio", f"Gasto fora do padrão: {t['descricao']} {brl(t['valor'])} em {t['data']} "
                              f"(normal em {t['categoria']}: ~{brl(med)}).")
+    prev = prev or _seguro(lambda: previsao(3))
+    if prev:
+        vermelho = next((m for m in prev["meses"][1:4] if m["sobra"] < 0), None)
+        if vermelho:
+            add("medio", f"Previsão: {vermelho['mes'][5:]}/{vermelho['mes'][:4]} deve fechar no vermelho "
+                         f"({brl(vermelho['sobra'])}: gastos {brl(vermelho['gastos'])}, receitas {brl(vermelho['receitas'])}).")
     ult = store.get_meta("ultima_sync")
     if not DEMO and ult and agora_br() - datetime.fromisoformat(ult) > timedelta(days=3):
         add("medio", f"Dados desatualizados desde {ult}. Clique em Atualizar.")
@@ -762,12 +867,13 @@ def painel(mes: str = "") -> dict:
         "recorrentes": recorrentes(),
         "parcelas": (parc := parcelas_futuras()),
         "parcelas_meses": parcelas_por_mes(parc),
+        "previsao": (prev := _seguro(previsao)),
         "faturas": faturas(),
         "investimentos": investimentos(),
         "rendimento_investimentos": rendimento_investimentos(),
         "indicadores": _seguro(indicadores),
         "regras": regras(),
-        "alertas": alertas(),
+        "alertas": alertas(prev),
         "neutras": sorted(NEUTRAS),
     }
 

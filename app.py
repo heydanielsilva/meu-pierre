@@ -6,6 +6,7 @@ Rotas
   GET  /sair              logout
   GET  /api/painel        todos os dados do painel em JSON (?mes=AAAA-MM)
   POST /api/sincronizar   busca dados novos na Pluggy
+  GET  /api/diagnostico   como as faturas dos cartões foram calculadas (para conferir com o banco)
   POST /api/orcamento     cria, altera ou remove um orçamento
   POST /api/regra         cria uma regra de categoria
   POST /api/regra/remover remove uma regra de categoria
@@ -169,6 +170,11 @@ async def api_painel(request: Request) -> Response:
 
 
 @_protegido
+async def api_diagnostico(request: Request) -> Response:
+    return JSONResponse({"cartoes": _nucleo().diagnostico_cartoes()}, headers={"Cache-Control": "no-store"})
+
+
+@_protegido
 async def api_sincronizar(request: Request) -> Response:
     dias = int((await _json(request)).get("dias") or 30)
     return JSONResponse(_nucleo().sincronizar(dias))
@@ -235,6 +241,7 @@ app = _App(routes=[
     Route("/sair", sair),
     Route("/api/painel", api_painel),
     Route("/api/sincronizar", api_sincronizar, methods=["POST"]),
+    Route("/api/diagnostico", api_diagnostico),
     Route("/api/orcamento", api_orcamento, methods=["POST"]),
     Route("/api/regra", api_regra, methods=["POST"]),
     Route("/api/regra/remover", api_regra_remover, methods=["POST"]),

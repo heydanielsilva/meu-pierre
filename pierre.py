@@ -214,17 +214,21 @@ def _mais_meses(d: date, n: int) -> date:
     return date(a, m, min(d.day, calendar.monthrange(a, m)[1]))
 
 
-def _faturas_do_cartao(c) -> dict:
+def _faturas_do_cartao(c, diagnostico: bool = False) -> dict:
     """Fatura aberta, fatura fechada a pagar e as próximas (parcelas já lançadas) de um cartão.
 
     O saldo que a Pluggy manda para o cartão é o total devido (inclui parcelas futuras), e /bills só
-    traz faturas fechadas. A fatura aberta é calculada pelas compras do ciclo atual: as que ainda não
-    têm fatura (billId vazio) ou, se o banco não informa o billId, as feitas entre o fechamento
-    anterior e o próximo.
+    traz faturas fechadas. Por isso a fatura aberta é calculada pelas compras:
+    - se o banco informa a fatura de cada compra (billId): soma as faturas que ainda não fecharam,
+      isto é, que não estão em /bills e têm compra depois do último fechamento (as parcelas de
+      compras antigas vêm junto, porque têm o mesmo billId); compras sem billId entram pela data;
+    - se não informa: soma as compras do ciclo pela data em que entram na fatura. Parcelas que
+      vêm com a data da compra original são empurradas para o mês da parcela.
     """
     hoje = hoje_br()
     venc = date.fromisoformat(c["vencimento_fatura"]) if c["vencimento_fatura"] else None
-    fech = date.fromisoformat(c["fechamento_fatura"]) if c["fechamento_fatura"] else (venc - timedelta(days=7) if venc else None)
+    fech_banco = date.fromisoformat(c["fechamento_fatura"]) if c["fechamento_fatura"] else None
+    fech = fech_banco or (venc - timedelta(days=7) if venc else None)
     if not fech:
         fech = hoje.replace(day=calendar.monthrange(hoje.year, hoje.month)[1])
     folga = max(1, (venc - fech).days) if venc and venc > fech else 7
@@ -233,23 +237,48 @@ def _faturas_do_cartao(c) -> dict:
     while _mais_meses(fech, -1) >= hoje:
         fech = _mais_meses(fech, -1)
     ini = _mais_meses(fech, -1)                          # ciclo aberto: (ini, fech]
+    ini_ant = _mais_meses(ini, -1)                       # ciclo anterior: (ini_ant, ini]
 
     txs = [dict(t) for t in store.con.execute(
         "SELECT * FROM transactions WHERE account_id=? AND data > ?", (c["id"], (hoje - timedelta(days=400)).isoformat())).fetchall()]
-    com_fatura = any(t.get("fatura_id") for t in txs)
+    fechadas_banco = {b["id"]: dict(b) for b in store.con.execute("SELECT * FROM bills WHERE account_id=?", (c["id"],)).fetchall()}
 
     def valor(t) -> float:
         if t["direcao"] == "saida":
             return t["valor"]
         return -t["valor"] if "estorno" in _sem_acento(t["descricao"] or "") else 0.0   # pagamento da fatura não conta
 
-    def soma(de: date, ate: date) -> float:
-        return sum(valor(t) for t in txs if de.isoformat() < t["data"] <= ate.isoformat())
+    # data em que a compra entra na fatura: parcela que veio com a data da compra original vai para o mês dela
+    datas_por_compra: dict[tuple, set] = defaultdict(set)
+    for t in txs:
+        if (t.get("parcelas_total") or 0) > 1:
+            datas_por_compra[(_chave_recorrente(t), round(t["valor"], 2), t["parcelas_total"])].add((t["parcela_atual"], t["data"]))
 
+    def data_fatura(t) -> str:
+        p = t.get("parcela_atual") or 0
+        if (t.get("parcelas_total") or 0) <= 1 or p <= 1:
+            return t["data"]
+        irmas = datas_por_compra[(_chave_recorrente(t), round(t["valor"], 2), t["parcelas_total"])]
+        mesma_data = len({d for _, d in irmas}) == 1 and len(irmas) > 1
+        compra = t.get("data_compra")
+        if mesma_data or (compra and abs((date.fromisoformat(t["data"]) - date.fromisoformat(compra)).days) <= 3):
+            return _mais_meses(date.fromisoformat(t["data"]), p - 1).isoformat()
+        return t["data"]
+
+    def no_ciclo(t, de: date, ate: date) -> bool:
+        return de.isoformat() < data_fatura(t) <= ate.isoformat()
+
+    grupos: dict[str, list[dict]] = defaultdict(list)
+    for t in txs:
+        if t.get("fatura_id"):
+            grupos[t["fatura_id"]].append(t)
+    com_fatura = bool(grupos)
     if com_fatura:
-        aberta = sum(valor(t) for t in txs if not t.get("fatura_id") and t["data"] <= fech.isoformat())
+        abertas_ids = {g for g, ts in grupos.items() if g not in fechadas_banco and max(x["data"] for x in ts) > ini.isoformat()}
+        aberta = sum(valor(t) for t in txs if t.get("fatura_id") in abertas_ids or (not t.get("fatura_id") and no_ciclo(t, ini, fech)))
     else:
-        aberta = soma(ini, fech)
+        abertas_ids = set()
+        aberta = sum(valor(t) for t in txs if no_ciclo(t, ini, fech))
 
     # fatura já fechada que ainda vence (a do ciclo anterior)
     fechada = None
@@ -259,15 +288,53 @@ def _faturas_do_cartao(c) -> dict:
                               (c["id"], hoje.isoformat())).fetchone()
         if b:
             fechada = {"valor": b["valor"], "vence": b["vencimento"], "minimo": b["pagamento_minimo"]}
-        elif not com_fatura:
-            fechada = {"valor": soma(_mais_meses(ini, -1), ini), "vence": venc_ant.isoformat(), "minimo": None}
+        else:
+            if com_fatura:
+                ant_ids = {g for g, ts in grupos.items() if g not in abertas_ids and g not in fechadas_banco
+                           and ini_ant.isoformat() < max(x["data"] for x in ts) <= ini.isoformat()}
+                v = sum(valor(t) for t in txs if t.get("fatura_id") in ant_ids or (not t.get("fatura_id") and no_ciclo(t, ini_ant, ini)))
+            else:
+                v = sum(valor(t) for t in txs if no_ciclo(t, ini_ant, ini))
+            if v > 0:
+                fechada = {"valor": round(v, 2), "vence": venc_ant.isoformat(), "minimo": None}
 
     # próximas faturas: só o que já está comprometido em parcelas deste cartão
     parcelas = [p for p in parcelas_futuras() if p.get("conta_id") == c["id"]]
     proximas = [{"vence": (_mais_meses(fech, k) + timedelta(days=folga)).isoformat(),
                  "valor": sum(p["valor"] for p in parcelas if p["restantes"] >= k)} for k in range(1, 7)]
-    return {"fatura_aberta": round(aberta, 2), "fecha_em": fech.isoformat(), "vence_em": (fech + timedelta(days=folga)).isoformat(),
-            "fatura_fechada": fechada, "proximas_faturas": proximas, "total_devido": c["saldo"]}
+    out = {"fatura_aberta": round(aberta, 2), "fecha_em": fech.isoformat(), "vence_em": (fech + timedelta(days=folga)).isoformat(),
+           "fatura_fechada": fechada, "proximas_faturas": proximas, "total_devido": c["saldo"]}
+    if diagnostico:  # só números e datas, sem descrições
+        out["diagnostico"] = {
+            "fechamento_banco": c["fechamento_fatura"], "vencimento_banco": c["vencimento_fatura"],
+            "ciclo_aberto": [ini.isoformat(), fech.isoformat()], "ciclo_anterior": [ini_ant.isoformat(), ini.isoformat()],
+            "metodo": "billId" if com_fatura else "datas", "transacoes_400_dias": len(txs),
+            "com_billId": sum(1 for t in txs if t.get("fatura_id")), "com_data_compra": sum(1 for t in txs if t.get("data_compra")),
+            "parceladas": sum(1 for t in txs if (t.get("parcelas_total") or 0) > 1),
+            "faturas_fechadas_do_banco": [{"vence": b["vencimento"], "valor": b["valor"]} for b in
+                                          sorted(fechadas_banco.values(), key=lambda b: b["vencimento"] or "", reverse=True)[:4]],
+            "grupos_por_billId": sorted([{"id": g[-6:], "qtd": len(ts), "de": min(x["data"] for x in ts), "ate": max(x["data"] for x in ts),
+                                          "soma": round(sum(valor(x) for x in ts), 2), "fechada_no_banco": g in fechadas_banco,
+                                          "conta_como_aberta": g in abertas_ids} for g, ts in grupos.items()],
+                                        key=lambda x: x["ate"], reverse=True)[:6],
+            "soma_por_data_ciclo_aberto": round(sum(valor(t) for t in txs if no_ciclo(t, ini, fech)), 2),
+            "soma_por_data_ciclo_anterior": round(sum(valor(t) for t in txs if no_ciclo(t, ini_ant, ini)), 2),
+            "parcelas_recentes": [{"data": t["data"], "data_compra": t.get("data_compra"), "parcela": f"{t['parcela_atual']}/{t['parcelas_total']}",
+                                   "valor": t["valor"], "entra_na_fatura_em": data_fatura(t), "billId": (t.get("fatura_id") or "")[-6:]}
+                                  for t in sorted(txs, key=lambda t: t["data"], reverse=True) if (t.get("parcelas_total") or 0) > 1][:10],
+        }
+    return out
+
+
+def diagnostico_cartoes() -> list[dict]:
+    """Resumo do cálculo das faturas de cada cartão, para conferir com o app do banco (sem descrições)."""
+    out = []
+    for c in store.con.execute("SELECT * FROM accounts WHERE subtipo='CREDIT_CARD'").fetchall():
+        f = _faturas_do_cartao(c, diagnostico=True)
+        out.append({"cartao": f"{c['banco']} final {str(c['numero'] or '')[-4:]}", "total_devido_pluggy": c["saldo"],
+                    "limite": c["limite"], "limite_disponivel": c["limite_disponivel"],
+                    "fatura_aberta_calculada": f["fatura_aberta"], "fatura_fechada": f["fatura_fechada"], **f["diagnostico"]})
+    return out
 
 
 def patrimonio() -> dict:

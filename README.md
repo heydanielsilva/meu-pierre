@@ -100,6 +100,15 @@ Dica: no celular, use "Adicionar à tela inicial" no navegador para abrir o pain
 
 ---
 
+## Instalar como app no celular ou no computador
+
+O painel é um app instalável (PWA): ganha ícone na tela inicial, abre em tela cheia e mostra os últimos dados guardados mesmo sem internet.
+
+- **Android (Chrome)** e **computador (Chrome/Edge):** toque no botão com o ícone de celular no topo do painel, ou em "Instalar app" no menu do navegador.
+- **iPhone (Safari):** toque em **Compartilhar** e depois em **Adicionar à Tela de Início**. O botão no topo do painel mostra essa instrução.
+
+Ao clicar em **Sair**, os dados guardados no aparelho são apagados.
+
 ## Rodar no computador, sem nuvem (opcional)
 
 Também funciona 100% local, com SQLite. Deixe `DATABASE_URL` vazio no `.env`, preencha o `MEU_PIERRE_TOKEN` e rode:
@@ -141,3 +150,4 @@ Para testar sem banco nenhum, com dados fictícios: `MEU_PIERRE_DEMO=1 python de
 | `painel.html`, `login.html` | As telas do painel |
 | `desktop.py` | Uso local e carga inicial do histórico |
 | `vercel.json` | Agenda do cron diário |
+| `pwa/` | App instalável: manifesto, service worker (`sw.js`) e ícones |

@@ -2,7 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="/pwa/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meu Pierre">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0f4a49">
 <title>Meu Pierre</title>
@@ -12,6 +18,7 @@
     var t = "dark";
     try { t = localStorage.getItem("tema") || "dark"; } catch (e) {}
     document.documentElement.dataset.theme = t;
+    document.querySelector('meta[name="theme-color"]').content = t === "dark" ? "#071817" : "#0f4a49";
   })();
 </script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%230f4a49%27/%3E%3Cg transform=%27translate(26 26) scale(.0538)%27%3E%3Crect width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23fff%27/%3E%3Crect x=%27315%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23fff%27/%3E%3Crect x=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23f28c3b%27/%3E%3Crect y=%27315%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23cfe3e0%27/%3E%3Crect y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3Crect x=%27315%27 y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3Crect x=%27630%27 y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3C/g%3E%3C/svg%3E">
@@ -55,5 +62,6 @@
   <button type="submit">Entrar</button>
   <div class="erro">{{erro}}</div>
 </form>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});</script>
 </body>
 </html>

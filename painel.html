@@ -2,7 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="/pwa/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meu Pierre">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0f4a49">
 <title>Meu Pierre</title>
@@ -12,6 +18,7 @@
     var t = "dark";
     try { t = localStorage.getItem("tema") || "dark"; } catch (e) {}
     document.documentElement.dataset.theme = t;
+    document.querySelector('meta[name="theme-color"]').content = t === "dark" ? "#071817" : "#0f4a49";
   })();
 </script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%230f4a49%27/%3E%3Cg transform=%27translate(26 26) scale(.0538)%27%3E%3Crect width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23fff%27/%3E%3Crect x=%27315%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23fff%27/%3E%3Crect x=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23f28c3b%27/%3E%3Crect y=%27315%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%23cfe3e0%27/%3E%3Crect y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3Crect x=%27315%27 y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3Crect x=%27630%27 y=%27630%27 width=%27262%27 height=%27262%27 rx=%2734%27 fill=%27%239ec7c2%27/%3E%3C/g%3E%3C/svg%3E">
@@ -641,6 +648,14 @@
   .guia td, .guia th { padding: 5px 8px; }
   .aviso-legal { color: var(--suave); font-size: 12.5px; text-align: center; margin: 4px 0 0; }
 
+  /* App instalado (PWA): respeita o entalhe e a barra inferior do iPhone */
+  @media (display-mode: standalone) {
+    .area { padding-top: max(32px, env(safe-area-inset-top)); }
+  }
+  .dica-instalar { position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 30; background: var(--cartao);
+                   border: 1px solid var(--linha); border-radius: 18px; padding: 14px 44px 14px 16px; box-shadow: 0 18px 40px rgba(0,0,0,.35); font-size: 14px; }
+  .dica-instalar .x { position: absolute; top: 10px; right: 10px; }
+
   /* Telas */
   .vista { display: grid; gap: 24px; min-width: 0; }
   .vista[hidden] { display: none !important; }
@@ -710,15 +725,17 @@
   }
   @media (max-width: 760px) {
     body { background: var(--app); }
-    .app { display: block; padding-bottom: 76px; }
-    nav.lateral { position: fixed; z-index: 10; top: auto; bottom: 0; left: 0; right: 0; width: auto; height: 68px; flex-direction: row;
-                  justify-content: space-around; padding: 0 8px; border-radius: 22px 22px 0 0; }
+    .app { display: block; padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+    .area { padding-top: max(22px, env(safe-area-inset-top)); }
+    nav.lateral { position: fixed; z-index: 10; top: auto; bottom: 0; left: 0; right: 0; width: auto; height: calc(68px + env(safe-area-inset-bottom)); flex-direction: row;
+                  justify-content: space-around; padding: 0 8px env(safe-area-inset-bottom); border-radius: 22px 22px 0 0; }
     .logo, nav.lateral .fim { display: none; }
     .area { border-radius: 0; padding: 22px 16px 32px; }
     .titulo h1 { font-size: 30px; }
     .titulo p { font-size: 16px; }
     .acoes { width: 100%; }
     .acoes select { flex: 1; min-width: 0; }
+    .acoes:has(#btnInstalar:not([hidden])) #btnExcel { display: none; }  /* no celular, o espaço vai para "Instalar" */
     #btnSync { width: 46px; padding: 0; justify-content: center; }
     #btnSync span { display: none; }
     .sync { text-align: left; }
@@ -832,6 +849,7 @@
     <path d="M4 12.5h24M10.5 4v5M21.5 4v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 23l4-4 2.5 2.5L22 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="k-alvo" viewBox="0 0 32 32"><circle cx="15" cy="17" r="11" fill="currentColor" fill-opacity=".3"/><circle cx="15" cy="17" r="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="17" r="6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="17" r="1.6" fill="currentColor"/>
     <path d="M15 17 25 7M21.5 6.5H25.5V10.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-celular" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M12 7.5v7M9 11.5l3 3 3-3M10.5 18.5h3"/></symbol>
   <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
 </svg>
 
@@ -856,6 +874,7 @@
       </div>
       <div class="acoes">
         <select id="mes" class="pilula" aria-label="Mês"></select>
+        <button class="pilula redonda" id="btnInstalar" type="button" hidden title="Instalar o app"><svg class="i"><use href="#i-celular"/></svg></button>
         <button class="pilula redonda" id="btnOlho" type="button"><svg class="i"><use href="#i-olho"/></svg></button>
         <button class="pilula redonda" id="btnTema" type="button"><svg class="i"><use href="#i-sol"/></svg></button>
         <a class="pilula redonda" id="btnExcel" href="/exportar.xlsx?meses=6" title="Baixar Excel (6 meses)"><svg class="i"><use href="#i-baixar"/></svg></a>
@@ -1311,10 +1330,12 @@ const contaTx = (t) => (t.subtipo === "CREDIT_CARD" ? "Cartão " : "Conta ") + (
 
 let D = null, graficos = {}, txLimite = 60, txTipo = "";
 
+let semInternet = false;
 async function api(url, corpo) {
   const r = await fetch(url, corpo === undefined ? {} : {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo),
   });
+  if (corpo === undefined) semInternet = r.headers.get("x-offline") === "1";
   if (r.status === 401) { location.href = "/"; throw new Error("Sessão expirada"); }
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.erro || "Erro " + r.status);
@@ -1366,6 +1387,8 @@ function render() {
       (U ? ` (última busca: ${U.dias} dias, ${U.transacoes} transações` + (st ? "; status " + st : "") + ")" : "") +
       ". Se os bancos foram conectados há pouco, o Meu Pluggy ainda pode estar baixando o histórico: tente Atualizar mais tarde." });
   }
+  if (semInternet) f.unshift({ classe: "aviso", texto: "Você está sem internet. Mostrando os últimos dados guardados neste aparelho" +
+    (D.ultima_sync ? ` (atualizados em ${data(D.ultima_sync)} às ${D.ultima_sync.slice(11, 16)})` : "") + "." });
   faixas(f);
 
   // KPIs
@@ -2594,6 +2617,30 @@ $("btnTema").addEventListener("click", () => {
   refazerWidgetsTV();  // os gráficos leem as cores do tema na hora de desenhar
 });
 aplicarTema(document.documentElement.dataset.theme || "dark");
+
+// ---- App instalável (PWA)
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+let pedidoInstalar = null;
+const instalado = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); pedidoInstalar = e; $("btnInstalar").hidden = false; });
+window.addEventListener("appinstalled", () => { $("btnInstalar").hidden = true; pedidoInstalar = null; });
+const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (ehIOS && !instalado()) $("btnInstalar").hidden = false;  // no iPhone a instalação é pelo menu Compartilhar
+$("btnInstalar").addEventListener("click", async () => {
+  if (pedidoInstalar) {
+    pedidoInstalar.prompt();
+    await pedidoInstalar.userChoice.catch(() => null);
+    pedidoInstalar = null; $("btnInstalar").hidden = true;
+    return;
+  }
+  document.querySelector(".dica-instalar")?.remove();
+  document.body.insertAdjacentHTML("beforeend", `<div class="dica-instalar" role="dialog"><button class="x" type="button" title="Fechar">✕</button>
+    <b>Instalar o Meu Pierre</b><br>Toque em <b>Compartilhar</b> (o quadrado com a seta) e depois em <b>Adicionar à Tela de Início</b>.</div>`);
+  document.querySelector(".dica-instalar .x").addEventListener("click", (e) => e.target.parentElement.remove());
+});
+// ao sair, apaga os dados guardados para uso sem internet
+document.querySelector('a[href="/sair"]').addEventListener("click", () => navigator.serviceWorker?.controller?.postMessage("limpar"));
+window.addEventListener("online", () => { if (semInternet) carregar(); });
 
 mostrarVista();
 carregar();

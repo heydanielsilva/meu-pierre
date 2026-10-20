@@ -438,6 +438,56 @@
   .prox-mes .barra-pv { display: flex; gap: 2px; height: 12px; border-radius: 6px; overflow: hidden; margin: 2px 0 10px; }
   .prox-mes .barra-pv i { min-width: 3px; }
   .prox-mes .link { color: #f7a865; }
+  .intro-prev { color: var(--suave); font-size: 14px; margin: -6px 0 18px; max-width: 860px; line-height: 1.5; }
+  .intro-prev b { color: var(--texto); }
+  .prev-graf button.pc { border: 0; background: none; color: inherit; font: inherit; padding: 8px 4px 6px; border-radius: 16px; cursor: pointer; }
+  .prev-graf button.pc:hover { background: var(--cartao-2); }
+  .prev-graf button.pc[aria-pressed="true"] { background: var(--cartao-2); box-shadow: inset 0 0 0 2px var(--acento); }
+  .prev-graf button.pc[aria-pressed="true"] small { color: var(--texto); }
+  .conta-pv { background: var(--cartao-2); border-radius: 20px; padding: 18px 18px 8px; }
+  .conta-pv .conta-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .conta-pv .conta-cab b { font-size: 16px; }
+  .conta-pv .conta-cab small { color: var(--suave); font-size: 12px; }
+  .lc { border-top: 1px solid var(--linha); }
+  .lc > summary, .lc.linha { display: flex; align-items: center; gap: 10px; padding: 11px 0; list-style: none; }
+  .lc > summary { cursor: pointer; }
+  .lc > summary::-webkit-details-marker { display: none; }
+  .lc .op { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font-weight: 800; flex: none;
+            background: color-mix(in srgb, var(--c, var(--suave)) 18%, transparent); color: var(--c, var(--suave)); }
+  .lc .nm { flex: 1; min-width: 0; font-weight: 600; }
+  .lc .nm small { display: block; color: var(--suave); font-size: 12px; font-weight: 500; }
+  .lc > summary > b, .lc.linha > b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lc > summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--suave); border-bottom: 2px solid var(--suave);
+                         transform: rotate(45deg); margin: -4px 2px 0 4px; transition: transform .2s; flex: none; }
+  .lc[open] > summary::after { transform: rotate(-135deg); margin-top: 4px; }
+  .lc .exp { padding: 0 0 12px 32px; color: var(--suave); font-size: 13px; line-height: 1.5; }
+  .lc .exp .it { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; color: var(--texto); }
+  .lc .exp .it span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lc .exp .it small { color: var(--suave); margin-left: 6px; }
+  .lc .exp .it b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lc .exp p { margin: 0 0 6px; }
+  .lc.total { border-top: 2px solid var(--texto); }
+  .lc.total .nm { font-size: 15px; }
+  .lc.total > b { font-size: 19px; }
+  .rolar-cat { overflow-x: auto; max-width: 100%; }
+  .lc .exp { min-width: 0; }
+  .tab-cat { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+  .tab-cat th { color: var(--suave); font-weight: 600; text-align: right; padding: 3px 4px; }
+  .tab-cat td { text-align: right; padding: 4px; color: var(--suave); border-top: 1px solid var(--linha); white-space: nowrap; }
+  .tab-cat th:first-child, .tab-cat td:first-child { text-align: left; color: var(--texto); white-space: normal; }
+  .tab-cat td.usa { color: var(--texto); font-weight: 700; }
+  .tab-cat td.usa::before { content: "→ "; color: var(--suave); font-weight: 400; }
+  .ritmo-mes { position: relative; height: 12px; border-radius: 6px; background: var(--linha); margin: 6px 0 4px; overflow: hidden; display: flex; }
+  .ritmo-mes i { display: block; height: 100%; }
+  .ritmo-mes .hoje { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--texto); }
+  .ritmo-leg { display: flex; justify-content: space-between; color: var(--suave); font-size: 11.5px; margin-bottom: 6px; }
+  .prev-tabela { margin-top: 18px; }
+  .prev-tabela summary { cursor: pointer; color: var(--acento-texto); font-weight: 600; font-size: 14px; }
+  .prev-tabela table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .prev-tabela th { color: var(--suave); font-weight: 600; text-align: right; padding: 6px; font-size: 12px; }
+  .prev-tabela td { text-align: right; padding: 8px 6px; border-top: 1px solid var(--linha); white-space: nowrap; }
+  .prev-tabela th:first-child, .prev-tabela td:first-child { text-align: left; }
+  .prev-tabela .rolar { overflow-x: auto; }
   @media (max-width: 760px) {
     .prev-topo { grid-template-columns: 1fr 1fr; gap: 8px; }
     .prev-topo > div { padding: 12px; }
@@ -445,6 +495,11 @@
     .prev-graf { gap: 4px; }
     .prev-graf .pv-area { height: 150px; }
     .prev-graf .pc .s { display: none; }
+    .lc .exp { padding-left: 4px; }
+    .tab-cat { font-size: 11.5px; }
+    .tab-cat th, .tab-cat td { padding: 4px 3px; }
+    .tab-cat td.usa::before { content: ""; }
+    .conta-pv { padding: 14px 12px 6px; }
     .prev-mes .sub, #prevLanc .sub { white-space: normal; }
   }
 
@@ -1095,37 +1150,41 @@
         <div class="aba" data-aba-an="previsao" hidden>
         <section class="cartao" id="secPrevisao">
           <div class="cab"><h2>Previsão dos próximos meses</h2><span class="extra" id="prevExtra"></span></div>
+          <p class="intro-prev">Uma estimativa feita com o seu histórico: o que já está garantido (contas fixas, assinaturas e parcelas),
+            quanto você costuma gastar no dia a dia e o que você adicionar. <b>Clique num mês</b> para ver a conta completa.</p>
           <div class="prev-topo" id="prevTopo"></div>
-          <div class="legenda" id="prevLegenda">
+          <div class="legenda">
             <span><i style="background:var(--pv-fixo)"></i>Contas fixas e assinaturas</span>
             <span><i style="background:var(--pv-parc)"></i>Parcelas</span>
-            <span><i style="background:var(--pv-var)"></i>Gasto típico do dia a dia</span>
+            <span><i style="background:var(--pv-var)"></i>Dia a dia</span>
             <span><i style="background:var(--pv-man)"></i>Adicionados por você</span>
-            <span><i style="background:var(--barra)"></i>Este mês: já gasto</span>
-            <span><i class="hach"></i>Ainda deve gastar</span>
             <span><i class="linha-rec"></i>Receita prevista</span>
           </div>
-          <div class="prev-graf" id="prevGrafico"></div>
+          <div class="prev-graf" id="prevGrafico" role="group" aria-label="Escolha um mês"></div>
           <div class="prev-grade">
-            <div><div class="subtitulo"><span>Mês a mês</span><span>sobra prevista</span></div><div id="prevMeses"></div></div>
+            <div id="prevConta"></div>
+            <div id="prevEsteMes"></div>
+          </div>
+          <details class="prev-tabela"><summary>Ver todos os meses em tabela</summary><div id="prevTabela"></div></details>
+        </section>
+        <section class="cartao">
+          <div class="cab"><h2>Gastos e entradas que você sabe que vêm</h2><span class="extra" id="prevLancTotal"></span></div>
+          <p class="intro-prev">O que o banco ainda não mostra: uma compra planejada, um imposto, uma viagem, um bônus. Entra na previsão do mês escolhido.</p>
+          <div class="prev-grade" style="margin-top:0">
+            <div id="prevLanc"></div>
             <div>
-              <div class="subtitulo"><span>Gastos e entradas que você sabe que vêm</span><span id="prevLancTotal"></span></div>
-              <div id="prevLanc"></div>
-              <form class="form-prev" id="formPrev">
-                <input class="campo largo" id="pvDesc" placeholder="O que é (ex.: IPVA, viagem, 13º salário)" maxlength="80" required>
-                <input class="campo" id="pvValor" type="number" min="0.01" step="0.01" placeholder="Valor R$" required>
-                <select class="campo" id="pvTipo" aria-label="Tipo"><option value="saida">Gasto</option><option value="entrada">Entrada</option></select>
-                <input class="campo" id="pvMes" type="month" aria-label="Mês" required>
-                <select class="campo" id="pvRepetir" aria-label="Repetição">
-                  <option value="unica">Só uma vez</option><option value="mensal">Todo mês</option><option value="parcelado">Parcelado</option>
-                </select>
-                <input class="campo" id="pvVezes" type="number" min="1" max="120" step="1" placeholder="Por quantos meses" hidden>
-                <button class="pilula roxa">Adicionar</button>
-              </form>
-              <div class="dica" id="pvDica">Para o que o banco ainda não mostra: uma compra planejada, um imposto, uma viagem, um bônus.</div>
-              <div class="subtitulo" style="margin-top:22px"><span>Como a previsão é feita</span></div>
-              <div class="dica" id="prevComo" style="margin-top:0"></div>
-              <div class="base-prev" id="prevBase"></div>
+          <form class="form-prev" id="formPrev">
+            <input class="campo largo" id="pvDesc" placeholder="O que é (ex.: IPVA, viagem, 13º salário)" maxlength="80" required>
+            <input class="campo" id="pvValor" type="number" min="0.01" step="0.01" placeholder="Valor R$" required>
+            <select class="campo" id="pvTipo" aria-label="Tipo"><option value="saida">Gasto</option><option value="entrada">Entrada</option></select>
+            <input class="campo" id="pvMes" type="month" aria-label="Mês" required>
+            <select class="campo" id="pvRepetir" aria-label="Repetição">
+              <option value="unica">Só uma vez</option><option value="mensal">Todo mês</option><option value="parcelado">Parcelado</option>
+            </select>
+            <input class="campo" id="pvVezes" type="number" min="1" max="120" step="1" placeholder="Por quantos meses" hidden>
+            <button class="pilula roxa">Adicionar</button>
+          </form>
+              <div class="dica" id="pvDica">Parcelado: informe o valor total, que é dividido pelos meses. Todo mês: deixe "por quantos meses" vazio para valer sempre.</div>
             </div>
           </div>
         </section>
@@ -1875,54 +1934,115 @@ function renderFixasEParcelas() {
   renderCartoesAnalise();
 }
 
-// Análise > Previsão: este mês projetado e os próximos, empilhando fixos, parcelas, gasto típico e o que você adicionou
-const PV = [["fixos", "--pv-fixo", "Contas fixas e assinaturas"], ["parcelas", "--pv-parc", "Parcelas"],
-            ["variavel", "--pv-var", "Gasto típico"], ["manuais", "--pv-man", "Adicionados por você"]];
+// Análise > Previsão: os próximos meses empilhando fixos, parcelas, dia a dia e o que você adicionou;
+// ao clicar num mês, a conta completa aparece ao lado, com cada parte explicada
+const PV = [["fixos", "var(--pv-fixo)", "Contas fixas e assinaturas"], ["parcelas", "var(--pv-parc)", "Parcelas"],
+            ["variavel", "var(--pv-var)", "Dia a dia"], ["manuais", "var(--pv-man)", "Adicionados por você"]];
 const sinal = (v) => (v < 0 ? "−" : "+") + brl(Math.abs(v));
 const sinalCurto = (v) => (v < 0 ? "−" : "+") + brlCurto(Math.abs(v));
-function segmentosPv(m) {
-  return m.atual ? [["ja_gasto", "var(--barra)", "Já gasto"], ["restante", "", "Ainda deve gastar"], ["manuais", "var(--pv-man)", "Adicionados por você"]]
-    : PV.map(([k, c, n]) => [k, `var(${c})`, n]);
-}
+const mesC = (m) => NOMES_MES[+m.slice(5, 7) - 1];
+const listaMeses = (ms) => ms.length > 1 ? ms.slice(0, -1).join(", ") + " e " + ms.at(-1) : ms[0] || "";
+let pvSel = 0;
+
 function renderPrevisao() {
   const P = D.previsao;
   $("secPrevisao").hidden = !P;
   renderProxMes();
   if (!P) return;
-  const M = P.meses, prox = M[1], futuros = M.slice(1);
-  const mesC = (m) => NOMES_MES[+m.slice(5, 7) - 1];
+  const M = P.meses;
+  if (pvSel >= M.length) pvSel = 0;
+  const prox = M[0];
   $("prevExtra").textContent = `${mesC(M[0].mes)} a ${mesC(M.at(-1).mes)}/${M.at(-1).mes.slice(2, 4)}`;
-  const piorMes = futuros.reduce((a, m) => (m.sobra < a.sobra ? m : a), futuros[0]);
-  const somaSobra = futuros.reduce((s, m) => s + m.sobra, 0);
+  const pior = M.reduce((a, m) => (m.sobra < a.sobra ? m : a), M[0]);
+  const somaSobra = M.reduce((s, m) => s + m.sobra, 0);
   $("prevTopo").innerHTML =
     `<div><small>Gastos previstos em ${nomeMesLongo(prox.mes)}</small><b>${contar(prox.gastos)}</b><span>receita prevista ${brl(prox.receitas)}</span></div>` +
     `<div><small>Sobra prevista em ${nomeMesLongo(prox.mes)}</small><b class="${prox.sobra < 0 ? "neg" : "pos"}">${sinal(prox.sobra)}</b><span>${prox.receitas ? pctInt(Math.max(0, prox.sobra) / prox.receitas) + " da receita" : ""}</span></div>` +
-    `<div><small>Sobra nos próximos ${futuros.length} meses</small><b class="${somaSobra < 0 ? "neg" : "pos"}">${sinal(somaSobra)}</b><span>se tudo sair como previsto</span></div>` +
-    `<div><small>Mês mais apertado</small><b>${nomeMesLongo(piorMes.mes).replace(/ de \d+$/, "")}</b><span class="${piorMes.sobra < 0 ? "neg" : ""}">sobra ${sinal(piorMes.sobra)}</span></div>`;
+    `<div><small>Sobra somada em ${M.length} meses</small><b class="${somaSobra < 0 ? "neg" : "pos"}">${sinal(somaSobra)}</b><span>se tudo sair como previsto</span></div>` +
+    `<div><small>Mês mais apertado</small><b>${nomeMesLongo(pior.mes).replace(/ de \d+$/, "")}</b><span class="${pior.sobra < 0 ? "neg" : ""}">sobra ${sinal(pior.sobra)}</span></div>`;
 
   const maior = Math.max(...M.map((m) => Math.max(m.gastos, m.receitas)), 1) * 1.06;
   $("prevGrafico").style.gridTemplateColumns = `repeat(${M.length},minmax(0,1fr))`;
   $("prevGrafico").innerHTML = M.map((m, i) => {
-    const segs = segmentosPv(m).filter(([k]) => m[k] > 0);
-    const rot = `${nomeMesLongo(m.mes)}${m.atual ? " (este mês)" : ""}\n` + segs.map(([k, , n]) => `${n}: ${brl(m[k])}`).join("\n") +
-      `\nGastos: ${brl(m.gastos)} · Receita: ${brl(m.receitas)}\nSobra: ${sinal(m.sobra)}`;
-    return `<div class="pc${m.atual ? " atual" : ""}" style="--i:${i}" data-rotulo="${esc(rot)}" tabindex="0" aria-label="${esc(rot.replace(/\n/g, ". "))}">
+    const segs = PV.filter(([k]) => m[k] > 0);
+    const rot = `${nomeMesLongo(m.mes)}: gastos ${brl(m.gastos)}, receita ${brl(m.receitas)}, sobra ${sinal(m.sobra)}`;
+    return `<button type="button" class="pc" data-pv="${i}" aria-pressed="${i === pvSel}" style="--i:${i}" aria-label="${esc(rot)}" title="${esc(rot)}">
       <div class="pv-area"><div class="pilha-pv" style="height:${m.gastos / maior * 100}%;--i:${i}">${segs.map(([k, c]) =>
-        `<i class="${c ? "" : "hach-gas"}" style="flex:${m[k]} 1 0;${c ? "background:" + c : ""}"></i>`).join("")}</div>
+        `<i style="flex:${m[k]} 1 0;background:${c}"></i>`).join("")}</div>
         ${m.receitas ? `<span class="rec" style="bottom:calc(${m.receitas / maior * 100}% - 1.5px);--i:${i}"></span>` : ""}</div>
-      <small>${m.atual ? "este mês" : mesC(m.mes) + (m.mes.slice(5) === "01" ? "/" + m.mes.slice(2, 4) : "")}</small>
-      <span class="s ${m.sobra < 0 ? "neg" : "pos"}">${sinalCurto(m.sobra)}</span></div>`;
+      <small>${mesC(m.mes) + (m.mes.slice(5) === "01" ? "/" + m.mes.slice(2, 4) : "")}</small>
+      <span class="s ${m.sobra < 0 ? "neg" : "pos"}">${sinalCurto(m.sobra)}</span></button>`;
   }).join("");
 
-  $("prevMeses").innerHTML = M.map((m) => {
-    const segs = segmentosPv(m).filter(([k]) => m[k] > 0);
-    return `<div class="item prev-mes"><div class="meio"><div class="nome">${nomeMesLongo(m.mes)}${m.atual ? `<span class="selo-atual">este mês</span>` : ""}</div>
-      <div class="sub">gastos ${brl(m.gastos)} · receita ${brl(m.receitas)}</div>
-      <div class="mini">${segs.map(([k, c]) => `<i class="${c ? "" : "hach-gas"}" style="flex:${m[k]} 1 0;${c ? "background:" + c : ""}" title="${esc(segmentosPv(m).find((s) => s[0] === k)[2])}: ${brl(m[k])}"></i>`).join("")}</div></div>
-      <div class="direita"><b class="${m.sobra < 0 ? "neg" : "pos"}">${sinal(m.sobra)}</b><small>acumulado ${sinal(m.acumulado)}</small></div></div>`;
-  }).join("");
+  renderContaMes();
+  renderEsteMes();
 
-  const L = P.lancamentos;
+  $("prevTabela").innerHTML = `<div class="rolar"><table><thead><tr><th>Mês</th>${PV.map(([, , n]) => `<th>${n}</th>`).join("")}<th>Gastos</th><th>Receita</th><th>Sobra</th><th>Acumulado</th></tr></thead><tbody>` +
+    M.map((m) => `<tr><td>${nomeMesLongo(m.mes)}</td>${PV.map(([k]) => `<td>${brl(m[k])}</td>`).join("")}<td><b>${brl(m.gastos)}</b></td><td>${brl(m.receitas)}</td>
+      <td class="${m.sobra < 0 ? "neg" : "pos"}"><b>${sinal(m.sobra)}</b></td><td>${sinal(m.acumulado)}</td></tr>`).join("") + `</tbody></table></div>`;
+
+  renderLancamentos();
+}
+
+// A conta de um mês: receita − cada parte dos gastos = sobra, e cada linha abre mostrando de onde veio o número
+function renderContaMes() {
+  const P = D.previsao, m = P.meses[pvSel], base = P.base_meses.map(mesC);
+  const it = (nome, valor, extra = "") => `<div class="it"><span>${esc(nome)}${extra ? `<small>${esc(extra)}</small>` : ""}</span><b>${brl(valor)}</b></div>`;
+  const linha = (cor, op, nome, sub, valor, corpo, aberto = false) => `<details class="lc"${aberto ? " open" : ""} style="--c:${cor}">
+      <summary><span class="op" aria-hidden="true">${op}</span><span class="nm">${nome}<small>${sub}</small></span><b>${op === "−" ? "−" : ""}${brl(valor)}</b></summary>
+      <div class="exp">${corpo}</div></details>`;
+  const receitaCorpo = (P.receitas_base.length
+      ? `<p>Usamos o valor do meio das suas receitas de ${listaMeses(base)}:</p>` + P.receitas_base.map((r) => it(nomeMesLongo(r.mes), r.valor)).join("") +
+        `<p style="margin-top:6px">Valor do meio: <b>${brl(P.receita_tipica)}</b>. O valor do meio (e não a média) evita que um mês fora do normal distorça a conta.</p>`
+      : `<p>Ainda não há um mês completo de histórico para estimar a receita.</p>`) +
+    m.itens_manuais.filter((x) => x.tipo === "entrada").map((x) => it(x.descricao + " (adicionado por você)", x.valor)).join("");
+  const fixosCorpo = P.fixos_itens.length
+    ? `<p>Cobranças que se repetiram todo mês nos últimos 6 meses. Entra o valor médio de cada uma:</p>` +
+      P.fixos_itens.map((f) => it(nomeTx({ descricao: f.nome }), f.valor, f.tipo)).join("")
+    : `<p>Nenhuma cobrança recorrente encontrada.</p>`;
+  const parcCorpo = m.itens_parcelas.length
+    ? `<p>Parcelas de compras que você já fez e que caem neste mês:</p>` + m.itens_parcelas.map((p) => it(nomeTx({ descricao: p.nome }), p.valor, `parcela ${p.parcela}${p.banco ? " · " + p.banco : ""}`)).join("")
+    : `<p>Nenhuma parcela neste mês.</p>`;
+  const cats = P.variavel_categorias;
+  const diaCorpo = cats.length
+    ? `<p>Tudo que não é conta fixa nem parcela (mercado, delivery, transporte…). Para cada categoria, olhamos quanto você gastou em ${listaMeses(base)} e usamos o <b>valor do meio</b>:</p>
+       <div class="rolar-cat"><table class="tab-cat"><thead><tr><th>Categoria</th>${base.map((b) => `<th>${b}</th>`).join("")}<th>entra na conta</th></tr></thead><tbody>` +
+      cats.map((c) => `<tr><td>${esc(c.categoria)}</td>${c.meses.map((x) => `<td>${x.valor ? (oculto ? "•••" : Math.round(x.valor).toLocaleString("pt-BR")) : "—"}</td>`).join("")}<td class="usa">${brl(c.valor)}</td></tr>`).join("") +
+      `</tbody></table></div>` + (P.pontuais.length ? `<p>Ficaram de fora por aparecerem em só um desses meses (compra pontual): ${P.pontuais.map((c) => esc(c.categoria)).join(", ")}.</p>` : "")
+    : `<p>Ainda não há histórico suficiente.</p>`;
+  const manuais = m.itens_manuais.filter((x) => x.tipo === "saida");
+  $("prevConta").innerHTML = `<div class="conta-pv"><div class="conta-cab"><b>Conta de ${nomeMesLongo(m.mes)}</b><small>estimativa · clique nas linhas para detalhes</small></div>
+    ${linha("var(--serie-rec)", "+", "Receita prevista", m.manuais_entrada ? "receita típica + entradas que você adicionou" : `valor do meio de ${listaMeses(base)}`, m.receitas, receitaCorpo)}
+    ${linha("var(--pv-fixo)", "−", "Contas fixas e assinaturas", `${P.fixos_itens.length} cobranças que se repetem todo mês`, m.fixos, fixosCorpo)}
+    ${linha("var(--pv-parc)", "−", "Parcelas", m.itens_parcelas.length ? `${m.itens_parcelas.length} parcela${m.itens_parcelas.length === 1 ? "" : "s"} já assumida${m.itens_parcelas.length === 1 ? "" : "s"}` : "nenhuma neste mês", m.parcelas, parcCorpo)}
+    ${linha("var(--pv-var)", "−", "Dia a dia", "quanto você costuma gastar por mês", m.variavel, diaCorpo)}
+    ${manuais.length ? linha("var(--pv-man)", "−", "Adicionados por você", manuais.map((x) => x.descricao).join(", "), m.manuais, manuais.map((x) => it(x.descricao, x.valor)).join("")) : ""}
+    <div class="lc linha total"><span class="op" aria-hidden="true" style="--c:var(--texto)">=</span><span class="nm">Sobra prevista</span><b class="${m.sobra < 0 ? "neg" : "pos"}">${sinal(m.sobra)}</b></div></div>`;
+}
+
+// Este mês: quanto já foi + quanto ainda deve sair até o último dia, com a conta à mostra
+function renderEsteMes() {
+  const E = D.previsao.este_mes, falta = E.dias_mes - E.dia, fixasCair = E.fixas_a_cair.reduce((s, f) => s + f.valor, 0);
+  const tot = Math.max(E.gastos, 1);
+  const it = (nome, valor, extra = "") => `<div class="it"><span>${esc(nome)}${extra ? `<small>${esc(extra)}</small>` : ""}</span><b>${brl(valor)}</b></div>`;
+  const linhaSimples = (cor, op, nome, sub, valor) => `<div class="lc linha" style="--c:${cor}"><span class="op" aria-hidden="true">${op}</span><span class="nm">${nome}<small>${sub}</small></span><b>${brl(valor)}</b></div>`;
+  $("prevEsteMes").innerHTML = `<div class="conta-pv"><div class="conta-cab"><b>Como ${nomeMesLongo(E.mes)} deve fechar</b><small>este mês · dia ${E.dia} de ${E.dias_mes}</small></div>
+    <div class="ritmo-mes" role="img" aria-label="Já gasto ${brl(E.ja_gasto)}; estimativa até o fim do mês ${brl(E.gastos - E.ja_gasto)}">
+      <i style="width:${E.ja_gasto / tot * 100}%;background:var(--serie-gas)"></i><i style="width:${(E.gastos - E.ja_gasto) / tot * 100}%;background:color-mix(in srgb, var(--serie-gas) 35%, transparent)"></i></div>
+    <div class="ritmo-leg"><span>já gasto</span><span>falta</span></div>
+    ${linhaSimples("var(--serie-gas)", "✓", "Já gasto até hoje", `transações de 1º a ${E.dia}`, E.ja_gasto)}
+    <details class="lc" style="--c:var(--pv-var)"><summary><span class="op" aria-hidden="true">+</span><span class="nm">Dia a dia até o fim do mês<small>${brl(E.ritmo_dia)} por dia × ${falta} dia${falta === 1 ? "" : "s"} que faltam</small></span><b>${brl(E.falta_variavel)}</b></summary>
+      <div class="exp"><p>Neste mês você gastou ${brl(E.variavel_ate_hoje)} no dia a dia (sem contar contas fixas e parcelas) em ${E.dia} dias, ou seja, ${brl(E.ritmo_dia)} por dia.
+      Se continuar nesse ritmo, os ${falta} dias que faltam somam ${brl(E.falta_variavel)}.</p></div></details>
+    ${E.fixas_a_cair.length ? `<details class="lc" style="--c:var(--pv-fixo)"><summary><span class="op" aria-hidden="true">+</span><span class="nm">Contas fixas que ainda vão cair<small>${E.fixas_a_cair.length} cobrança${E.fixas_a_cair.length === 1 ? "" : "s"} que ainda não apareceu este mês</small></span><b>${brl(fixasCair)}</b></summary>
+      <div class="exp">${E.fixas_a_cair.map((f) => it(nomeTx({ descricao: f.nome }), f.valor, "por volta do dia " + f.dia)).join("")}</div></details>` : ""}
+    ${E.manuais ? linhaSimples("var(--pv-man)", "+", "Adicionados por você", E.itens_manuais.filter((x) => x.tipo === "saida").map((x) => x.descricao).join(", "), E.manuais) : ""}
+    <div class="lc linha total"><span class="op" aria-hidden="true" style="--c:var(--texto)">=</span><span class="nm">Deve fechar em</span><b>${brl(E.gastos)}</b></div>
+    <p class="dica" style="margin:4px 0 10px">Receita do mês: ${brl(E.receitas_ja)} já recebidos${E.receitas > E.receitas_ja ? ` (a previsão usa ${brl(E.receitas)}, sua receita típica)` : ""}. Sobra estimada: <b class="${E.sobra < 0 ? "neg" : "pos"}">${sinal(E.sobra)}</b>.</p></div>`;
+}
+
+function renderLancamentos() {
+  const L = D.previsao.lancamentos;
   const quando = (p) => {
     const ini = mesCurtoAno(p.mes);
     if (p.repetir === "parcelado") return `${p.vezes}x de ${brl(p.valor / p.vezes)} · de ${ini} a ${mesCurtoAno(somarMeses(p.mes, p.vezes - 1))}`;
@@ -1934,22 +2054,24 @@ function renderPrevisao() {
       <div class="meio"><div class="nome">${esc(p.descricao)}</div><div class="sub">${p.tipo === "entrada" ? "entrada" : "gasto"} · ${quando(p)}</div></div>
       <div class="direita ${p.tipo === "entrada" ? "pos" : ""}">${p.tipo === "entrada" ? "+" : ""}${brl(p.valor)}<small>${p.repetir === "parcelado" ? "total" : p.repetir === "mensal" ? "por mês" : "uma vez"}</small></div>
       <button class="x" type="button" title="Remover" data-previsto="${esc(p.id)}">✕</button></div>`).join("")
-    : `<div class="vazio">Nada adicionado ainda. Use o formulário abaixo para incluir algo que o banco não mostra.</div>`;
-
-  const nomesBase = P.base_meses.map(mesC);
-  $("prevComo").innerHTML = P.base_meses.length
-    ? `Contas fixas e assinaturas (${brl(P.fixos)}/mês) + parcelas já assumidas + o gasto típico das outras categorias (mediana de ${nomesBase.join(", ")}: ${brl(P.variavel)}/mês) + o que você adicionou. Receita prevista: ${brl(P.receita_tipica)}/mês (mediana dos mesmos meses).`
-    : "Ainda não há 1 mês completo de histórico: a previsão usa só fixos, parcelas e o que você adicionar.";
-  $("prevBase").innerHTML = P.variavel_categorias.slice(0, 8).map((c) => `<span>${esc(c.categoria)} <b>${brl(c.valor)}</b></span>`).join("");
+    : `<div class="vazio">Nada adicionado ainda.</div>`;
 }
+
+$("prevGrafico").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-pv]");
+  if (!b) return;
+  pvSel = +b.dataset.pv;
+  $("prevGrafico").querySelectorAll("button[data-pv]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  renderContaMes();
+});
 
 // Início: resumo do próximo mês no painel escuro
 function renderProxMes() {
-  const P = D.previsao, m = P?.meses?.[1];
+  const P = D.previsao, m = P?.meses?.[0];
   $("proxMes").hidden = !m;
   if (!m) return;
   $("proxMesNome").textContent = nomeMesLongo(m.mes);
-  const segs = segmentosPv(m).filter(([k]) => m[k] > 0);
+  const segs = PV.filter(([k]) => m[k] > 0);
   $("proxMesConteudo").innerHTML =
     `<div class="barra-pv" role="img" aria-label="${esc(segs.map(([k, , n]) => n + " " + brl(m[k])).join(", "))}">${segs.map(([k, c, n], i) =>
       `<i style="flex:${m[k]} 1 0;background:${c};animation-delay:${i * 80}ms" title="${esc(n)}: ${brl(m[k])}"></i>`).join("")}</div>` +

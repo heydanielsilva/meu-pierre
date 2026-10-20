@@ -499,6 +499,11 @@ def recorrentes() -> list[dict]:
 
 def _projecao_mes(txs_mes: list[dict]) -> float:
     """Gasto atual + ritmo diário dos gastos variáveis + recorrentes que ainda vão cair no mês."""
+    return _projecao_detalhe(txs_mes)["total"]
+
+
+def _projecao_detalhe(txs_mes: list[dict]) -> dict:
+    """As partes da projeção do mês atual, para o painel explicar a conta."""
     hoje = hoje_br()
     dias_mes = calendar.monthrange(hoje.year, hoje.month)[1]
     rec = _recorrentes()
@@ -507,9 +512,15 @@ def _projecao_mes(txs_mes: list[dict]) -> float:
     atual = sum(t["valor"] for t in gastos)
     variavel = sum(t["valor"] for t in gastos if _chave_recorrente(t) not in chaves and not t.get("parcelas_total"))
     ja_cobradas = {_chave_recorrente(t) for t in gastos}
-    pendentes = sum(r["media"] for r in rec if r["chave"] not in ja_cobradas
-                    and r["proxima"].month == hoje.month and r["proxima"].year == hoje.year)
-    return atual + variavel / hoje.day * (dias_mes - hoje.day) + pendentes
+    pendentes = [r for r in rec if r["chave"] not in ja_cobradas
+                 and r["proxima"].month == hoje.month and r["proxima"].year == hoje.year]
+    ritmo = variavel / hoje.day
+    falta_variavel = ritmo * (dias_mes - hoje.day)
+    soma_pend = sum(r["media"] for r in pendentes)
+    return {"ja_gasto": atual, "variavel_ate_hoje": variavel, "ritmo_dia": ritmo, "falta_variavel": falta_variavel,
+            "dia": hoje.day, "dias_mes": dias_mes, "total": atual + falta_variavel + soma_pend,
+            "fixas_a_cair": [{"nome": r["nome"], "categoria": r["categoria"], "valor": round(r["media"], 2),
+                              "dia": r["proxima"].day} for r in pendentes]}
 
 
 def _somar_meses(d: date, n: int) -> str:
@@ -592,70 +603,86 @@ def _valor_previsto_no_mes(p: dict, mes: str) -> float:
 
 
 def previsao(meses: int = 6) -> dict:
-    """Este mês (projetado) e os próximos: contas fixas e assinaturas, parcelas já assumidas, gasto típico
-    das outras categorias (mediana dos últimos 3 meses) e o que você adicionou à mão."""
+    """Este mês (projetado) e os próximos meses, com cada parte da conta detalhada:
+    contas fixas e assinaturas + parcelas já assumidas + gasto do dia a dia (valor do meio dos últimos 3 meses,
+    por categoria) + o que você adicionou à mão. Receita: valor do meio dos mesmos 3 meses."""
     hoje = hoje_br()
     rec = _recorrentes()
     chaves = {r["chave"] for r in rec}
     fixos = sum(r["media"] for r in rec)
 
     # base: últimos 3 meses completos que têm transações
-    por_cat: dict[str, list[float]] = defaultdict(list)
-    receitas_base, base = [], []
     _, de3, _ = _mes(_somar_meses(hoje, -3))
     _, _, ate1 = _mes(_somar_meses(hoje, -1))
     base_txs: dict[str, list[dict]] = defaultdict(list)
     for t in _tx(de3, ate1):
         base_txs[t["data"][:7]].append(t)
-    for k in (3, 2, 1):
-        m = _somar_meses(hoje, -k)
-        txs = base_txs[m]
-        if not txs:
-            continue
-        base.append(m)
-        receitas_base.append(_fluxo(txs)[0])
-        cat: dict[str, float] = defaultdict(float)
-        for t in txs:
+    base = [m for m in (_somar_meses(hoje, -k) for k in (3, 2, 1)) if base_txs[m]]
+    receitas_base = [{"mes": m, "valor": round(_fluxo(base_txs[m])[0], 2)} for m in base]
+    por_cat: dict[str, dict[str, float]] = defaultdict(lambda: {m: 0.0 for m in base})
+    for m in base:
+        for t in base_txs[m]:
             if t["neutra"] or t["direcao"] != "saida" or (t.get("parcelas_total") or 0) > 1 or _chave_recorrente(t) in chaves:
                 continue
-            cat[t["categoria"]] += t["valor"]
-        for c, v in cat.items():
-            por_cat[c].append(v)
-    n = len(base)
-    tipico = {c: statistics.median(vs + [0.0] * (n - len(vs))) for c, vs in por_cat.items()}
-    tipico = {c: v for c, v in sorted(tipico.items(), key=lambda kv: -kv[1]) if v >= 1}
-    variavel = sum(tipico.values())
-    receita_tipica = statistics.median(receitas_base) if receitas_base else 0.0
+            por_cat[t["categoria"]][m] += t["valor"]
+    categorias = sorted(({"categoria": c, "valor": round(statistics.median(vs.values()), 2),
+                          "meses": [{"mes": m, "valor": round(v, 2)} for m, v in vs.items()]} for c, vs in por_cat.items()),
+                        key=lambda x: -x["valor"])
+    pontuais = sorted((c for c in categorias if c["valor"] < 1), key=lambda c: -sum(x["valor"] for x in c["meses"]))
+    categorias = [c for c in categorias if c["valor"] >= 1]   # gasto em só 1 dos 3 meses: o valor do meio é zero
+    variavel = sum(c["valor"] for c in categorias)
+    receita_tipica = statistics.median([r["valor"] for r in receitas_base]) if receitas_base else 0.0
 
     previstos = [dict(p) for p in store.con.execute("SELECT * FROM previstos ORDER BY mes, criado_em").fetchall()]
-    parc = {m["mes"]: m["valor"] for m in parcelas_por_mes(parcelas_futuras(), meses)}
+    parcelas = parcelas_futuras()
+
+    def parcelas_do_mes(m: str) -> list[dict]:
+        out = []
+        for p in parcelas:
+            d = date.fromisoformat(p["ultima"])
+            for i in range(1, p["restantes"] + 1):
+                if _somar_meses(d, i) == m:
+                    out.append({"nome": p["estabelecimento"] or p["descricao"], "parcela": f"{p['parcela'] + i}/{p['total_parcelas']}",
+                                "valor": round(p["valor"], 2), "cartao": p["cartao"], "banco": p["banco"]})
+        return sorted(out, key=lambda x: -x["valor"])
+
+    def manuais_do_mes(m: str) -> list[dict]:
+        return [{"descricao": p["descricao"], "tipo": p["tipo"], "valor": round(_valor_previsto_no_mes(p, m), 2)}
+                for p in previstos if _valor_previsto_no_mes(p, m)]
+
+    # este mês: já gasto + o que ainda deve gastar até o fim (ritmo do dia a dia + contas fixas que ainda não caíram)
+    _, de, ate = _mes("")
+    txs_mes = _tx(de, ate)
+    rec_ja, _ = _fluxo(txs_mes)
+    proj = _projecao_detalhe(txs_mes)
+    m0 = hoje.strftime("%Y-%m")
+    man0 = manuais_do_mes(m0)
+    man0_s = sum(x["valor"] for x in man0 if x["tipo"] == "saida")
+    man0_e = sum(x["valor"] for x in man0 if x["tipo"] == "entrada")
+    receitas0 = max(rec_ja, receita_tipica) + man0_e
+    este_mes = {"mes": m0, **{k: (round(v, 2) if isinstance(v, float) else v) for k, v in proj.items()},
+                "manuais": round(man0_s, 2), "itens_manuais": man0, "receitas_ja": round(rec_ja, 2),
+                "receitas": round(receitas0, 2), "gastos": round(proj["total"] + man0_s, 2),
+                "sobra": round(receitas0 - proj["total"] - man0_s, 2)}
 
     out, acumulado = [], 0.0
-    rotulo, de, ate = _mes("")
-    txs_mes = _tx(de, ate)
-    for k in range(0, meses + 1):
+    for k in range(1, meses + 1):
         m = _somar_meses(hoje, k)
-        manual_s = sum(_valor_previsto_no_mes(p, m) for p in previstos if p["tipo"] == "saida")
-        manual_e = sum(_valor_previsto_no_mes(p, m) for p in previstos if p["tipo"] == "entrada")
-        if k == 0:   # este mês: o que já foi gasto + o que ainda deve cair até o fim
-            rec_ja, gasto_ja = _fluxo(txs_mes)
-            proj = _projecao_mes(txs_mes)
-            item = {"mes": m, "atual": True, "ja_gasto": round(gasto_ja, 2), "restante": round(max(0.0, proj - gasto_ja), 2),
-                    "fixos": 0.0, "parcelas": 0.0, "variavel": 0.0,
-                    "receitas": round(max(rec_ja, receita_tipica) + manual_e, 2), "receitas_ja": round(rec_ja, 2)}
-            gastos = proj + manual_s
-        else:
-            p_m = parc.get(m, 0.0)
-            item = {"mes": m, "atual": False, "ja_gasto": 0.0, "restante": 0.0, "fixos": round(fixos, 2),
-                    "parcelas": round(p_m, 2), "variavel": round(variavel, 2), "receitas": round(receita_tipica + manual_e, 2)}
-            gastos = fixos + p_m + variavel + manual_s
-        item.update({"manuais": round(manual_s, 2), "manuais_entrada": round(manual_e, 2), "gastos": round(gastos, 2),
-                     "sobra": round(item["receitas"] - gastos, 2)})
-        acumulado += item["sobra"]
-        item["acumulado"] = round(acumulado, 2)
-        out.append(item)
-    return {"meses": out, "base_meses": base, "fixos": round(fixos, 2), "receita_tipica": round(receita_tipica, 2),
-            "variavel": round(variavel, 2), "variavel_categorias": [{"categoria": c, "valor": round(v, 2)} for c, v in tipico.items()],
+        itens_p, itens_m = parcelas_do_mes(m), manuais_do_mes(m)
+        p_m = sum(x["valor"] for x in itens_p)
+        manual_s = sum(x["valor"] for x in itens_m if x["tipo"] == "saida")
+        manual_e = sum(x["valor"] for x in itens_m if x["tipo"] == "entrada")
+        receitas = receita_tipica + manual_e
+        gastos = fixos + p_m + variavel + manual_s
+        acumulado += receitas - gastos
+        out.append({"mes": m, "fixos": round(fixos, 2), "parcelas": round(p_m, 2), "variavel": round(variavel, 2),
+                    "manuais": round(manual_s, 2), "manuais_entrada": round(manual_e, 2), "receitas": round(receitas, 2),
+                    "gastos": round(gastos, 2), "sobra": round(receitas - gastos, 2), "acumulado": round(acumulado, 2),
+                    "itens_parcelas": itens_p, "itens_manuais": itens_m})
+    return {"este_mes": este_mes, "meses": out, "base_meses": base, "receitas_base": receitas_base,
+            "receita_tipica": round(receita_tipica, 2), "fixos": round(fixos, 2), "variavel": round(variavel, 2),
+            "fixos_itens": [{"nome": r["nome"], "categoria": r["categoria"], "tipo": r["tipo"], "valor": round(r["media"], 2)} for r in rec],
+            "variavel_categorias": categorias, "pontuais": pontuais[:8],
             "lancamentos": [{k: p[k] for k in ("id", "descricao", "valor", "tipo", "mes", "repetir", "vezes")} for p in previstos]}
 
 
@@ -869,7 +896,7 @@ def alertas(prev: dict | None = None) -> list[dict]:
                              f"(normal em {t['categoria']}: ~{brl(med)}).")
     prev = prev or _seguro(lambda: previsao(3))
     if prev:
-        vermelho = next((m for m in prev["meses"][1:4] if m["sobra"] < 0), None)
+        vermelho = next((m for m in prev["meses"][:3] if m["sobra"] < 0), None)
         if vermelho:
             add("medio", f"Previsão: {vermelho['mes'][5:]}/{vermelho['mes'][:4]} deve fechar no vermelho "
                          f"({brl(vermelho['sobra'])}: gastos {brl(vermelho['gastos'])}, receitas {brl(vermelho['receitas'])}).")

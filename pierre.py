@@ -111,6 +111,12 @@ def garantir_dados() -> str:
     ult = store.get_meta("ultima_sync")
     limite = timedelta(hours=30 if NUVEM else 24)  # na nuvem o cron diário cuida disso
     regra_nova = bool(ult) and store.get_meta("versao_transacoes") != VERSAO_TRANSACOES
+    if regra_nova:   # reprocessa sozinho, mas no máximo a cada 6h: se der erro, não pode travar toda abertura do app
+        tentou = store.get_meta("reprocesso_tentado_em")
+        if tentou and agora_br() - datetime.fromisoformat(tentou) < timedelta(hours=6):
+            regra_nova = False
+        else:
+            store.set_meta("reprocesso_tentado_em", agora_br().isoformat())
     if ult and agora_br() - datetime.fromisoformat(ult) < limite and not regra_nova:
         return ""
     try:
@@ -386,10 +392,10 @@ def patrimonio() -> dict:
 def resumo_mes(mes: str = "") -> dict:
     """Receitas, gastos, sobra, taxa de poupança, categorias e estabelecimentos, comparando com o mês anterior."""
     rotulo, de, ate = _mes(mes)
-    txs = store.transacoes(de, ate)
+    txs = _tx(de, ate)
     rec, desp = _fluxo(txs)
     _, de_a, ate_a = _mes(_mes_anterior(rotulo))
-    txs_a = store.transacoes(de_a, ate_a)
+    txs_a = _tx(de_a, ate_a)
     rec_a, desp_a = _fluxo(txs_a)
     cats, cats_a = _por_categoria(txs), _por_categoria(txs_a)
     estab: dict[str, float] = defaultdict(float)
@@ -418,10 +424,14 @@ def evolucao_mensal(meses: int = 12) -> list[dict]:
     for _ in range(meses):
         lista.append(m.strftime("%Y-%m"))
         m = (m - timedelta(days=1)).replace(day=1)
+    _, de, _ = _mes(lista[-1])
+    _, _, ate = _mes(lista[0])
+    por_mes: dict[str, list[dict]] = defaultdict(list)
+    for t in _tx(de, ate):   # uma consulta para os 12 meses
+        por_mes[t["data"][:7]].append(t)
     out = []
     for rot in reversed(lista):
-        _, de, ate = _mes(rot)
-        rec, desp = _fluxo(store.transacoes(de, ate))
+        rec, desp = _fluxo(por_mes[rot])
         out.append({"mes": rot, "receitas": rec, "gastos": desp, "sobra": rec - desp})
     return out
 
@@ -430,10 +440,30 @@ CONTAS_FIXAS = {"Aluguel", "Contas da casa", "Internet e telefone", "Plano de sa
                 "Educação", "Moradia", "Academia", "Previdência", "Empréstimos e financiamentos"}
 
 
+# Cálculos usados por várias partes do painel: feitos uma vez por carregamento (só dentro de painel())
+_MEMO: dict | None = None
+
+
+def _memo(chave, fn):
+    if _MEMO is None:
+        return fn()
+    if chave not in _MEMO:
+        _MEMO[chave] = fn()
+    return _MEMO[chave]
+
+
+def _tx(de: str, ate: str) -> list[dict]:
+    return _memo(("tx", de, ate), lambda: store.transacoes(de, ate))
+
+
 def _recorrentes() -> list[dict]:
     """Cobranças que se repetem todo mês: valor fixo (assinatura) ou conta fixa de valor variável."""
+    return _memo("recorrentes", _calcular_recorrentes)
+
+
+def _calcular_recorrentes() -> list[dict]:
     hoje = hoje_br()
-    txs = store.transacoes((hoje - timedelta(days=185)).isoformat(), hoje.isoformat())
+    txs = _tx((hoje - timedelta(days=185)).isoformat(), hoje.isoformat())
     grupos: dict[str, list[dict]] = defaultdict(list)
     for t in txs:
         if t["direcao"] == "saida" and not t["neutra"] and not t.get("parcelas_total"):
@@ -489,6 +519,10 @@ def _somar_meses(d: date, n: int) -> str:
 
 def parcelas_futuras() -> list[dict]:
     """Compras parceladas em andamento: em que parcela estão, quanto falta e quando terminam."""
+    return [dict(p) for p in _memo("parcelas", _calcular_parcelas)]
+
+
+def _calcular_parcelas() -> list[dict]:
     rows = store.con.execute(
         """SELECT t.*, a.banco, a.subtipo FROM transactions t LEFT JOIN accounts a ON a.id = t.account_id
            WHERE t.parcelas_total > 1 AND t.data <= ? ORDER BY t.data DESC""", (hoje_br().isoformat(),)).fetchall()
@@ -568,10 +602,14 @@ def previsao(meses: int = 6) -> dict:
     # base: últimos 3 meses completos que têm transações
     por_cat: dict[str, list[float]] = defaultdict(list)
     receitas_base, base = [], []
+    _, de3, _ = _mes(_somar_meses(hoje, -3))
+    _, _, ate1 = _mes(_somar_meses(hoje, -1))
+    base_txs: dict[str, list[dict]] = defaultdict(list)
+    for t in _tx(de3, ate1):
+        base_txs[t["data"][:7]].append(t)
     for k in (3, 2, 1):
         m = _somar_meses(hoje, -k)
-        _, de, ate = _mes(m)
-        txs = store.transacoes(de, ate)
+        txs = base_txs[m]
         if not txs:
             continue
         base.append(m)
@@ -594,7 +632,7 @@ def previsao(meses: int = 6) -> dict:
 
     out, acumulado = [], 0.0
     rotulo, de, ate = _mes("")
-    txs_mes = store.transacoes(de, ate)
+    txs_mes = _tx(de, ate)
     for k in range(0, meses + 1):
         m = _somar_meses(hoje, k)
         manual_s = sum(_valor_previsto_no_mes(p, m) for p in previstos if p["tipo"] == "saida")
@@ -761,7 +799,7 @@ def definir_orcamento(categoria: str, valor_mensal: float) -> None:
 def status_orcamentos(mes: str = "") -> list[dict]:
     """Quanto já foi gasto de cada orçamento, projeção até o fim do mês e quanto ainda dá por dia."""
     rotulo, de, ate = _mes(mes)
-    cats = _por_categoria(store.transacoes(de, ate))
+    cats = _por_categoria(_tx(de, ate))
     hoje = hoje_br()
     atual = rotulo == hoje.strftime("%Y-%m")
     dias_mes = calendar.monthrange(int(rotulo[:4]), int(rotulo[5:]))[1]
@@ -817,12 +855,12 @@ def alertas(prev: dict | None = None) -> list[dict]:
         if it["erro"]:
             add("alto", f"Conexão {it['banco'] or it['id']} com erro: {it['erro']}")
     # Gastos fora da curva nos últimos 10 dias (> 3x a mediana da categoria em 90 dias)
-    hist = store.transacoes((hoje - timedelta(days=100)).isoformat(), (hoje - timedelta(days=11)).isoformat())
+    hist = _tx((hoje - timedelta(days=100)).isoformat(), (hoje - timedelta(days=11)).isoformat())
     base: dict[str, list[float]] = defaultdict(list)
     for t in hist:
         if t["direcao"] == "saida" and not t["neutra"]:
             base[t["categoria"]].append(t["valor"])
-    for t in store.transacoes((hoje - timedelta(days=10)).isoformat(), hoje.isoformat()):
+    for t in _tx((hoje - timedelta(days=10)).isoformat(), hoje.isoformat()):
         b = base.get(t["categoria"])
         if t["direcao"] == "saida" and not t["neutra"] and b and len(b) >= 4 and not t.get("parcelas_total"):
             med = statistics.median(b)
@@ -850,7 +888,16 @@ def _seguro(fn):
 
 def painel(mes: str = "") -> dict:
     """Tudo que o painel mostra, de uma vez."""
+    global _MEMO
     aviso = garantir_dados()
+    _MEMO = {}
+    try:
+        return _montar_painel(mes, aviso)
+    finally:
+        _MEMO = None
+
+
+def _montar_painel(mes: str, aviso: str) -> dict:
     return {
         "aviso": aviso,
         "demo": DEMO,
@@ -891,7 +938,7 @@ def gerar_planilha(de: str = "", ate: str = "", meses: int = 6):
             inicio = (inicio - timedelta(days=1)).replace(day=1)
         de = inicio.isoformat()
     ate = ate or hoje.isoformat()
-    txs = sorted(store.transacoes(de, ate), key=lambda t: t["data"])
+    txs = sorted(_tx(de, ate), key=lambda t: t["data"])
     wb = Workbook()
     cab = Font(bold=True, color="FFFFFF")
     fundo = PatternFill("solid", fgColor="1F4E78")

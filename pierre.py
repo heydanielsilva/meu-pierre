@@ -18,7 +18,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from pluggy_client import PluggyClient
-from store import NEUTRAS, Store, _sem_acento, agora_br, hoje_br
+from store import NEUTRAS, VERSAO_TRANSACOES, Store, _sem_acento, agora_br, hoje_br
 
 PASTA = Path(__file__).resolve().parent
 
@@ -109,7 +109,8 @@ def garantir_dados() -> str:
         return ""
     ult = store.get_meta("ultima_sync")
     limite = timedelta(hours=30 if NUVEM else 24)  # na nuvem o cron diário cuida disso
-    if ult and agora_br() - datetime.fromisoformat(ult) < limite:
+    regra_nova = bool(ult) and store.get_meta("versao_transacoes") != VERSAO_TRANSACOES
+    if ult and agora_br() - datetime.fromisoformat(ult) < limite and not regra_nova:
         return ""
     try:
         _sync(90 if NUVEM and not ult else 365 if not ult else 30)
@@ -350,6 +351,16 @@ def _faturas_do_cartao(c, diagnostico: bool = False) -> dict:
                                   for t in sorted(txs, key=lambda t: t["data"], reverse=True) if (t.get("parcelas_total") or 0) > 1][:10],
         }
     return out
+
+
+def diagnostico_sync() -> dict:
+    """Versão das transações gravadas e o resultado da última sincronização."""
+    try:
+        ultimo = json.loads(store.get_meta("ultimo_resultado") or "{}")
+    except ValueError:
+        ultimo = {}
+    return {"versao_gravada": store.get_meta("versao_transacoes"), "versao_atual": VERSAO_TRANSACOES,
+            "ultima_sync": store.get_meta("ultima_sync"), "ultimo_resultado": ultimo}
 
 
 def diagnostico_cartoes() -> list[dict]:

@@ -2409,10 +2409,15 @@ async function diagnostico(copiar) {
   try {
     const d = await api("/api/diagnostico");
     $("diagResumo").innerHTML = d.cartoes.map((c) => `<div class="fatura-linha"><div class="meio"><b>${esc(c.cartao)}</b>
-        <small>método: ${c.metodo === "billId" ? "fatura de cada compra (billId)" : "datas"} · ciclo ${data(c.ciclo_aberto[0]).slice(0, 5)} a ${data(c.ciclo_aberto[1]).slice(0, 5)}
+        <small>método: ${c.metodo === "fatura prevista" ? "fatura prevista pelo banco" : c.metodo === "billId" ? "fatura de cada compra (billId)" : "datas"} · ${c.com_fatura_prevista || 0} compras com fatura prevista · ciclo ${data(c.ciclo_aberto[0]).slice(0, 5)} a ${data(c.ciclo_aberto[1]).slice(0, 5)}
         · fechamento do banco ${c.fechamento_banco ? data(c.fechamento_banco).slice(0, 5) : "não informado"}</small></div>
         <span style="text-align:right">aberta <b>${brl(c.fatura_aberta_calculada)}</b>${c.fatura_fechada ? `<br><small class="suave">fechada ${brl(c.fatura_fechada.valor)}</small>` : ""}
         <br><small class="suave">total ${brl(c.total_devido_pluggy)}</small></span></div>`).join("") || `<div class="vazio">Nenhum cartão.</div>`;
+    const s = d.sync || {}, erros = (s.ultimo_resultado || {}).erros || [];
+    $("diagResumo").insertAdjacentHTML("beforeend", `<div class="fatura-linha"><div class="meio"><b>Última atualização</b>
+        <small>${s.ultima_sync ? esc(s.ultima_sync.slice(0, 16).replace("T", " ")) : "nunca"} · dados na versão ${esc(s.versao_gravada || "?")} de ${esc(s.versao_atual || "?")}
+        ${s.versao_gravada && s.versao_gravada !== s.versao_atual ? " · <b>falta reprocessar: clique em Atualizar</b>" : ""}</small>
+        ${erros.map((e) => `<small class="neg">${esc(e)}</small>`).join("")}</div></div>`);
     if (copiar) {
       const texto = JSON.stringify(d, null, 2);
       try { await navigator.clipboard.writeText(texto); $("btnDiagCopiar").textContent = "Copiado!"; }
@@ -2581,7 +2586,8 @@ $("btnSync").addEventListener("click", async () => {
     const dias = D && D.total_transacoes ? 30 : 90;
     const r = await api("/api/sincronizar", { dias });
     await carregar();
-    $("faixas").insertAdjacentHTML("afterbegin", `<div class="faixa">${esc(`Atualizado: ${r.contas} contas, ${r.transacoes} transações, ${r.investimentos} investimentos.`)}</div>`);
+    if (r.erros && r.erros.length) faixas([{ classe: "erro", texto: "Atualizado com erros: " + r.erros.join(" · ") }]);
+    else $("faixas").insertAdjacentHTML("afterbegin", `<div class="faixa">${esc(`Atualizado: ${r.contas} contas, ${r.transacoes} transações, ${r.investimentos} investimentos.`)}</div>`);
   } catch (e) {
     faixas([{ classe: "erro", texto: "Falha ao atualizar: " + e.message }]);
   } finally {

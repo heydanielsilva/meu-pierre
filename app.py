@@ -171,7 +171,7 @@ async def api_painel(request: Request) -> Response:
 
 @_protegido
 async def api_diagnostico(request: Request) -> Response:
-    return JSONResponse({"cartoes": _nucleo().diagnostico_cartoes()}, headers={"Cache-Control": "no-store"})
+    return JSONResponse({"sync": _nucleo().diagnostico_sync(), "cartoes": _nucleo().diagnostico_cartoes()}, headers={"Cache-Control": "no-store"})
 
 
 @_protegido

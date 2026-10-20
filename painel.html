@@ -1118,7 +1118,15 @@
             </form>
             <div class="dica">Toda transação que contém o texto passa a usar a categoria escolhida.</div>
           </div>
-          <div class="cartao"><div class="cab"><h2>Conexões com os bancos</h2></div><ul class="lista" id="conexoes"></ul></div>
+          <div class="coluna">
+            <div class="cartao"><div class="cab"><h2>Conexões com os bancos</h2></div><ul class="lista" id="conexoes"></ul></div>
+            <div class="cartao">
+              <div class="cab"><h2>Conferir faturas dos cartões</h2></div>
+              <p class="suave" style="margin:0 0 12px;font-size:14px">Se a fatura do painel não bater com o app do banco, copie o diagnóstico e envie para quem cuida do sistema. Ele tem só datas e valores, sem descrições das compras.</p>
+              <div id="diagResumo"></div>
+              <div class="form-linha"><button class="pilula" type="button" id="btnDiagVer">Ver cálculo</button><button class="pilula roxa" type="button" id="btnDiagCopiar">Copiar diagnóstico</button></div>
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -1785,6 +1793,7 @@ function renderCartoesAnalise() {
   const stat = (rot, val) => `<div><small>${rot}</small><b>${val}</b></div>`;
   if (sel) {
     $("ccDetalhe").innerHTML = htmlCartao(sel) + `<div class="cc-stats">
+      ${sel.fatura_fechada ? stat("Fatura fechada · vence " + data(sel.fatura_fechada.vence).slice(0, 5), brl(sel.fatura_fechada.valor)) : ""}
       ${stat("Fatura aberta", brl(sel.fatura_aberta ?? sel.saldo))}${stat("Total no cartão", brl(sel.saldo))}
       ${stat("Fecha em", data(sel.fecha_em || sel.fechamento).slice(0, 5))}${stat("Vence em", data(sel.vence_em || sel.vencimento).slice(0, 5))}
       ${stat("Gasto no mês", brl(gastoCartao(sel.id)))}${stat("Limite disponível", brl(sel.limite_disponivel))}</div>`;
@@ -2276,11 +2285,14 @@ function htmlCartao(c) {
   const logo = `<span class="cc-logo">${esc((c.banco || "?")[0].toUpperCase())}${b ? `<img src="https://www.google.com/s2/favicons?domain=${b.dominio}&sz=64" alt="" referrerpolicy="no-referrer">` : ""}</span>`;
   return `<div class="cc${estilo}">
       <div class="banco"><span class="nome-banco">${logo}<span>${esc(c.banco)}</span></span>${icone("sinal")}</div>
-      <div class="rot">Fatura aberta${c.fecha_em ? " · fecha " + data(c.fecha_em).slice(0, 5) : ""}</div>
+      ${c.fatura_fechada ? `<div class="rot">Fatura fechada · vence ${data(c.fatura_fechada.vence).slice(0, 5)}</div>
+      <div class="valor">${brl(c.fatura_fechada.valor)}</div>
+      <div class="devido">Fatura aberta: ${brl(c.fatura_aberta)} · fecha ${data(c.fecha_em).slice(0, 5)}</div>` :
+      `<div class="rot">Fatura aberta${c.fecha_em ? " · fecha " + data(c.fecha_em).slice(0, 5) : ""}</div>
       <div class="valor">${brl(c.fatura_aberta ?? c.saldo)}</div>
-      ${c.fatura_aberta != null ? `<div class="devido">Total no cartão (com parcelas): ${brl(c.saldo)}</div>` : ""}
+      ${c.fatura_aberta != null ? `<div class="devido">Total no cartão (com parcelas): ${brl(c.saldo)}</div>` : ""}`}
       <div class="numero">**** **** ${esc(c.final || "····")}</div>
-      <div class="rodape"><span>Limite ${brl(c.limite)}</span><span>Vence ${data(c.vence_em || c.vencimento).slice(0, 5)}</span></div>
+      <div class="rodape"><span>Limite ${brl(c.limite)}</span><span>${c.fatura_fechada ? "Total " + brl(c.saldo) : "Vence " + data(c.vence_em || c.vencimento).slice(0, 5)}</span></div>
       ${c.uso_limite != null ? `<div class="trilho" title="${pct(c.uso_limite)} do limite usado"><div style="width:${Math.min(100, c.uso_limite * 100)}%"></div></div>` : ""}
     </div>`;
 }
@@ -2391,6 +2403,26 @@ function renderTransacoes() {
   }).join("") : `<div class="vazio">Nenhuma transação com esses filtros.</div>`;
   $("txMais").hidden = lst.length <= txLimite;
 }
+
+// Ajustes > Conferir faturas: mostra como cada fatura foi calculada e copia o diagnóstico
+async function diagnostico(copiar) {
+  try {
+    const d = await api("/api/diagnostico");
+    $("diagResumo").innerHTML = d.cartoes.map((c) => `<div class="fatura-linha"><div class="meio"><b>${esc(c.cartao)}</b>
+        <small>método: ${c.metodo === "billId" ? "fatura de cada compra (billId)" : "datas"} · ciclo ${data(c.ciclo_aberto[0]).slice(0, 5)} a ${data(c.ciclo_aberto[1]).slice(0, 5)}
+        · fechamento do banco ${c.fechamento_banco ? data(c.fechamento_banco).slice(0, 5) : "não informado"}</small></div>
+        <span style="text-align:right">aberta <b>${brl(c.fatura_aberta_calculada)}</b>${c.fatura_fechada ? `<br><small class="suave">fechada ${brl(c.fatura_fechada.valor)}</small>` : ""}
+        <br><small class="suave">total ${brl(c.total_devido_pluggy)}</small></span></div>`).join("") || `<div class="vazio">Nenhum cartão.</div>`;
+    if (copiar) {
+      const texto = JSON.stringify(d, null, 2);
+      try { await navigator.clipboard.writeText(texto); $("btnDiagCopiar").textContent = "Copiado!"; }
+      catch (e) { prompt("Copie o diagnóstico:", texto); }
+      setTimeout(() => { $("btnDiagCopiar").textContent = "Copiar diagnóstico"; }, 2500);
+    }
+  } catch (err) { alert(err.message); }
+}
+$("btnDiagVer").addEventListener("click", () => diagnostico(false));
+$("btnDiagCopiar").addEventListener("click", () => diagnostico(true));
 
 // Gaveta com os detalhes de uma transação
 function abrirTransacao(id, focarCategoria = false) {

@@ -10,6 +10,8 @@ Rotas
   POST /api/orcamento     cria, altera ou remove um orçamento
   POST /api/regra         cria uma regra de categoria
   POST /api/regra/remover remove uma regra de categoria
+  POST /api/previsto      adiciona um gasto ou entrada previsto (que o banco ainda não mostra)
+  POST /api/previsto/remover remove um lançamento previsto
   GET  /exportar.xlsx     download da planilha (?meses=6)
   GET  /api/cron          sincronização diária (chamada pelo Cron da Vercel)
   GET  /sw.js, /pwa/...   app instalável (PWA): service worker, manifesto e ícones
@@ -206,6 +208,22 @@ async def api_regra_remover(request: Request) -> Response:
     return JSONResponse({"ok": bool(n)})
 
 
+@_protegido
+async def api_previsto(request: Request) -> Response:
+    d = await _json(request)
+    try:
+        _nucleo().adicionar_previsto(str(d.get("descricao") or ""), float(d.get("valor") or 0), str(d.get("tipo") or ""),
+                                     str(d.get("mes") or ""), str(d.get("repetir") or ""), int(d.get("vezes") or 0) or None)
+    except ValueError as e:
+        return JSONResponse({"erro": str(e)}, status_code=400)
+    return JSONResponse({"ok": True})
+
+
+@_protegido
+async def api_previsto_remover(request: Request) -> Response:
+    return JSONResponse({"ok": bool(_nucleo().remover_previsto(str((await _json(request)).get("id") or "")))})
+
+
 async def exportar(request: Request) -> Response:
     if not _logado(request):
         return RedirectResponse("/", status_code=303)
@@ -245,6 +263,8 @@ app = _App(routes=[
     Route("/api/orcamento", api_orcamento, methods=["POST"]),
     Route("/api/regra", api_regra, methods=["POST"]),
     Route("/api/regra/remover", api_regra_remover, methods=["POST"]),
+    Route("/api/previsto", api_previsto, methods=["POST"]),
+    Route("/api/previsto/remover", api_previsto_remover, methods=["POST"]),
     Route("/exportar.xlsx", exportar),
     Route("/api/cron", cron),
     Route("/sw.js", service_worker),

@@ -32,6 +32,7 @@
     --escuro: #0f4a49; --escuro-2: #175957; --escuro-texto: #fff; --escuro-suave: #9ec7c2;
     --acento: #f28c3b; --acento-claro: #fdeddf; --acento-texto: #b85a14; --menta: #cfe3e0; --menta-2: #9ec7c2; --menta-texto: #0f4a49;
     --barra: #0f4a49; --pos: #1e8a5a; --neg: #d9534f; --aviso: #e08a1e; --hachura: #b5d3cf; --serie-rec: #009688; --serie-gas: #d96a14;
+    --pv-fixo: #c73f8f; --pv-parc: #7c4ff0; --pv-var: #d4701f; --pv-man: #00909f;
     --raio: 26px; --sombra: 0 1px 2px rgba(0,0,0,.03);
     color-scheme: light;
   }
@@ -41,6 +42,7 @@
       --app: #0a1f1f; --cartao: #112c2b; --cartao-2: #173836; --texto: #eaf3f2; --suave: #8fb0ac; --linha: #1f4240;
       --escuro: #071817; --escuro-2: #12302f; --acento: #f59a4e; --acento-claro: #3a2a1c; --acento-texto: #f7a865;
       --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c; --serie-rec: #36a597; --serie-gas: #d8691a;
+      --pv-fixo: #d14d9b; --pv-parc: #8b5cf6; --pv-var: #d86a1c; --pv-man: #0ea5b7;
     }
   }
   :root[data-theme="dark"] {
@@ -48,6 +50,7 @@
     --app: #0a1f1f; --cartao: #112c2b; --cartao-2: #173836; --texto: #eaf3f2; --suave: #8fb0ac; --linha: #1f4240;
     --escuro: #071817; --escuro-2: #12302f; --acento: #f59a4e; --acento-claro: #3a2a1c; --acento-texto: #f7a865;
     --barra: #9ec7c2; --pos: #4ade9b; --neg: #ff7b73; --aviso: #f5b041; --hachura: #2a4f4c; --serie-rec: #36a597; --serie-gas: #d8691a;
+    --pv-fixo: #d14d9b; --pv-parc: #8b5cf6; --pv-var: #d86a1c; --pv-man: #0ea5b7;
   }
   /* No computador, tudo em 75% do tamanho (como o zoom de 75% do navegador); no celular, tamanho normal */
   @media (min-width: 761px) {
@@ -386,6 +389,65 @@
   .barras-mes .bm:nth-child(-n+2)::after { left: 0; transform: none; }
   .barras-mes .bm:nth-last-child(-n+2)::after { left: auto; right: 0; transform: none; }
 
+  /* Previsão dos próximos meses */
+  .prev-topo { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); margin-bottom: 22px; }
+  .prev-topo > div { background: var(--cartao-2); border-radius: 18px; padding: 14px 16px; }
+  .prev-topo small { display: block; color: var(--suave); font-size: 12.5px; font-weight: 600; }
+  .prev-topo b { display: block; font-size: 21px; font-variant-numeric: tabular-nums; margin-top: 2px; white-space: nowrap; }
+  .prev-topo > div > span { color: var(--suave); font-size: 12px; }
+  .legenda i.linha-rec { height: 3px; width: 16px; border-radius: 2px; background: var(--serie-rec); }
+  .legenda i.hach { background: repeating-linear-gradient(45deg, var(--barra) 0 3px, transparent 3px 6px); box-shadow: inset 0 0 0 1px var(--barra); }
+  .prev-graf { display: grid; gap: 10px; align-items: end; margin: 4px 0 8px; }
+  .prev-graf .pc { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; cursor: default; }
+  .prev-graf .pv-area { position: relative; width: 100%; height: 190px; display: flex; align-items: flex-end; justify-content: center;
+                     border-bottom: 1px solid var(--linha); }
+  .prev-graf .pilha-pv { width: 100%; max-width: 46px; display: flex; flex-direction: column-reverse; gap: 2px; border-radius: 6px 6px 2px 2px; overflow: hidden; }
+  .prev-graf .pilha-pv i { display: block; min-height: 3px; }
+  .prev-graf .rec { position: absolute; left: 4%; right: 4%; height: 0; border-top: 3px solid var(--serie-rec); border-radius: 2px; }
+  .prev-graf .rec::before { content: ""; position: absolute; right: -3px; top: -6px; width: 9px; height: 9px; border-radius: 50%;
+                            background: var(--serie-rec); box-shadow: 0 0 0 2px var(--cartao); }
+  .prev-graf .pc small { color: var(--suave); font-size: 12px; font-weight: 600; }
+  .prev-graf .pc.atual small { color: var(--texto); }
+  .prev-graf .pc .s { font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .prev-graf .pc::after { content: attr(data-rotulo); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+                          background: #0f4a49; color: #fff; font-size: 12px; font-weight: 500; line-height: 1.5; padding: 8px 10px; border-radius: 10px;
+                          width: max-content; max-width: 220px; white-space: pre-line; text-align: left;
+                          opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 3; }
+  .prev-graf .pc:hover::after { opacity: 1; }
+  .prev-graf .pc:hover .pilha-pv { filter: brightness(1.08); }
+  .prev-graf .pc:nth-child(-n+2)::after { left: 0; transform: none; }
+  .prev-graf .pc:nth-last-child(-n+2)::after { left: auto; right: 0; transform: none; }
+  .hach-gas { background: repeating-linear-gradient(45deg, var(--barra) 0 4px, color-mix(in srgb, var(--barra) 22%, transparent) 4px 8px); }
+  .prev-grade { display: grid; gap: 8px 40px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); margin-top: 18px; }
+  .prev-mes .direita b { display: block; }
+  .prev-mes .mini { display: flex; height: 6px; gap: 2px; margin-top: 6px; max-width: 220px; }
+  .prev-mes .mini i { border-radius: 3px; min-width: 3px; }
+  .lanc-ic { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; flex: none; font-weight: 800; font-size: 17px; }
+  .lanc-ic.saida { background: color-mix(in srgb, var(--pv-man) 18%, var(--cartao)); color: var(--pv-man); }
+  .lanc-ic.entrada { background: color-mix(in srgb, var(--pos) 18%, var(--cartao)); color: var(--pos); }
+  .form-prev { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); margin-top: 14px; }
+  .form-prev .largo { grid-column: 1 / -1; }
+  .form-prev .pilula { height: 44px; justify-content: center; }
+  .base-prev { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .base-prev span { background: var(--cartao-2); border-radius: 999px; padding: 4px 10px; font-size: 12.5px; color: var(--suave); }
+  .base-prev b { color: var(--texto); font-weight: 600; }
+  .prox-mes .linha-pv { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; color: var(--escuro-suave); }
+  .prox-mes .linha-pv b { color: var(--escuro-texto); font-variant-numeric: tabular-nums; }
+  .prox-mes .linha-pv.total { border-top: 1px solid rgba(255,255,255,.14); margin-top: 4px; padding-top: 11px; }
+  .prox-mes .linha-pv.total b { font-size: 20px; }
+  .prox-mes .barra-pv { display: flex; gap: 2px; height: 12px; border-radius: 6px; overflow: hidden; margin: 2px 0 10px; }
+  .prox-mes .barra-pv i { min-width: 3px; }
+  .prox-mes .link { color: #f7a865; }
+  @media (max-width: 760px) {
+    .prev-topo { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .prev-topo > div { padding: 12px; }
+    .prev-topo b { font-size: 17px; }
+    .prev-graf { gap: 4px; }
+    .prev-graf .pv-area { height: 150px; }
+    .prev-graf .pc .s { display: none; }
+    .prev-mes .sub, #prevLanc .sub { white-space: normal; }
+  }
+
   /* Início: mini visuais nos cartões do topo */
   .composicao { display: flex; gap: 3px; height: 10px; margin: 14px 0 10px; }
   .composicao i { border-radius: 4px; min-width: 4px; }
@@ -417,6 +479,9 @@
     .vista:not([hidden]) > :nth-child(4) { animation-delay: .21s; }
     .ranking .eixo i { animation: crescerX 1s .2s cubic-bezier(.2,.8,.2,1) both; }
     .trilho > div, .empilhada i { animation: crescerX 1s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
+    .prev-graf .pilha-pv { animation: crescerY .9s cubic-bezier(.2,.8,.2,1) both; transform-origin: bottom; animation-delay: calc(var(--i, 0) * 60ms); }
+    .prev-graf .rec { animation: surgir .5s ease both; animation-delay: calc(var(--i, 0) * 60ms + .5s); }
+    .prox-mes .barra-pv i { animation: crescerX 1s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
     .barras-mes .bm i, .mini-barras i { animation: crescerY .8s cubic-bezier(.2,.8,.2,1) both; transform-origin: bottom;
                                         animation-delay: calc(var(--i, 0) * 45ms); }
     svg.bolhas g { animation: estourar .7s cubic-bezier(.3,1.4,.5,1) both; transform-box: fill-box; transform-origin: center;
@@ -938,6 +1003,10 @@
               <a href="#transacoes" data-tipo="entrada"><svg class="i"><use href="#i-baixo"/></svg>Entradas</a>
             </div>
           </div>
+          <div class="prox-mes" id="proxMes" hidden>
+            <div class="cab"><div><h2>Próximo mês</h2><small id="proxMesNome"></small></div><a class="link" href="#analise" id="verPrevisao">Ver previsão</a></div>
+            <div id="proxMesConteudo"></div>
+          </div>
           <div>
             <div class="cab"><div><h2>Contas</h2><small id="qtdContas"></small></div></div>
             <ul class="lista contas-escuras" id="contas"></ul>
@@ -980,6 +1049,42 @@
       <!-- Análise -->
       <div class="vista" data-vista="analise" hidden>
         <section class="grade-4" id="anResumo"></section>
+        <section class="cartao" id="secPrevisao">
+          <div class="cab"><h2>Previsão dos próximos meses</h2><span class="extra" id="prevExtra"></span></div>
+          <div class="prev-topo" id="prevTopo"></div>
+          <div class="legenda" id="prevLegenda">
+            <span><i style="background:var(--pv-fixo)"></i>Contas fixas e assinaturas</span>
+            <span><i style="background:var(--pv-parc)"></i>Parcelas</span>
+            <span><i style="background:var(--pv-var)"></i>Gasto típico do dia a dia</span>
+            <span><i style="background:var(--pv-man)"></i>Adicionados por você</span>
+            <span><i style="background:var(--barra)"></i>Este mês: já gasto</span>
+            <span><i class="hach"></i>Ainda deve gastar</span>
+            <span><i class="linha-rec"></i>Receita prevista</span>
+          </div>
+          <div class="prev-graf" id="prevGrafico"></div>
+          <div class="prev-grade">
+            <div><div class="subtitulo"><span>Mês a mês</span><span>sobra prevista</span></div><div id="prevMeses"></div></div>
+            <div>
+              <div class="subtitulo"><span>Gastos e entradas que você sabe que vêm</span><span id="prevLancTotal"></span></div>
+              <div id="prevLanc"></div>
+              <form class="form-prev" id="formPrev">
+                <input class="campo largo" id="pvDesc" placeholder="O que é (ex.: IPVA, viagem, 13º salário)" maxlength="80" required>
+                <input class="campo" id="pvValor" type="number" min="0.01" step="0.01" placeholder="Valor R$" required>
+                <select class="campo" id="pvTipo" aria-label="Tipo"><option value="saida">Gasto</option><option value="entrada">Entrada</option></select>
+                <input class="campo" id="pvMes" type="month" aria-label="Mês" required>
+                <select class="campo" id="pvRepetir" aria-label="Repetição">
+                  <option value="unica">Só uma vez</option><option value="mensal">Todo mês</option><option value="parcelado">Parcelado</option>
+                </select>
+                <input class="campo" id="pvVezes" type="number" min="1" max="120" step="1" placeholder="Por quantos meses" hidden>
+                <button class="pilula roxa">Adicionar</button>
+              </form>
+              <div class="dica" id="pvDica">Para o que o banco ainda não mostra: uma compra planejada, um imposto, uma viagem, um bônus.</div>
+              <div class="subtitulo" style="margin-top:22px"><span>Como a previsão é feita</span></div>
+              <div class="dica" id="prevComo" style="margin-top:0"></div>
+              <div class="base-prev" id="prevBase"></div>
+            </div>
+          </div>
+        </section>
         <section class="grade-2">
           <div class="cartao cat-card">
             <div class="cab"><h2>Gastos por categoria</h2><span class="extra cat-mes"></span></div>
@@ -1450,6 +1555,7 @@ function render() {
     : `<li class="vazio">Sem gastos neste mês.</li>`;
 
   renderFixasEParcelas();
+  renderPrevisao();
 
   renderInvestimentos();
 
@@ -1759,6 +1865,89 @@ function renderFixasEParcelas() {
     : `<div class="vazio">Nenhuma cobrança recorrente clara nos últimos 6 meses.</div>`;
 
   renderCartoesAnalise();
+}
+
+// Análise > Previsão: este mês projetado e os próximos, empilhando fixos, parcelas, gasto típico e o que você adicionou
+const PV = [["fixos", "--pv-fixo", "Contas fixas e assinaturas"], ["parcelas", "--pv-parc", "Parcelas"],
+            ["variavel", "--pv-var", "Gasto típico"], ["manuais", "--pv-man", "Adicionados por você"]];
+const sinal = (v) => (v < 0 ? "−" : "+") + brl(Math.abs(v));
+const sinalCurto = (v) => (v < 0 ? "−" : "+") + brlCurto(Math.abs(v));
+function segmentosPv(m) {
+  return m.atual ? [["ja_gasto", "var(--barra)", "Já gasto"], ["restante", "", "Ainda deve gastar"], ["manuais", "var(--pv-man)", "Adicionados por você"]]
+    : PV.map(([k, c, n]) => [k, `var(${c})`, n]);
+}
+function renderPrevisao() {
+  const P = D.previsao;
+  $("secPrevisao").hidden = !P;
+  renderProxMes();
+  if (!P) return;
+  const M = P.meses, prox = M[1], futuros = M.slice(1);
+  const mesC = (m) => NOMES_MES[+m.slice(5, 7) - 1];
+  $("prevExtra").textContent = `${mesC(M[0].mes)} a ${mesC(M.at(-1).mes)}/${M.at(-1).mes.slice(2, 4)}`;
+  const piorMes = futuros.reduce((a, m) => (m.sobra < a.sobra ? m : a), futuros[0]);
+  const somaSobra = futuros.reduce((s, m) => s + m.sobra, 0);
+  $("prevTopo").innerHTML =
+    `<div><small>Gastos previstos em ${nomeMesLongo(prox.mes)}</small><b>${contar(prox.gastos)}</b><span>receita prevista ${brl(prox.receitas)}</span></div>` +
+    `<div><small>Sobra prevista em ${nomeMesLongo(prox.mes)}</small><b class="${prox.sobra < 0 ? "neg" : "pos"}">${sinal(prox.sobra)}</b><span>${prox.receitas ? pctInt(Math.max(0, prox.sobra) / prox.receitas) + " da receita" : ""}</span></div>` +
+    `<div><small>Sobra nos próximos ${futuros.length} meses</small><b class="${somaSobra < 0 ? "neg" : "pos"}">${sinal(somaSobra)}</b><span>se tudo sair como previsto</span></div>` +
+    `<div><small>Mês mais apertado</small><b>${nomeMesLongo(piorMes.mes).replace(/ de \d+$/, "")}</b><span class="${piorMes.sobra < 0 ? "neg" : ""}">sobra ${sinal(piorMes.sobra)}</span></div>`;
+
+  const maior = Math.max(...M.map((m) => Math.max(m.gastos, m.receitas)), 1) * 1.06;
+  $("prevGrafico").style.gridTemplateColumns = `repeat(${M.length},minmax(0,1fr))`;
+  $("prevGrafico").innerHTML = M.map((m, i) => {
+    const segs = segmentosPv(m).filter(([k]) => m[k] > 0);
+    const rot = `${nomeMesLongo(m.mes)}${m.atual ? " (este mês)" : ""}\n` + segs.map(([k, , n]) => `${n}: ${brl(m[k])}`).join("\n") +
+      `\nGastos: ${brl(m.gastos)} · Receita: ${brl(m.receitas)}\nSobra: ${sinal(m.sobra)}`;
+    return `<div class="pc${m.atual ? " atual" : ""}" style="--i:${i}" data-rotulo="${esc(rot)}" tabindex="0" aria-label="${esc(rot.replace(/\n/g, ". "))}">
+      <div class="pv-area"><div class="pilha-pv" style="height:${m.gastos / maior * 100}%;--i:${i}">${segs.map(([k, c]) =>
+        `<i class="${c ? "" : "hach-gas"}" style="flex:${m[k]} 1 0;${c ? "background:" + c : ""}"></i>`).join("")}</div>
+        ${m.receitas ? `<span class="rec" style="bottom:calc(${m.receitas / maior * 100}% - 1.5px);--i:${i}"></span>` : ""}</div>
+      <small>${m.atual ? "este mês" : mesC(m.mes) + (m.mes.slice(5) === "01" ? "/" + m.mes.slice(2, 4) : "")}</small>
+      <span class="s ${m.sobra < 0 ? "neg" : "pos"}">${sinalCurto(m.sobra)}</span></div>`;
+  }).join("");
+
+  $("prevMeses").innerHTML = M.map((m) => {
+    const segs = segmentosPv(m).filter(([k]) => m[k] > 0);
+    return `<div class="item prev-mes"><div class="meio"><div class="nome">${nomeMesLongo(m.mes)}${m.atual ? `<span class="selo-atual">este mês</span>` : ""}</div>
+      <div class="sub">gastos ${brl(m.gastos)} · receita ${brl(m.receitas)}</div>
+      <div class="mini">${segs.map(([k, c]) => `<i class="${c ? "" : "hach-gas"}" style="flex:${m[k]} 1 0;${c ? "background:" + c : ""}" title="${esc(segmentosPv(m).find((s) => s[0] === k)[2])}: ${brl(m[k])}"></i>`).join("")}</div></div>
+      <div class="direita"><b class="${m.sobra < 0 ? "neg" : "pos"}">${sinal(m.sobra)}</b><small>acumulado ${sinal(m.acumulado)}</small></div></div>`;
+  }).join("");
+
+  const L = P.lancamentos;
+  const quando = (p) => {
+    const ini = mesCurtoAno(p.mes);
+    if (p.repetir === "parcelado") return `${p.vezes}x de ${brl(p.valor / p.vezes)} · de ${ini} a ${mesCurtoAno(somarMeses(p.mes, p.vezes - 1))}`;
+    if (p.repetir === "mensal") return p.vezes ? `todo mês por ${p.vezes} meses · de ${ini} a ${mesCurtoAno(somarMeses(p.mes, p.vezes - 1))}` : `todo mês a partir de ${ini}`;
+    return `só em ${ini}`;
+  };
+  $("prevLancTotal").textContent = L.length ? L.length + (L.length === 1 ? " lançamento" : " lançamentos") : "";
+  $("prevLanc").innerHTML = L.length ? L.map((p) => `<div class="item"><span class="lanc-ic ${p.tipo}" aria-hidden="true">${p.tipo === "entrada" ? "+" : "−"}</span>
+      <div class="meio"><div class="nome">${esc(p.descricao)}</div><div class="sub">${p.tipo === "entrada" ? "entrada" : "gasto"} · ${quando(p)}</div></div>
+      <div class="direita ${p.tipo === "entrada" ? "pos" : ""}">${p.tipo === "entrada" ? "+" : ""}${brl(p.valor)}<small>${p.repetir === "parcelado" ? "total" : p.repetir === "mensal" ? "por mês" : "uma vez"}</small></div>
+      <button class="x" type="button" title="Remover" data-previsto="${esc(p.id)}">✕</button></div>`).join("")
+    : `<div class="vazio">Nada adicionado ainda. Use o formulário abaixo para incluir algo que o banco não mostra.</div>`;
+
+  const nomesBase = P.base_meses.map(mesC);
+  $("prevComo").innerHTML = P.base_meses.length
+    ? `Contas fixas e assinaturas (${brl(P.fixos)}/mês) + parcelas já assumidas + o gasto típico das outras categorias (mediana de ${nomesBase.join(", ")}: ${brl(P.variavel)}/mês) + o que você adicionou. Receita prevista: ${brl(P.receita_tipica)}/mês (mediana dos mesmos meses).`
+    : "Ainda não há 1 mês completo de histórico: a previsão usa só fixos, parcelas e o que você adicionar.";
+  $("prevBase").innerHTML = P.variavel_categorias.slice(0, 8).map((c) => `<span>${esc(c.categoria)} <b>${brl(c.valor)}</b></span>`).join("");
+}
+
+// Início: resumo do próximo mês no painel escuro
+function renderProxMes() {
+  const P = D.previsao, m = P?.meses?.[1];
+  $("proxMes").hidden = !m;
+  if (!m) return;
+  $("proxMesNome").textContent = nomeMesLongo(m.mes);
+  const segs = segmentosPv(m).filter(([k]) => m[k] > 0);
+  $("proxMesConteudo").innerHTML =
+    `<div class="barra-pv" role="img" aria-label="${esc(segs.map(([k, , n]) => n + " " + brl(m[k])).join(", "))}">${segs.map(([k, c, n], i) =>
+      `<i style="flex:${m[k]} 1 0;background:${c};animation-delay:${i * 80}ms" title="${esc(n)}: ${brl(m[k])}"></i>`).join("")}</div>` +
+    segs.map(([k, c, n]) => `<div class="linha-pv"><span><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:${c};margin-right:7px"></i>${esc(n)}</span><b>${brl(m[k])}</b></div>`).join("") +
+    `<div class="linha-pv"><span>Receita prevista</span><b>${brl(m.receitas)}</b></div>` +
+    `<div class="linha-pv total"><span>Sobra prevista</span><b style="color:${m.sobra < 0 ? "#ff8a80" : "#6ee7b0"}">${sinal(m.sobra)}</b></div>`;
 }
 
 // Análise > Cartões de crédito: escolha um cartão (ou todos) para ver fatura, histórico de faturas e parcelas
@@ -2497,7 +2686,7 @@ function trocarMes(m) { $("mes").value = m; carregar(m); }
 const VISTAS = {
   inicio: [null, "Seu resumo financeiro"],
   transacoes: ["Transações", null],
-  analise: ["Análise", "Categorias, assinaturas, parcelas e orçamentos"],
+  analise: ["Análise", "Previsão, categorias, assinaturas, parcelas e orçamentos"],
   investimentos: ["Investimentos", "Sua carteira, o mercado e dicas"],
   ajustes: ["Ajustes", "Regras de categoria e conexões com os bancos"],
 };
@@ -2613,7 +2802,38 @@ $("formRegra").addEventListener("submit", async (e) => {
   } catch (err) { alert(err.message); }
 });
 
+$("pvRepetir").addEventListener("change", () => {
+  const r = $("pvRepetir").value, v = $("pvVezes");
+  v.hidden = r === "unica"; v.required = r === "parcelado";
+  v.placeholder = r === "parcelado" ? "Em quantas parcelas" : "Por quantos meses (vazio = sempre)";
+  $("pvValor").placeholder = r === "parcelado" ? "Valor total R$" : r === "mensal" ? "Valor por mês R$" : "Valor R$";
+});
+$("formPrev").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    await api("/api/previsto", { descricao: $("pvDesc").value, valor: +$("pvValor").value, tipo: $("pvTipo").value,
+                                 mes: $("pvMes").value, repetir: $("pvRepetir").value, vezes: +$("pvVezes").value || null });
+    $("pvDesc").value = ""; $("pvValor").value = ""; $("pvVezes").value = "";
+    await carregar();
+    $("secPrevisao").scrollIntoView({ block: "nearest" });
+  } catch (err) { alert(err.message); }
+});
+$("verPrevisao").addEventListener("click", (e) => {
+  e.preventDefault();
+  irPara("analise");
+  requestAnimationFrame(() => $("secPrevisao").scrollIntoView({ behavior: menosMovimento() ? "auto" : "smooth" }));
+});
+{ // mês padrão do formulário: o próximo
+  const d = new Date(), t = d.getFullYear() * 12 + d.getMonth() + 1;
+  $("pvMes").value = Math.floor(t / 12) + "-" + String(t % 12 + 1).padStart(2, "0");
+}
+
 document.addEventListener("click", async (e) => {
+  const remPv = e.target.closest("[data-previsto]");
+  if (remPv && confirm("Remover este lançamento da previsão?")) {
+    await api("/api/previsto/remover", { id: remPv.dataset.previsto }).catch((err) => alert(err.message));
+    carregar();
+  }
   const rem = e.target.closest("[data-regra]");
   if (rem && confirm(`Remover a regra "${rem.dataset.regra}"?`)) {
     await api("/api/regra/remover", { texto: rem.dataset.regra }).catch((err) => alert(err.message));

@@ -58,6 +58,9 @@ CREATE TABLE IF NOT EXISTS meta (chave TEXT PRIMARY KEY, valor TEXT);
 CREATE TABLE IF NOT EXISTS invest_historico (
     chave TEXT PRIMARY KEY, invest_id TEXT, item_id TEXT, data TEXT, saldo REAL, aplicado REAL
 );
+CREATE TABLE IF NOT EXISTS previstos (
+    id TEXT PRIMARY KEY, descricao TEXT, valor REAL, tipo TEXT, mes TEXT, repetir TEXT, vezes INTEGER, criado_em TEXT
+);
 """
 
 # Categorias da Pluggy (em inglês) -> português. O que não estiver aqui
@@ -132,7 +135,8 @@ def _sem_acento(s: str) -> str:
 
 # Chave primária de cada tabela, para traduzir "INSERT OR REPLACE" no Postgres.
 CHAVES = {"items": "id", "accounts": "id", "transactions": "id", "investments": "id",
-          "bills": "id", "orcamentos": "categoria", "meta": "chave", "invest_historico": "chave"}
+          "bills": "id", "orcamentos": "categoria", "meta": "chave", "invest_historico": "chave",
+          "previstos": "id"}
 _COLUNAS: dict[str, list[str]] = {}
 for _bloco in re.findall(r"CREATE TABLE IF NOT EXISTS (\w+) \((.*?)\);", SCHEMA, re.S):
     _COLUNAS[_bloco[0]] = [c.strip().split()[0] for c in _bloco[1].split(",") if c.strip()]

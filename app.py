@@ -12,6 +12,8 @@ Rotas
   POST /api/regra/remover remove uma regra de categoria
   POST /api/previsto      adiciona um gasto ou entrada previsto (que o banco ainda não mostra)
   POST /api/previsto/remover remove um lançamento previsto
+  POST /api/previsao/ajuste  corrige um item da previsão (valor novo ou não considerar)
+  POST /api/previsao/ajuste/remover volta o item ao valor calculado
   GET  /exportar.xlsx     download da planilha (?meses=6)
   GET  /api/cron          sincronização diária (chamada pelo Cron da Vercel)
   GET  /sw.js, /pwa/...   app instalável (PWA): service worker, manifesto e ícones
@@ -224,6 +226,24 @@ async def api_previsto_remover(request: Request) -> Response:
     return JSONResponse({"ok": bool(_nucleo().remover_previsto(str((await _json(request)).get("id") or "")))})
 
 
+@_protegido
+async def api_previsao_ajuste(request: Request) -> Response:
+    d = await _json(request)
+    try:
+        valor = d.get("valor")
+        _nucleo().ajustar_previsao(str(d.get("tipo") or ""), str(d.get("alvo") or ""),
+                                   None if valor in (None, "") else float(valor), bool(d.get("ignorar")), d.get("desde") or None)
+    except (ValueError, TypeError) as e:
+        return JSONResponse({"erro": str(e)}, status_code=400)
+    return JSONResponse({"ok": True})
+
+
+@_protegido
+async def api_previsao_ajuste_remover(request: Request) -> Response:
+    d = await _json(request)
+    return JSONResponse({"ok": bool(_nucleo().remover_ajuste(str(d.get("tipo") or ""), str(d.get("alvo") or "")))})
+
+
 async def exportar(request: Request) -> Response:
     if not _logado(request):
         return RedirectResponse("/", status_code=303)
@@ -265,6 +285,8 @@ app = _App(routes=[
     Route("/api/regra/remover", api_regra_remover, methods=["POST"]),
     Route("/api/previsto", api_previsto, methods=["POST"]),
     Route("/api/previsto/remover", api_previsto_remover, methods=["POST"]),
+    Route("/api/previsao/ajuste", api_previsao_ajuste, methods=["POST"]),
+    Route("/api/previsao/ajuste/remover", api_previsao_ajuste_remover, methods=["POST"]),
     Route("/exportar.xlsx", exportar),
     Route("/api/cron", cron),
     Route("/sw.js", service_worker),

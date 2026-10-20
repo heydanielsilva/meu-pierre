@@ -519,7 +519,7 @@ def _projecao_detalhe(txs_mes: list[dict]) -> dict:
     soma_pend = sum(r["media"] for r in pendentes)
     return {"ja_gasto": atual, "variavel_ate_hoje": variavel, "ritmo_dia": ritmo, "falta_variavel": falta_variavel,
             "dia": hoje.day, "dias_mes": dias_mes, "total": atual + falta_variavel + soma_pend,
-            "fixas_a_cair": [{"nome": r["nome"], "categoria": r["categoria"], "valor": round(r["media"], 2),
+            "fixas_a_cair": [{"chave": r["chave"], "nome": r["nome"], "categoria": r["categoria"], "valor": round(r["media"], 2),
                               "dia": r["proxima"].day} for r in pendentes]}
 
 
@@ -590,6 +590,31 @@ def remover_previsto(id_: str) -> int:
     return n
 
 
+TIPOS_AJUSTE = ("receita", "fonte_receita", "fixo", "categoria", "parcela")
+
+
+def ajustar_previsao(tipo: str, alvo: str, valor: float | None, ignorar: bool, desde: str | None) -> None:
+    """Corrige a previsão: troca o valor calculado de um item ou tira o item da conta (a partir de um mês, se quiser).
+    tipo: receita (valor da receita do mês), fonte_receita (uma origem de receita), fixo (conta fixa ou assinatura),
+    categoria (gasto do dia a dia) ou parcela (compra parcelada)."""
+    if tipo not in TIPOS_AJUSTE or (tipo != "receita" and not alvo.strip()):
+        raise ValueError("Ajuste inválido.")
+    if desde and not re.fullmatch(r"\d{4}-\d{2}", desde):
+        raise ValueError("Mês inválido.")
+    if not ignorar and (valor is None or valor < 0):
+        raise ValueError("Informe o valor ou marque para não considerar.")
+    store.con.execute("INSERT OR REPLACE INTO previsao_ajustes VALUES (?,?,?,?,?,?,?)",
+                      (f"{tipo}|{alvo.strip()}", tipo, alvo.strip(), None if ignorar else round(valor, 2), 1 if ignorar else 0,
+                       desde or None, agora_br().isoformat()))
+    store.con.commit()
+
+
+def remover_ajuste(tipo: str, alvo: str) -> int:
+    n = store.con.execute("DELETE FROM previsao_ajustes WHERE chave=?", (f"{tipo}|{alvo.strip()}",)).rowcount
+    store.con.commit()
+    return n
+
+
 def _valor_previsto_no_mes(p: dict, mes: str) -> float:
     """Quanto um lançamento manual pesa no mês (parcelado: valor total dividido nas parcelas)."""
     if mes < p["mes"]:
@@ -605,11 +630,24 @@ def _valor_previsto_no_mes(p: dict, mes: str) -> float:
 def previsao(meses: int = 6) -> dict:
     """Este mês (projetado) e os próximos meses, com cada parte da conta detalhada:
     contas fixas e assinaturas + parcelas já assumidas + gasto do dia a dia (valor do meio dos últimos 3 meses,
-    por categoria) + o que você adicionou à mão. Receita: valor do meio dos mesmos 3 meses."""
+    por categoria) + o que você adicionou à mão. Receita: valor do meio dos mesmos 3 meses.
+    Cada item pode ser corrigido por você (valor novo ou "não considerar", a partir de um mês)."""
     hoje = hoje_br()
     rec = _recorrentes()
     chaves = {r["chave"] for r in rec}
-    fixos = sum(r["media"] for r in rec)
+    ajustes = {(a["tipo"], a["alvo"]): dict(a) for a in store.con.execute("SELECT * FROM previsao_ajustes").fetchall()}
+
+    def aplicar(tipo: str, alvo: str, calculado: float, mes: str | None) -> float:
+        """Valor do item no mês, já com o seu ajuste (mes=None: o ajuste vale em qualquer mês)."""
+        a = ajustes.get((tipo, alvo))
+        if not a or (mes and a["desde"] and mes < a["desde"]):
+            return calculado
+        return 0.0 if a["ignorar"] else a["valor"]
+
+    def info(tipo: str, alvo: str, calculado: float) -> dict:
+        a = ajustes.get((tipo, alvo))
+        return {"alvo": alvo, "calculado": round(calculado, 2), "ajustado": bool(a), "ignorado": bool(a and a["ignorar"]),
+                "valor_ajuste": a["valor"] if a else None, "desde": a["desde"] if a else None}
 
     # base: últimos 3 meses completos que têm transações
     _, de3, _ = _mes(_somar_meses(hoje, -3))
@@ -618,23 +656,51 @@ def previsao(meses: int = 6) -> dict:
     for t in _tx(de3, ate1):
         base_txs[t["data"][:7]].append(t)
     base = [m for m in (_somar_meses(hoje, -k) for k in (3, 2, 1)) if base_txs[m]]
-    receitas_base = [{"mes": m, "valor": round(_fluxo(base_txs[m])[0], 2)} for m in base]
+
+    # receitas por origem (quem pagou), para você escolher o que conta como receita
+    def eh_receita(t) -> bool:
+        return t["direcao"] == "entrada" and not t["neutra"] and t["categoria"] != "Estornos"
+    fontes: dict[str, dict] = {}
+    for m in base:
+        for t in base_txs[m]:
+            if eh_receita(t):
+                k = _chave_recorrente(t)
+                f = fontes.setdefault(k, {"nome": t.get("estabelecimento") or t["descricao"], "categoria": t["categoria"],
+                                          "meses": {x: 0.0 for x in base}})
+                f["meses"][m] += t["valor"]
+    fontes_lista = sorted(({**info("fonte_receita", k, 0.0), "nome": f["nome"], "categoria": f["categoria"],
+                            "meses": [{"mes": m, "valor": round(v, 2)} for m, v in f["meses"].items()],
+                            "total": round(sum(f["meses"].values()), 2)} for k, f in fontes.items()), key=lambda x: -x["total"])
+    ignoradas = {f["alvo"] for f in fontes_lista if f["ignorado"]}
+    receitas_base = [{"mes": m, "valor": round(sum(f["meses"][m] for k, f in fontes.items() if k not in ignoradas), 2),
+                      "sem_ajuste": round(_fluxo(base_txs[m])[0], 2)} for m in base]
+    receita_calc = statistics.median([r["valor"] for r in receitas_base]) if receitas_base else 0.0
+
+    # dia a dia por categoria
     por_cat: dict[str, dict[str, float]] = defaultdict(lambda: {m: 0.0 for m in base})
     for m in base:
         for t in base_txs[m]:
             if t["neutra"] or t["direcao"] != "saida" or (t.get("parcelas_total") or 0) > 1 or _chave_recorrente(t) in chaves:
                 continue
             por_cat[t["categoria"]][m] += t["valor"]
-    categorias = sorted(({"categoria": c, "valor": round(statistics.median(vs.values()), 2),
-                          "meses": [{"mes": m, "valor": round(v, 2)} for m, v in vs.items()]} for c, vs in por_cat.items()),
-                        key=lambda x: -x["valor"])
-    pontuais = sorted((c for c in categorias if c["valor"] < 1), key=lambda c: -sum(x["valor"] for x in c["meses"]))
-    categorias = [c for c in categorias if c["valor"] >= 1]   # gasto em só 1 dos 3 meses: o valor do meio é zero
-    variavel = sum(c["valor"] for c in categorias)
-    receita_tipica = statistics.median([r["valor"] for r in receitas_base]) if receitas_base else 0.0
+    for (tipo, alvo) in ajustes:   # categoria ajustada que não apareceu nos 3 meses (ex.: valor definido por você)
+        if tipo == "categoria" and alvo not in por_cat:
+            por_cat[alvo] = {m: 0.0 for m in base}
+    todas = [{"categoria": c, **info("categoria", c, statistics.median(vs.values()) if vs else 0.0),
+              "meses": [{"mes": m, "valor": round(v, 2)} for m, v in vs.items()]} for c, vs in por_cat.items()]
+    for c in todas:   # valor no primeiro mês previsto
+        c["valor"] = round(aplicar("categoria", c["categoria"], c["calculado"], _somar_meses(hoje, 1)), 2)
+    categorias = sorted((c for c in todas if c["calculado"] >= 1 or c["ajustado"]), key=lambda x: -x["calculado"])
+    pontuais = sorted((c for c in todas if c["calculado"] < 1 and not c["ajustado"]),
+                      key=lambda c: -sum(x["valor"] for x in c["meses"]))
 
+    fixos_itens = [{**info("fixo", r["chave"], r["media"]), "nome": r["nome"], "categoria": r["categoria"], "tipo": r["tipo"]}
+                   for r in rec]
     previstos = [dict(p) for p in store.con.execute("SELECT * FROM previstos ORDER BY mes, criado_em").fetchall()]
     parcelas = parcelas_futuras()
+
+    def chave_parcela(p) -> str:
+        return f"{_chave_recorrente(p)}|{p['total_parcelas']}"
 
     def parcelas_do_mes(m: str) -> list[dict]:
         out = []
@@ -642,24 +708,33 @@ def previsao(meses: int = 6) -> dict:
             d = date.fromisoformat(p["ultima"])
             for i in range(1, p["restantes"] + 1):
                 if _somar_meses(d, i) == m:
-                    out.append({"nome": p["estabelecimento"] or p["descricao"], "parcela": f"{p['parcela'] + i}/{p['total_parcelas']}",
-                                "valor": round(p["valor"], 2), "cartao": p["cartao"], "banco": p["banco"]})
-        return sorted(out, key=lambda x: -x["valor"])
+                    k = chave_parcela(p)
+                    out.append({**info("parcela", k, p["valor"]), "nome": p["estabelecimento"] or p["descricao"],
+                                "parcela": f"{p['parcela'] + i}/{p['total_parcelas']}", "valor": round(aplicar("parcela", k, p["valor"], m), 2),
+                                "cartao": p["cartao"], "banco": p["banco"]})
+        return sorted(out, key=lambda x: -x["calculado"])
 
     def manuais_do_mes(m: str) -> list[dict]:
         return [{"descricao": p["descricao"], "tipo": p["tipo"], "valor": round(_valor_previsto_no_mes(p, m), 2)}
                 for p in previstos if _valor_previsto_no_mes(p, m)]
 
+    def receita_do_mes(m: str) -> float:
+        return aplicar("receita", "", receita_calc, m)
+
     # este mês: já gasto + o que ainda deve gastar até o fim (ritmo do dia a dia + contas fixas que ainda não caíram)
     _, de, ate = _mes("")
     txs_mes = _tx(de, ate)
-    rec_ja, _ = _fluxo(txs_mes)
+    rec_ja = sum(t["valor"] for t in txs_mes if eh_receita(t) and _chave_recorrente(t) not in ignoradas)
     proj = _projecao_detalhe(txs_mes)
     m0 = hoje.strftime("%Y-%m")
+    fixas_cair = [{**f, "valor": round(aplicar("fixo", f["chave"], f["valor"], m0), 2)} for f in proj["fixas_a_cair"]]
+    fixas_cair = [f for f in fixas_cair if f["valor"] > 0]
+    proj["total"] -= sum(f["valor"] for f in proj["fixas_a_cair"]) - sum(f["valor"] for f in fixas_cair)
+    proj["fixas_a_cair"] = fixas_cair
     man0 = manuais_do_mes(m0)
     man0_s = sum(x["valor"] for x in man0 if x["tipo"] == "saida")
     man0_e = sum(x["valor"] for x in man0 if x["tipo"] == "entrada")
-    receitas0 = max(rec_ja, receita_tipica) + man0_e
+    receitas0 = max(rec_ja, receita_do_mes(m0)) + man0_e
     este_mes = {"mes": m0, **{k: (round(v, 2) if isinstance(v, float) else v) for k, v in proj.items()},
                 "manuais": round(man0_s, 2), "itens_manuais": man0, "receitas_ja": round(rec_ja, 2),
                 "receitas": round(receitas0, 2), "gastos": round(proj["total"] + man0_s, 2),
@@ -669,20 +744,25 @@ def previsao(meses: int = 6) -> dict:
     for k in range(1, meses + 1):
         m = _somar_meses(hoje, k)
         itens_p, itens_m = parcelas_do_mes(m), manuais_do_mes(m)
+        fixos_m = sum(aplicar("fixo", f["alvo"], f["calculado"], m) for f in fixos_itens)
+        var_m = sum(aplicar("categoria", c["categoria"], c["calculado"], m) for c in categorias)
         p_m = sum(x["valor"] for x in itens_p)
         manual_s = sum(x["valor"] for x in itens_m if x["tipo"] == "saida")
         manual_e = sum(x["valor"] for x in itens_m if x["tipo"] == "entrada")
-        receitas = receita_tipica + manual_e
-        gastos = fixos + p_m + variavel + manual_s
+        receitas = receita_do_mes(m) + manual_e
+        gastos = fixos_m + p_m + var_m + manual_s
         acumulado += receitas - gastos
-        out.append({"mes": m, "fixos": round(fixos, 2), "parcelas": round(p_m, 2), "variavel": round(variavel, 2),
+        out.append({"mes": m, "fixos": round(fixos_m, 2), "parcelas": round(p_m, 2), "variavel": round(var_m, 2),
                     "manuais": round(manual_s, 2), "manuais_entrada": round(manual_e, 2), "receitas": round(receitas, 2),
                     "gastos": round(gastos, 2), "sobra": round(receitas - gastos, 2), "acumulado": round(acumulado, 2),
-                    "itens_parcelas": itens_p, "itens_manuais": itens_m})
+                    "itens_parcelas": itens_p, "itens_manuais": itens_m,
+                    "fixos_valores": {f["alvo"]: round(aplicar("fixo", f["alvo"], f["calculado"], m), 2) for f in fixos_itens},
+                    "categorias_valores": {c["categoria"]: round(aplicar("categoria", c["categoria"], c["calculado"], m), 2) for c in categorias}})
     return {"este_mes": este_mes, "meses": out, "base_meses": base, "receitas_base": receitas_base,
-            "receita_tipica": round(receita_tipica, 2), "fixos": round(fixos, 2), "variavel": round(variavel, 2),
-            "fixos_itens": [{"nome": r["nome"], "categoria": r["categoria"], "tipo": r["tipo"], "valor": round(r["media"], 2)} for r in rec],
-            "variavel_categorias": categorias, "pontuais": pontuais[:8],
+            "receita": info("receita", "", receita_calc), "receita_tipica": round(receita_calc, 2),
+            "fontes_receita": fontes_lista,
+            "fixos_itens": fixos_itens, "variavel_categorias": categorias, "pontuais": pontuais[:8],
+            "ajustes": [{k: a[k] for k in ("tipo", "alvo", "valor", "ignorar", "desde")} for a in ajustes.values()],
             "lancamentos": [{k: p[k] for k in ("id", "descricao", "valor", "tipo", "mes", "repetir", "vezes")} for p in previstos]}
 
 

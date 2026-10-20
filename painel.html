@@ -482,6 +482,43 @@
   .ritmo-mes .hoje { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--texto); }
   .ritmo-leg { display: flex; justify-content: space-between; color: var(--suave); font-size: 11.5px; margin-bottom: 6px; }
   .prev-tabela { margin-top: 18px; }
+  .ed { border: 0; background: none; color: var(--suave); cursor: pointer; width: 28px; height: 28px; border-radius: 8px; flex: none;
+        display: inline-grid; place-items: center; margin-left: 4px; }
+  .ed:hover { background: var(--cartao); color: var(--acento-texto); }
+  .ed svg { width: 14px; height: 14px; }
+  .lc .exp .it { align-items: center; }
+  .lc .exp .it .n { flex: 1; }
+  .lc .exp .it.fora .n, .lc .exp .it.fora b { text-decoration: line-through; color: var(--suave); }
+  .selo-aj { font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 999px; margin-left: 6px; vertical-align: 1px;
+             background: color-mix(in srgb, var(--acento) 20%, transparent); color: var(--acento-texto); text-decoration: none; display: inline-block; }
+  .selo-aj.fora { background: var(--linha); color: var(--suave); }
+  .fonte-rec { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid var(--linha); color: var(--texto); }
+  .fonte-rec .nm { flex: 1; min-width: 0; font-weight: 600; }
+  .fonte-rec .nm small { display: block; color: var(--suave); font-weight: 500; font-size: 11.5px; }
+  .fonte-rec.fora .nm { color: var(--suave); text-decoration: line-through; }
+  .chave-on { position: relative; width: 38px; height: 22px; flex: none; }
+  .chave-on input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .chave-on i { position: absolute; inset: 0; border-radius: 999px; background: var(--linha); transition: background .2s; pointer-events: none; }
+  .chave-on i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; }
+  .chave-on input:checked + i { background: var(--pos); }
+  .chave-on input:checked + i::after { transform: translateX(16px); }
+  .chave-on input:focus-visible + i { outline: 2px solid var(--acento); outline-offset: 2px; }
+  .tab-cat td.acao { padding: 0; width: 30px; }
+  .tab-cat tr.fora td:first-child, .tab-cat tr.fora td.usa { text-decoration: line-through; color: var(--suave); }
+  .bt-texto { border: 0; background: none; color: var(--acento-texto); font-weight: 600; cursor: pointer; padding: 0; font: inherit; }
+  .dlg-aj { border: 0; border-radius: 24px; padding: 22px; width: min(420px, calc(100vw - 32px)); background: var(--cartao); color: var(--texto);
+            box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+  .dlg-aj::backdrop { background: rgba(4, 20, 19, .55); }
+  .dlg-aj form { display: grid; gap: 10px; }
+  .dlg-aj .cab { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0; }
+  .dlg-aj h3 { margin: 0; font-size: 18px; }
+  .dlg-aj .opcao { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
+  .dlg-aj .opcao input { width: 18px; height: 18px; accent-color: var(--acento); }
+  .dlg-aj .rot-campo { color: var(--suave); font-size: 13px; font-weight: 600; margin-top: 4px; }
+  .dlg-aj .campo { flex: none; }
+  .dlg-aj .botoes-aj { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .dlg-aj .botoes-aj .pilula { height: 42px; }
+  .dlg-aj .botoes-aj .pilula:not(.roxa) { background: var(--cartao-2); }
   .prev-tabela summary { cursor: pointer; color: var(--acento-texto); font-weight: 600; font-size: 14px; }
   .prev-tabela table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
   .prev-tabela th { color: var(--suave); font-weight: 600; text-align: right; padding: 6px; font-size: 12px; }
@@ -1168,10 +1205,14 @@
           <details class="prev-tabela"><summary>Ver todos os meses em tabela</summary><div id="prevTabela"></div></details>
         </section>
         <section class="cartao">
-          <div class="cab"><h2>Gastos e entradas que você sabe que vêm</h2><span class="extra" id="prevLancTotal"></span></div>
+          <div class="cab"><h2>Lançamentos e ajustes da previsão</h2><span class="extra" id="prevLancTotal"></span></div>
           <p class="intro-prev">O que o banco ainda não mostra: uma compra planejada, um imposto, uma viagem, um bônus. Entra na previsão do mês escolhido.</p>
           <div class="prev-grade" style="margin-top:0">
-            <div id="prevLanc"></div>
+            <div>
+              <div id="prevLanc"></div>
+              <div class="subtitulo" style="margin-top:22px"><span>Seus ajustes na previsão</span><span id="prevAjTotal"></span></div>
+              <div id="prevAjustes"></div>
+            </div>
             <div>
           <form class="form-prev" id="formPrev">
             <input class="campo largo" id="pvDesc" placeholder="O que é (ex.: IPVA, viagem, 13º salário)" maxlength="80" required>
@@ -1306,6 +1347,21 @@
 </div>
 <datalist id="listaCats"></datalist>
 <div class="gaveta-fundo" id="gavetaFundo" hidden></div>
+<dialog class="dlg-aj" id="dlgAjuste" aria-labelledby="ajTitulo">
+  <form id="formAjuste" method="dialog">
+    <div class="cab"><h3 id="ajTitulo"></h3><button class="x" type="button" id="ajFechar" title="Fechar">✕</button></div>
+    <p class="dica" id="ajCalc" style="margin-top:0"></p>
+    <label class="opcao"><input type="radio" name="ajModo" value="valor" checked><span>Usar outro valor</span></label>
+    <input class="campo" id="ajValor" type="number" min="0" step="0.01" placeholder="Valor por mês R$">
+    <label class="opcao"><input type="radio" name="ajModo" value="ignorar"><span id="ajIgnorarRot">Não considerar na previsão</span></label>
+    <label class="rot-campo" for="ajDesde">Vale a partir de</label>
+    <select class="campo" id="ajDesde"></select>
+    <div class="botoes-aj">
+      <button class="pilula" type="button" id="ajVoltar">Voltar ao calculado</button>
+      <button class="pilula roxa" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
 <aside class="gaveta" id="gaveta" hidden role="dialog" aria-modal="true" aria-labelledby="gvNome">
   <button class="x gaveta-fechar" id="gavetaFechar" type="button" title="Fechar">✕</button>
   <div id="gavetaCorpo"></div>
@@ -1982,43 +2038,129 @@ function renderPrevisao() {
       <td class="${m.sobra < 0 ? "neg" : "pos"}"><b>${sinal(m.sobra)}</b></td><td>${sinal(m.acumulado)}</td></tr>`).join("") + `</tbody></table></div>`;
 
   renderLancamentos();
+  renderAjustes();
 }
 
-// A conta de um mês: receita − cada parte dos gastos = sobra, e cada linha abre mostrando de onde veio o número
+// A conta de um mês: receita − cada parte dos gastos = sobra, e cada linha abre mostrando de onde veio o número.
+// Cada item tem um lápis para trocar o valor ou tirar da previsão (a partir de um mês, se quiser).
+const LAPIS = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
+const botaoAj = (tipo, alvo, nome, calc, ajuste) => `<button type="button" class="ed" title="Editar ${esc(nome)}" aria-label="Editar ${esc(nome)}"
+  data-aj-tipo="${tipo}" data-aj-alvo="${esc(alvo)}" data-aj-nome="${esc(nome)}" data-aj-calc="${calc}"
+  data-aj-valor="${ajuste?.valor_ajuste ?? ""}" data-aj-ignorado="${ajuste?.ignorado ? 1 : ""}" data-aj-desde="${ajuste?.desde || ""}">${LAPIS}</button>`;
+const seloAj = (x) => !x.ajustado ? "" : x.ignorado ? `<span class="selo-aj fora">fora${x.desde ? " desde " + mesCurtoAno(x.desde) : ""}</span>`
+  : `<span class="selo-aj">ajustado${x.desde ? " desde " + mesCurtoAno(x.desde) : ""}</span>`;
+
 function renderContaMes() {
   const P = D.previsao, m = P.meses[pvSel], base = P.base_meses.map(mesC);
-  const it = (nome, valor, extra = "") => `<div class="it"><span>${esc(nome)}${extra ? `<small>${esc(extra)}</small>` : ""}</span><b>${brl(valor)}</b></div>`;
-  const linha = (cor, op, nome, sub, valor, corpo, aberto = false) => `<details class="lc"${aberto ? " open" : ""} style="--c:${cor}">
-      <summary><span class="op" aria-hidden="true">${op}</span><span class="nm">${nome}<small>${sub}</small></span><b>${op === "−" ? "−" : ""}${brl(valor)}</b></summary>
+  const it = (nome, valor, extra = "", fim = "", classe = "", selo = "") => `<div class="it ${classe}"><span class="n">${esc(nome)}${extra ? `<small>${esc(extra)}</small>` : ""}${selo}</span><b>${brl(valor)}</b>${fim}</div>`;
+  const linha = (cor, op, nome, sub, valor, corpo, ajustado) => `<details class="lc" data-linha="${esc(nome)}" style="--c:${cor}">
+      <summary><span class="op" aria-hidden="true">${op}</span><span class="nm">${nome}${ajustado ? `<span class="selo-aj">com ajustes</span>` : ""}<small>${sub}</small></span><b>${op === "−" ? "−" : ""}${brl(valor)}</b></summary>
       <div class="exp">${corpo}</div></details>`;
-  const receitaCorpo = (P.receitas_base.length
-      ? `<p>Usamos o valor do meio das suas receitas de ${listaMeses(base)}:</p>` + P.receitas_base.map((r) => it(nomeMesLongo(r.mes), r.valor)).join("") +
-        `<p style="margin-top:6px">Valor do meio: <b>${brl(P.receita_tipica)}</b>. O valor do meio (e não a média) evita que um mês fora do normal distorça a conta.</p>`
-      : `<p>Ainda não há um mês completo de histórico para estimar a receita.</p>`) +
+  const R = P.receita, F = P.fontes_receita;
+  const receitaCorpo = (R.ajustado && !(R.desde && m.mes < R.desde)
+      ? `<p>Você definiu a receita em <b>${brl(R.valor_ajuste)}</b>${R.desde ? " a partir de " + mesCurtoAno(R.desde) : ""} (calculado: ${brl(R.calculado)}). ${botaoAj("receita", "", "Receita prevista", R.calculado, R)}</p>`
+      : `<p>Valor do meio das receitas de ${listaMeses(base)}: <b>${brl(R.calculado)}</b>. <button type="button" class="bt-texto" data-aj-tipo="receita" data-aj-alvo="" data-aj-nome="Receita prevista" data-aj-calc="${R.calculado}"
+          data-aj-valor="${R.valor_ajuste ?? ""}" data-aj-desde="${R.desde || ""}">Definir outro valor</button></p>`) +
+    (F.length ? `<p>De onde veio cada receita (desligue o que não deve contar, como um reembolso ou uma venda pontual):</p>` +
+      F.map((f) => `<div class="fonte-rec ${f.ignorado ? "fora" : ""}"><span class="nm">${esc(nomeTx({ descricao: f.nome }))}<small>${f.meses.map((x) => mesC(x.mes) + " " + (x.valor ? brlCurto(x.valor) : "—")).join(" · ")}</small></span>
+        <label class="chave-on" title="${f.ignorado ? "Não conta como receita" : "Conta como receita"}"><input type="checkbox" data-fonte="${esc(f.alvo)}" ${f.ignorado ? "" : "checked"} aria-label="Contar ${esc(f.nome)} como receita"><i></i></label></div>`).join("") : "") +
     m.itens_manuais.filter((x) => x.tipo === "entrada").map((x) => it(x.descricao + " (adicionado por você)", x.valor)).join("");
   const fixosCorpo = P.fixos_itens.length
-    ? `<p>Cobranças que se repetiram todo mês nos últimos 6 meses. Entra o valor médio de cada uma:</p>` +
-      P.fixos_itens.map((f) => it(nomeTx({ descricao: f.nome }), f.valor, f.tipo)).join("")
+    ? `<p>Cobranças que se repetiram todo mês nos últimos 6 meses. Cancelou alguma ou o valor mudou? Clique no lápis.</p>` +
+      P.fixos_itens.map((f) => { const v = m.fixos_valores[f.alvo] ?? f.calculado;
+        return it(nomeTx({ descricao: f.nome }), v, f.tipo, botaoAj("fixo", f.alvo, nomeTx({ descricao: f.nome }), f.calculado, f), !v ? "fora" : "", seloAj(f)); }).join("")
     : `<p>Nenhuma cobrança recorrente encontrada.</p>`;
   const parcCorpo = m.itens_parcelas.length
-    ? `<p>Parcelas de compras que você já fez e que caem neste mês:</p>` + m.itens_parcelas.map((p) => it(nomeTx({ descricao: p.nome }), p.valor, `parcela ${p.parcela}${p.banco ? " · " + p.banco : ""}`)).join("")
+    ? `<p>Parcelas de compras que você já fez e que caem neste mês. Vai quitar alguma antes? Clique no lápis e tire da previsão.</p>` +
+      m.itens_parcelas.map((p) => it(nomeTx({ descricao: p.nome }), p.valor, `parcela ${p.parcela}${p.banco ? " · " + p.banco : ""}`,
+        botaoAj("parcela", p.alvo, nomeTx({ descricao: p.nome }), p.calculado, p), !p.valor ? "fora" : "", seloAj(p))).join("")
     : `<p>Nenhuma parcela neste mês.</p>`;
   const cats = P.variavel_categorias;
   const diaCorpo = cats.length
-    ? `<p>Tudo que não é conta fixa nem parcela (mercado, delivery, transporte…). Para cada categoria, olhamos quanto você gastou em ${listaMeses(base)} e usamos o <b>valor do meio</b>:</p>
-       <div class="rolar-cat"><table class="tab-cat"><thead><tr><th>Categoria</th>${base.map((b) => `<th>${b}</th>`).join("")}<th>entra na conta</th></tr></thead><tbody>` +
-      cats.map((c) => `<tr><td>${esc(c.categoria)}</td>${c.meses.map((x) => `<td>${x.valor ? (oculto ? "•••" : Math.round(x.valor).toLocaleString("pt-BR")) : "—"}</td>`).join("")}<td class="usa">${brl(c.valor)}</td></tr>`).join("") +
-      `</tbody></table></div>` + (P.pontuais.length ? `<p>Ficaram de fora por aparecerem em só um desses meses (compra pontual): ${P.pontuais.map((c) => esc(c.categoria)).join(", ")}.</p>` : "")
+    ? `<p>Tudo que não é conta fixa nem parcela. Para cada categoria, olhamos quanto você gastou em ${listaMeses(base)} e usamos o <b>valor do meio</b>. Clique no lápis para definir quanto pretende gastar ou tirar a categoria da conta.</p>
+       <div class="rolar-cat"><table class="tab-cat"><thead><tr><th>Categoria</th>${base.map((b) => `<th>${b}</th>`).join("")}<th>entra na conta</th><th></th></tr></thead><tbody>` +
+      cats.map((c) => { const v = m.categorias_valores[c.categoria] ?? c.calculado;
+        return `<tr class="${!v ? "fora" : ""}"><td>${esc(c.categoria)}${seloAj(c)}</td>${c.meses.map((x) => `<td>${x.valor ? (oculto ? "•••" : Math.round(x.valor).toLocaleString("pt-BR")) : "—"}</td>`).join("")}<td class="usa">${brl(v)}</td>
+        <td class="acao">${botaoAj("categoria", c.categoria, c.categoria, c.calculado, c)}</td></tr>`; }).join("") +
+      `</tbody></table></div>` + (P.pontuais.length ? `<p>Ficaram de fora por aparecerem em só um desses meses (compra pontual): ${P.pontuais.map((c) =>
+        `<button type="button" class="bt-texto" data-aj-tipo="categoria" data-aj-alvo="${esc(c.categoria)}" data-aj-nome="${esc(c.categoria)}" data-aj-calc="0" title="Incluir ${esc(c.categoria)} na previsão">${esc(c.categoria)}</button>`).join(", ")}. Clique numa delas para incluir com um valor.</p>` : "")
     : `<p>Ainda não há histórico suficiente.</p>`;
   const manuais = m.itens_manuais.filter((x) => x.tipo === "saida");
-  $("prevConta").innerHTML = `<div class="conta-pv"><div class="conta-cab"><b>Conta de ${nomeMesLongo(m.mes)}</b><small>estimativa · clique nas linhas para detalhes</small></div>
-    ${linha("var(--serie-rec)", "+", "Receita prevista", m.manuais_entrada ? "receita típica + entradas que você adicionou" : `valor do meio de ${listaMeses(base)}`, m.receitas, receitaCorpo)}
-    ${linha("var(--pv-fixo)", "−", "Contas fixas e assinaturas", `${P.fixos_itens.length} cobranças que se repetem todo mês`, m.fixos, fixosCorpo)}
-    ${linha("var(--pv-parc)", "−", "Parcelas", m.itens_parcelas.length ? `${m.itens_parcelas.length} parcela${m.itens_parcelas.length === 1 ? "" : "s"} já assumida${m.itens_parcelas.length === 1 ? "" : "s"}` : "nenhuma neste mês", m.parcelas, parcCorpo)}
-    ${linha("var(--pv-var)", "−", "Dia a dia", "quanto você costuma gastar por mês", m.variavel, diaCorpo)}
-    ${manuais.length ? linha("var(--pv-man)", "−", "Adicionados por você", manuais.map((x) => x.descricao).join(", "), m.manuais, manuais.map((x) => it(x.descricao, x.valor)).join("")) : ""}
+  const tem = (tipo) => P.ajustes.some((a) => a.tipo === tipo);
+  $("prevConta").innerHTML = `<div class="conta-pv"><div class="conta-cab"><b>Conta de ${nomeMesLongo(m.mes)}</b><small>clique nas linhas para ver e editar</small></div>
+    ${linha("var(--serie-rec)", "+", "Receita prevista", R.ajustado ? "definida por você" : m.manuais_entrada ? "receita típica + entradas que você adicionou" : `valor do meio de ${listaMeses(base)}`, m.receitas, receitaCorpo, tem("receita") || tem("fonte_receita"))}
+    ${linha("var(--pv-fixo)", "−", "Contas fixas e assinaturas", `${P.fixos_itens.length} cobranças que se repetem todo mês`, m.fixos, fixosCorpo, tem("fixo"))}
+    ${linha("var(--pv-parc)", "−", "Parcelas", m.itens_parcelas.length ? `${m.itens_parcelas.length} parcela${m.itens_parcelas.length === 1 ? "" : "s"} já assumida${m.itens_parcelas.length === 1 ? "" : "s"}` : "nenhuma neste mês", m.parcelas, parcCorpo, tem("parcela"))}
+    ${linha("var(--pv-var)", "−", "Dia a dia", "quanto você costuma gastar por mês", m.variavel, diaCorpo, tem("categoria"))}
+    ${manuais.length ? linha("var(--pv-man)", "−", "Adicionados por você", manuais.map((x) => esc(x.descricao)).join(", "), m.manuais, manuais.map((x) => it(x.descricao, x.valor)).join("")) : ""}
     <div class="lc linha total"><span class="op" aria-hidden="true" style="--c:var(--texto)">=</span><span class="nm">Sobra prevista</span><b class="${m.sobra < 0 ? "neg" : "pos"}">${sinal(m.sobra)}</b></div></div>`;
 }
+
+// Lista dos ajustes feitos, para conferir e desfazer
+const NOME_TIPO_AJ = { receita: "Receita prevista", fonte_receita: "Receita", fixo: "Conta fixa", categoria: "Dia a dia", parcela: "Parcela" };
+function renderAjustes() {
+  const P = D.previsao, A = P.ajustes;
+  const nomeDe = (a) => a.tipo === "receita" ? "Receita do mês"
+    : a.tipo === "fonte_receita" ? nomeTx({ descricao: P.fontes_receita.find((f) => f.alvo === a.alvo)?.nome || a.alvo })
+    : a.tipo === "fixo" ? nomeTx({ descricao: P.fixos_itens.find((f) => f.alvo === a.alvo)?.nome || a.alvo })
+    : a.tipo === "parcela" ? nomeTx({ descricao: a.alvo.split("|")[0] }) : a.alvo;
+  $("prevAjTotal").textContent = A.length ? A.length + (A.length === 1 ? " ajuste" : " ajustes") : "";
+  $("prevAjustes").innerHTML = A.length ? A.map((a) => `<div class="item"><div class="meio"><div class="nome">${esc(nomeDe(a))}</div>
+      <div class="sub">${NOME_TIPO_AJ[a.tipo]} · ${a.ignorar ? (a.tipo === "fonte_receita" ? "não conta como receita" : "fora da previsão") : "valor definido por você"}${a.desde ? " desde " + mesCurtoAno(a.desde) : ""}</div></div>
+      ${a.ignorar ? "" : `<div class="direita">${brl(a.valor)}<small>por mês</small></div>`}
+      <button class="x" type="button" title="Desfazer ajuste" data-desfaz-tipo="${a.tipo}" data-desfaz-alvo="${esc(a.alvo)}">✕</button></div>`).join("")
+    : `<div class="vazio">Nenhum ajuste. Na conta do mês, use o lápis ao lado de um item para mudar o valor ou tirá-lo da previsão.</div>`;
+}
+
+// Janela de ajuste
+let ajAtual = null;
+function abrirAjuste(el) {
+  const d = el.dataset, P = D.previsao;
+  ajAtual = { tipo: d.ajTipo, alvo: d.ajAlvo };
+  const calc = +d.ajCalc || 0;
+  $("ajTitulo").textContent = d.ajNome;
+  $("ajCalc").innerHTML = calc ? `Valor calculado pelo sistema: <b>${brl(calc)}</b> por mês.` : "Não entra na previsão hoje. Defina um valor para incluir.";
+  $("ajIgnorarRot").textContent = d.ajTipo === "fonte_receita" ? "Não contar como receita" : d.ajTipo === "parcela" ? "Tirar da previsão (vou quitar ou já quitei)"
+    : d.ajTipo === "fixo" ? "Tirar da previsão (cancelei ou não vou pagar)" : "Não considerar na previsão";
+  $("ajValor").placeholder = d.ajTipo === "receita" ? "Receita por mês R$" : "Valor por mês R$";
+  $("ajValor").value = d.ajValor || (calc ? calc.toFixed(2) : "");
+  document.querySelector(`input[name=ajModo][value=${d.ajIgnorado ? "ignorar" : "valor"}]`).checked = true;
+  $("ajDesde").innerHTML = `<option value="">Todos os meses da previsão</option>` + P.meses.map((m) => `<option value="${m.mes}">${nomeMesLongo(m.mes)}</option>`).join("");
+  $("ajDesde").value = d.ajDesde || "";
+  $("ajVoltar").hidden = !(d.ajValor || d.ajIgnorado || d.ajDesde);
+  $("dlgAjuste").showModal();
+}
+async function salvarAjuste(corpo, url = "/api/previsao/ajuste") {
+  const abertas = [...document.querySelectorAll("#prevConta details[open]")].map((x) => x.dataset.linha);
+  await api(url, corpo);
+  await carregar();
+  abertas.forEach((n) => document.querySelector(`#prevConta details[data-linha="${CSS.escape(n)}"]`)?.setAttribute("open", ""));
+}
+$("formAjuste").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const ignorar = document.querySelector("input[name=ajModo]:checked").value === "ignorar";
+  try {
+    await salvarAjuste({ ...ajAtual, ignorar, valor: ignorar ? null : $("ajValor").value, desde: $("ajDesde").value || null });
+    $("dlgAjuste").close();
+  } catch (err) { alert(err.message); }
+});
+$("ajValor").addEventListener("focus", () => { document.querySelector("input[name=ajModo][value=valor]").checked = true; });
+$("ajFechar").addEventListener("click", () => $("dlgAjuste").close());
+$("ajVoltar").addEventListener("click", async () => {
+  try { await salvarAjuste(ajAtual, "/api/previsao/ajuste/remover"); $("dlgAjuste").close(); } catch (err) { alert(err.message); }
+});
+document.addEventListener("click", async (e) => {
+  const ed = e.target.closest("[data-aj-tipo]");
+  if (ed) { abrirAjuste(ed); return; }
+  const dz = e.target.closest("[data-desfaz-tipo]");
+  if (dz) await salvarAjuste({ tipo: dz.dataset.desfazTipo, alvo: dz.dataset.desfazAlvo }, "/api/previsao/ajuste/remover").catch((err) => alert(err.message));
+});
+document.addEventListener("change", async (e) => {
+  const f = e.target.closest("input[data-fonte]");
+  if (!f) return;
+  const corpo = { tipo: "fonte_receita", alvo: f.dataset.fonte, ignorar: true };
+  await salvarAjuste(corpo, f.checked ? "/api/previsao/ajuste/remover" : "/api/previsao/ajuste").catch((err) => alert(err.message));
+});
 
 // Este mês: quanto já foi + quanto ainda deve sair até o último dia, com a conta à mostra
 function renderEsteMes() {

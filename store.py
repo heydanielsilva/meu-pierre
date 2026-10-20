@@ -307,10 +307,12 @@ class Store:
     def sincronizar(self, cliente, itens: dict[str, str], dias: int) -> dict:
         hoje = hoje_br()
         reprocessar = self.get_meta("versao_transacoes") != VERSAO_TRANSACOES
-        if reprocessar:
-            dias = max(dias, 365)  # regrava o histórico gravado com a regra antiga
         de = (hoje - timedelta(days=dias)).isoformat()
         ate = hoje.isoformat()
+        # cartão: regrava o histórico quando a regra muda (só os cartões, para caber no tempo da Vercel)
+        # e busca também as parcelas futuras, que a Pluggy já manda lançadas com data à frente
+        periodo_cartao = ((hoje - timedelta(days=max(dias, 365 if reprocessar else 0))).isoformat(),
+                                (hoje + timedelta(days=400)).isoformat())
         resumo = {"contas": 0, "transacoes": 0, "investimentos": 0, "faturas": 0, "erros": [], "status": {}}
         agora = agora_br().isoformat()
 
@@ -318,7 +320,7 @@ class Store:
             # Cada banco é gravado e confirmado separadamente: se um falhar (ou a Vercel
             # interromper por tempo), o que já foi salvo dos outros não se perde.
             try:
-                self._sincronizar_item(cliente, item_id, banco_cfg, de, ate, agora, resumo)
+                self._sincronizar_item(cliente, item_id, banco_cfg, de, ate, periodo_cartao, agora, resumo)
                 self.con.commit()
             except Exception as e:  # noqa: BLE001
                 self._desfazer()
@@ -343,7 +345,7 @@ class Store:
             pass
 
     def _sincronizar_item(self, cliente, item_id: str, banco_cfg: str, de: str, ate: str,
-                          agora: str, resumo: dict) -> None:
+                          periodo_cartao: tuple[str, str], agora: str, resumo: dict) -> None:
         try:
             it = cliente.item(item_id)
         except Exception as e:  # noqa: BLE001
@@ -375,11 +377,19 @@ class Store:
                  (cd.get("balanceCloseDate") or "")[:10] or None, agora),
             )
             resumo["contas"] += 1
+            cartao = c.get("subtype") == "CREDIT_CARD"
             try:
-                txs = cliente.transactions(c["id"], de, ate)
+                txs = cliente.transactions(c["id"], *(periodo_cartao if cartao else (de, ate)))
             except Exception as e:  # noqa: BLE001
                 resumo["erros"].append(f"Transações de {banco} · {c.get('name') or c['id']}: {e}")
-                txs = []
+                txs = None
+            ids = [t["id"] for t in txs or [] if t.get("id")]
+            if cartao and ids:
+                # compra pendente que o banco não manda mais virou lançamento com outro id: sai para não contar duas vezes
+                self.con.execute(f"DELETE FROM transactions WHERE account_id=? AND data >= ? AND fatura_id IS NULL"
+                                 f" AND fatura_prevista IS NOT NULL AND id NOT IN ({','.join('?' * len(ids))})",
+                                 (c["id"], (hoje_br() - timedelta(days=60)).isoformat(), *ids))
+            txs = txs or []
             # Tudo de uma vez: gravar uma a uma no Postgres da nuvem estoura o tempo da Vercel.
             linhas = [self._linha_tx(c, t) for t in txs if t.get("id")]
             if linhas:

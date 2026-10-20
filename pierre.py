@@ -281,7 +281,9 @@ def _faturas_do_cartao(c, diagnostico: bool = False) -> dict:
     for t in txs:
         if not t.get("fatura_id") and t.get("fatura_prevista"):
             previstas[t["fatura_prevista"][:7]] += valor(t)
-    mes_aberta = min((m for m in previstas if m >= hoje.strftime("%Y-%m")), default=None)
+    # a aberta é a que vence neste ciclo; se o banco usar outro mês de referência, a primeira a partir de hoje
+    mes_venc = (fech + timedelta(days=folga)).strftime("%Y-%m")
+    mes_aberta = mes_venc if mes_venc in previstas else min((m for m in previstas if m >= hoje.strftime("%Y-%m")), default=None)
     if mes_aberta:
         aberta = previstas[mes_aberta] + sum(valor(t) for t in txs if not t.get("fatura_id") and not t.get("fatura_prevista")
                                              and no_ciclo(t, ini, fech))
@@ -330,7 +332,8 @@ def _faturas_do_cartao(c, diagnostico: bool = False) -> dict:
             "fechamento_banco": c["fechamento_fatura"], "vencimento_banco": c["vencimento_fatura"],
             "ciclo_aberto": [ini.isoformat(), fech.isoformat()], "ciclo_anterior": [ini_ant.isoformat(), ini.isoformat()],
             "metodo": "fatura prevista" if mes_aberta else "billId" if com_fatura else "datas",
-            "fatura_aberta_prevista": mes_aberta,
+            "fatura_aberta_prevista": mes_aberta, "com_fatura_prevista": sum(1 for t in txs if t.get("fatura_prevista")),
+            "data_mais_nova": max((t["data"] for t in txs), default=None),
             "soma_por_fatura_prevista": {m: round(v, 2) for m, v in sorted(previstas.items())}, "transacoes_400_dias": len(txs),
             "com_billId": sum(1 for t in txs if t.get("fatura_id")), "com_data_compra": sum(1 for t in txs if t.get("data_compra")),
             "parceladas": sum(1 for t in txs if (t.get("parcelas_total") or 0) > 1),

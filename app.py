@@ -11,6 +11,7 @@ Rotas
   POST /api/regra/remover remove uma regra de categoria
   GET  /exportar.xlsx     download da planilha (?meses=6)
   GET  /api/cron          sincronização diária (chamada pelo Cron da Vercel)
+  GET  /sw.js, /pwa/...   app instalável (PWA): service worker, manifesto e ícones
 
 A senha do painel é SENHA_PAINEL (se existir) ou MEU_PIERRE_TOKEN.
 O login fica guardado num cookie assinado com o MEU_PIERRE_TOKEN, válido por 30 dias.
@@ -125,6 +126,30 @@ async def entrar(request: Request) -> Response:
 async def sair(request: Request) -> Response:
     resp = RedirectResponse("/", status_code=303)
     resp.delete_cookie(COOKIE)
+    resp.headers["Clear-Site-Data"] = '"cache"'  # apaga os dados guardados para uso sem internet
+    return resp
+
+
+# ------------------------------------------------------------------ PWA
+TIPOS_PWA = {".png": "image/png", ".webmanifest": "application/manifest+json", ".js": "text/javascript; charset=utf-8"}
+
+
+def _arquivo_pwa(nome: str) -> Response:
+    caminho = (PASTA / "pwa" / nome).resolve()
+    if caminho.parent != (PASTA / "pwa").resolve() or not caminho.is_file() or caminho.suffix not in TIPOS_PWA:
+        return PlainTextResponse("Não encontrado", status_code=404)
+    cache = "no-cache" if caminho.suffix in (".js", ".webmanifest") else "public, max-age=604800"
+    return Response(caminho.read_bytes(), media_type=TIPOS_PWA[caminho.suffix], headers={"Cache-Control": cache})
+
+
+async def pwa(request: Request) -> Response:
+    return _arquivo_pwa(request.path_params["nome"])
+
+
+async def service_worker(request: Request) -> Response:
+    # servido na raiz para controlar o site todo
+    resp = _arquivo_pwa("sw.js")
+    resp.headers["Service-Worker-Allowed"] = "/"
     return resp
 
 
@@ -215,4 +240,6 @@ app = _App(routes=[
     Route("/api/regra/remover", api_regra_remover, methods=["POST"]),
     Route("/exportar.xlsx", exportar),
     Route("/api/cron", cron),
+    Route("/sw.js", service_worker),
+    Route("/pwa/{nome}", pwa),
 ])
